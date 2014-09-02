@@ -370,7 +370,8 @@ for filePos = firstFileToRead:lastFileToRead
 
   % read the data, read_bv will set the data in cnt.x because of the
   % read_opt.data options
- if isfield(hdr{filePos},'unit')     
+  read_bv([fileNames{filePos} '.eeg'], read_hdr, read_opt);
+  if isfield(hdr{filePos},'unit')     
     cnt.yUnit= hdr{filePos}.unit;
  end
  if isfield(hdr{filePos},'unitOfClab')
