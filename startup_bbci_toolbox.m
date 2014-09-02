@@ -79,6 +79,7 @@ props= {'Prefix'          'a'                     'CHAR'
         'Geometry'        []                      'DOUBLE[1 4]'
         'TriggerFcn'      @bbci_trigger_parport   'FCN'
         'TriggerParam'    {}                      'CELL'
+        'IoAddr'          '127.0.0.1'             'CHAR'
        };
 BTB.Acq= opt_setDefaults(BTB.Acq, props);
 
