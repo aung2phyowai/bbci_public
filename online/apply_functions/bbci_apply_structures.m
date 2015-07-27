@@ -192,7 +192,6 @@
 %  .state        Field that can be used by control functions to store
 %                'persistent' variables.
 %  .packet       Cell specifying a variable/value list;
-5
 %data.log - Information needed for logging
 %  .fid          file ID of log file (or 1 is bbci.log.output=='screen'),
 %                if bbci.log.output=='screen&file', this is a vector
