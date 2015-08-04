@@ -8,6 +8,12 @@ class Marker():
     
     # end of the trial (stimulus and cue vanish)
     trial_end = 65
+
+    # sync marker sent every 50th frame
+    sync_50_frames = 50
+
+    #trigger bbci online calculation (not used)
+    classifier_trigger = 80
     
     # general markers
     feedback_initialized = 100

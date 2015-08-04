@@ -14,8 +14,6 @@ pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
     ' 2> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stderr.log')...
     ' 1> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stdout.log')...
     '  &'];
-% fprintf(pyffStartupCmd)
-% system(pyffStartupCmd, '-echo')
 
 
 
@@ -41,8 +39,8 @@ fprintf(' Done!\n')
 %% Send parameters to the feedback
 fbsettings = struct;
 
-fbsettings.param_image_path = '/home/henkolk/local_data/kitti/parking';
-fbsettings.FPS = 50;
+fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, 'seq01_aldi.txt');
+fbsettings.FPS = 40;
 fbOpts = fieldnames(fbsettings);
 
 fprintf('Sending feedback parameters...')
@@ -81,17 +79,14 @@ bbci.feature(1).ival = [-10 0];
 C = struct('b', 0, 'w', ones(1,1));
 bbci.classifier(1).feature = 1;
 bbci.classifier(1).C = C;
-
-
-% bbci.control(1).classifier = [1];
-% bbci.control(1).fcn = @custom_control;
+bbci.control.condition.marker = 80; %currently not sent by pyff
 
 % defines, where control signals are *sent*
 bbci.feedback(1).host = 'localhost';
 bbci.feedback(1).port = 12345;
 bbci.feedback(1).receiver = 'pyff';
 
-bbci.quit_condition.marker= 127;
+bbci.quit_condition.marker= 65; % Marker.trial_end
 
 %% Run!
 
@@ -104,19 +99,19 @@ data_parking = bbci_apply(bbci);
 
 pyff_sendUdp('interaction-signal', 'command','stop');
 
-hist(data_parking.marker.desc)
+validation_stats(data_parking)
 pause;
 
 
 %% second clip
-fbsettings.param_image_path = '/home/henkolk/local_data/kitti/rural';
+fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, 'seq02_autobahn.txt');
 for optId = 1:length(fbOpts),
     pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId}));
 end
 
 pyff_sendUdp('interaction-signal', 'command','play');
 
-data_rural = bbci_apply(bbci);
+data_autobahn = bbci_apply(bbci);
 
 %% Stop!
 
@@ -131,9 +126,7 @@ pyff_sendUdp('close');
 disp('UDP connection succesfully closed')
 
 %% validation of data
-hist(data_parking.marker.desc)
-title('Observed markers by type')
 
-
+validation_stats(data_autobahn)
 
 
