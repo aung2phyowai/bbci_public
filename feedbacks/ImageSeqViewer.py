@@ -28,7 +28,7 @@ class ImageSeqViewer(PygameFeedback):
         self.screenSize = [1242, 375]
 #        self.FPS = 10
         self.state = 'standby'
-
+        self.preload_images = True
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
@@ -37,7 +37,11 @@ class ImageSeqViewer(PygameFeedback):
             prefix = [chr(int(i)) for i in self.param_image_seq_file]
             self.image_seq_file = ''.join(prefix)
 
+        self.image_cache = {}
         self.loadSeqFile()
+        if self.preload_images:
+            for seq_element in self.image_seq:
+                self.get_image(seq_element[0])
             
         self.current_seq_no = -1 #gets directly incremented a few lines below
         self.next_file_exists = True
@@ -50,9 +54,13 @@ class ImageSeqViewer(PygameFeedback):
         else:
             self.logger.error("couldn't find first image from sequence file %s, quitting" % self.image_seq_file)
             sys.exit(10)
-        
+
+        self.current_seq_no = 0
         self.state = 'playback'
         self.last_clock_value = 0.0
+
+
+     
 
     # load a file containing an image sequence
     #  expected format
@@ -68,15 +76,20 @@ class ImageSeqViewer(PygameFeedback):
     def readNextImage(self):
 #       nextFileName = os.path.join(self.image_path, "%010d.png" % (self.current_seq_no + 1))
         self.next_file_exists = False
+        # if self.current_seq_no + 1 < len(self.image_seq):
+        #     nextSeqElement = self.image_seq[self.current_seq_no + 1]
+        #     nextFileName = os.path.join(os.path.dirname(self.image_seq_file), nextSeqElement[0])
+        #     if os.access(nextFileName, os.R_OK):
+        #         # read image
+        #         self.next_file_exists = True
+        #         self.next_image = pygame.image.load(nextFileName)
+        #         # prepare markers if available
+        #         self.next_markers = nextSeqElement[1]
         if self.current_seq_no + 1 < len(self.image_seq):
-            nextSeqElement = self.image_seq[self.current_seq_no + 1]
-            nextFileName = os.path.join(os.path.dirname(self.image_seq_file), nextSeqElement[0])
-            if os.access(nextFileName, os.R_OK):
-                # read image
-                self.next_file_exists = True
-                self.next_image = pygame.image.load(nextFileName)
-                # prepare markers if available
-                self.next_markers = nextSeqElement[1]
+            next_seq_element = self.image_seq[self.current_seq_no + 1]
+            self.next_image = self.get_image(next_seq_element[0])
+            self.next_markers = next_seq_element[1]
+            self.next_file_exists = True
 
     def on_play(self):
         self.state = 'playback'
@@ -96,6 +109,16 @@ class ImageSeqViewer(PygameFeedback):
     def on_control_event(self, data):
         #do nothing, but prevent logging
         pass
+
+    def fill_buffer(self):
+        #basically, 
+        pass
+
+    def get_image(self, key):
+        if not key in self.image_cache:
+            next_file_name = os.path.join(os.path.dirname(self.image_seq_file), key)
+            self.image_cache[key] = pygame.image.load(next_file_name)
+        return self.image_cache[key]
         
     def play_tick(self):
         if self.state == "standby":
@@ -130,6 +153,8 @@ class ImageSeqViewer(PygameFeedback):
                 self.current_markers = self.next_markers
                 self.current_seq_no = self.current_seq_no + 1
                 self.readNextImage()
+                #to improve speed of later blit (c.f., http://www.pygame.org/docs/ref/surface.html#pygame.Surface.convert)
+                self.current_image.convert(self.screen)
             else:
                 self.send_marker(Marker.trial_end)                
                 self.logger.info('new state: playback -> standby')
