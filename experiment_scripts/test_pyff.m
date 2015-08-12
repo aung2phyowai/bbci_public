@@ -1,9 +1,9 @@
 %% Setup environment
 clear, clc, close all;
-setup_visual_complexity();
+project_setup();
 
 %% kill existing feedback process in case it's still running
-system('pkill -f "python FeedbackController.py"')
+system('pkill -9 -f "python FeedbackController.py"')
 
 %% Start pyff in background
 
@@ -39,15 +39,19 @@ fprintf(' Done!\n')
 %% Send parameters to the feedback
 fbsettings = struct;
 
-fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, 'seq01_aldi.txt');
-fbsettings.FPS = 40;
-fbOpts = fieldnames(fbsettings);
 
-fprintf('Sending feedback parameters...')
-for optId = 1:length(fbOpts),
-    pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId}));
-end
-fprintf(' Done!\n')
+sequences = {
+%   sequence file                           FPS    
+    'seq07a_hohenwetterbach_modified.txt'   10
+%       'seq07b_hohenwettersbach.txt'         15
+      'seq08b_weiherfeld2_highlighted.txt'  10
+%     'seq03_kelterstr_modified.txt'          20
+%     'seq04_hardtwald_modified.txt'          15
+%     'seq06_weiherfeld_modified.txt'       20
+    'seq05_erbprinzenstr_modified.txt'      10
+%     'seq02_autobahn.txt'                  20
+      'seq09a_kanord.txt'                   10    
+};
 
 
 %% Setup bbci toolbox
@@ -59,7 +63,7 @@ fs = 100;
 bbci.source(1).acquire_fcn= @bbci_acquire_randomSignals;
 bbci.source(1).acquire_param= {'clab',{'Cz'}, 'amplitude', max_amp,...
     'fs', fs, 'realtime', 1,...
-    'marker_mode', 'pyff_udp', 'marker_udp_port', 12344};
+    'marker_mode', 'pyff_udp', 'marker_udp_port', PROJECT_SETUP.UDP_MARKER_PORT};
 bbci.source(1).min_blocklength = 10;
 bbci.source(1).clab = {'Cz'};
 bbci.source(1).record_signals = false;
@@ -79,43 +83,60 @@ bbci.feature(1).ival = [-10 0];
 C = struct('b', 0, 'w', ones(1,1));
 bbci.classifier(1).feature = 1;
 bbci.classifier(1).C = C;
-bbci.control.condition.marker = 80; %currently not sent by pyff
+bbci.control.condition.marker = PROJECT_SETUP.markers.classifier_trigger; %currently not sent by pyff
 
 % defines, where control signals are *sent*
 bbci.feedback(1).host = 'localhost';
 bbci.feedback(1).port = 12345;
 bbci.feedback(1).receiver = 'pyff';
 
-bbci.quit_condition.marker= 65; % Marker.trial_end
-
-%% Run!
+bbci.quit_condition.marker= PROJECT_SETUP.markers.trial_end; 
 
 
-pyff_sendUdp('interaction-signal', 'command','play');
+%% loop over sequences
+%reset previous data
+for i = 1:size(sequences, 1)
+   seqFileName = sequences{i,1};
+   seqFPS = sequences{i,2};
+   
+   fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, seqFileName);
+   fbsettings.FPS = seqFPS;
+   fbOpts = fieldnames(fbsettings);
+   
+   fprintf('Sending feedback parameters...')
+   for optId = 1:length(fbOpts),
+       pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId})); %#ok<GFLD>
+   end
+   fprintf(' Done!\n')
+   
+   %% Loading data.
+   
+%    currently not in use due to pyffs socket lifecycle
+   % workaround, since command signals are only processed by the IPC
+   % channel and not delivered to the Feedback instance
+%    fprintf('Preloading ....\n')
+%    pyff_sendUdp('interaction-signal', 'trigger_preload','true');
+%    
+%    waitForMarker(PROJECT_SETUP.markers.preload_completed)
+   
+   fprintf('Press any key to start playing...\n')
+   pause;
+   
+   
+   %% Run!
+   pyff_sendUdp('interaction-signal', 'command','play');
+   
+   data(i) = bbci_apply(bbci);
+   
 
-data_parking = bbci_apply(bbci);
-
-%% Stop!
-
-pyff_sendUdp('interaction-signal', 'command','stop');
-
-validation_stats(data_parking)
-pause;
-
-
-%% second clip
-fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, 'seq02_autobahn.txt');
-for optId = 1:length(fbOpts),
-    pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId}));
+    %% Stop!
+   pyff_sendUdp('interaction-signal', 'command','stop');
+   
+   
+   validation_stats(data(i))
+   
 end
 
-pyff_sendUdp('interaction-signal', 'command','play');
-
-data_autobahn = bbci_apply(bbci);
-
-%% Stop!
-
-pyff_sendUdp('interaction-signal', 'command','stop');
 
 
 
@@ -124,9 +145,4 @@ pyff_sendUdp('interaction-signal', 'command','close');
 pyff_sendUdp('interaction-signal', 'command','quitfeedbackcontroller');
 pyff_sendUdp('close');
 disp('UDP connection succesfully closed')
-
-%% validation of data
-
-validation_stats(data_autobahn)
-
 
