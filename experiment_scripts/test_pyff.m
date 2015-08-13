@@ -38,11 +38,13 @@ pyff_sendUdp('interaction-signal', 's:_feedback', 'ImageSeqViewer', 'command','s
 fprintf(' Done!\n')
 %% Send parameters to the feedback
 fbsettings = struct;
-
+fbsettings.use_optomarker = true;
+fbsettings.image_width = 1242;
+fbsettings.image_height = 375;
 
 sequences = {
 %   sequence file                           FPS    
-    'seq07a_hohenwetterbach_modified.txt'   10
+    'seq07a_hohenwetterbach_modified2.txt'   10
 %       'seq07b_hohenwettersbach.txt'         15
       'seq08b_weiherfeld2_highlighted.txt'  10
 %     'seq03_kelterstr_modified.txt'          20
@@ -50,7 +52,7 @@ sequences = {
 %     'seq06_weiherfeld_modified.txt'       20
     'seq05_erbprinzenstr_modified.txt'      10
 %     'seq02_autobahn.txt'                  20
-      'seq09a_kanord.txt'                   10    
+     'seq09a_kanord.txt'                    10    
 };
 
 

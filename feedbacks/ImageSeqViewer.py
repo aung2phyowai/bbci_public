@@ -25,10 +25,16 @@ class ImageSeqViewer(PygameFeedback):
         self.caption = "Image Seq Viewer"
 
         self.screenPos = [400, 400]
-        self.screenSize = [1242, 375]
+        self.image_width = 1242
+        self.image_height = 375
+        self.screenSize = [self.image_width + 100, self.image_height + 200]
 
         self.state = 'standby'
         self.preload_images = True
+        self.use_optomarker = True
+        #for how many frames should the marker be displayed
+        self.optomarker_frame_length = 2
+        self.last_marker_seq_no = -1 - self.optomarker_frame_length
 
     def on_interaction_event(self, data):
         # self.logger.info("got event: %s\n with type %s" % (data, type(data)))
@@ -177,12 +183,9 @@ class ImageSeqViewer(PygameFeedback):
         elif self.state == "loading":
             self.print_message("Loading...")
         elif self.state == "playback":
-            pos = (0, 0)
-            curRect = self.current_image.get_rect()
-            curRect.topleft = pos
-            self.screen.fill(self.backgroundColor)
-            self.screen.blit(self.current_image, curRect)
-            pygame.display.flip()
+            # first, send markers for current image
+            # second, draw (including opto-marker)
+            # third, advance state
 
             if self.current_seq_no == 0:
                 self.send_marker(Marker.trial_start)
@@ -194,7 +197,9 @@ class ImageSeqViewer(PygameFeedback):
                 self.last_clock_value = time.clock()
 #                self.logger.info("%f s for last 50 frame: FPS %f, should be %f" % (elapsed, (50.0 / elapsed), self.FPS))
 #                self.logger.info("pygame tells %f FPS" % self.clock.get_fps())
-           
+
+            self.drawCurrentImage()
+            
             if self.next_file_exists:
                 self.current_image = self.next_image
                 self.current_markers = self.next_markers
@@ -212,6 +217,20 @@ class ImageSeqViewer(PygameFeedback):
             self.logger.error("unknown state")
             sys.exit(1)
 
+
+    def drawCurrentImage(self):
+         curRect = self.current_image.get_rect()
+         #center on screen
+         curRect.topleft = (int((self.screenSize[0] - self.image_width) / 2.0),
+                            int((self.screenSize[1] - self.image_height) / 2.0))
+         self.screen.fill(self.backgroundColor)
+         self.screen.blit(self.current_image, curRect)
+         if (self.use_optomarker and
+             self.current_seq_no - self.last_marker_seq_no < self.optomarker_frame_length):
+             #draw marker
+             pygame.draw.rect(self.screen, (255,255,255), (0.49*self.screen.get_width(), 0.02*self.screen.get_height(), 20,20))
+         pygame.display.flip()
+
     def checkInput(self):
         if self.keypressed:
             if self.state == "playback" and self.lastkey in (pygame.K_RETURN, pygame.K_KP_ENTER):
@@ -223,6 +242,7 @@ class ImageSeqViewer(PygameFeedback):
     
     def send_marker(self,data):
         """send marker both to parallel and to UDP"""
+        self.last_marker_seq_no = self.current_seq_no
         self.send_parallel(data)
         try:
             self.send_udp(str(data))
