@@ -3,7 +3,9 @@ clear, clc, close all;
 project_setup();
 
 %% kill existing feedback process in case it's still running
-system('pkill -9 -f "python FeedbackController.py"')
+if isunix()
+    system('pkill -9 -f "python FeedbackController.py"');
+end
 
 %% Start pyff in background
 
@@ -44,15 +46,16 @@ fbsettings.image_height = 375;
 
 sequences = {
 %   sequence file                           FPS    
-    'seq07a_hohenwetterbach_modified2.txt'   10
+    'seq07a_hohenwetterbach_modified2.txt'  10
 %       'seq07b_hohenwettersbach.txt'         15
-      'seq08b_weiherfeld2_highlighted.txt'  10
-%     'seq03_kelterstr_modified.txt'          20
-%     'seq04_hardtwald_modified.txt'          15
+    'seq08b_weiherfeld2_highlighted.txt'    10
+    'seq03_kelterstr_modified.txt'          10
+    'seq04_hardtwald_modified.txt'          10
 %     'seq06_weiherfeld_modified.txt'       20
     'seq05_erbprinzenstr_modified.txt'      10
 %     'seq02_autobahn.txt'                  20
-     'seq09a_kanord.txt'                    10    
+    'seq09a_kanord.txt'                     10    
+    'seq10_pfinztalstr.txt'                 10
 };
 
 
@@ -122,7 +125,9 @@ for i = 1:size(sequences, 1)
 %    waitForMarker(PROJECT_SETUP.markers.preload_completed)
    
    fprintf('Press any key to start playing...\n')
-   pause;
+   if (input('Press a to abort, anything else to continue...\n', 's') == 'a')
+       break
+   end
    
    
    %% Run!

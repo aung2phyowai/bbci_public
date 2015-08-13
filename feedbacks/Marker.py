@@ -1,6 +1,5 @@
 """
-    General description:
-    The markers used for visual complexity feedback.
+    The marker constants used for visual complexity feedback.
 """
 class Marker():
     # preload completed
