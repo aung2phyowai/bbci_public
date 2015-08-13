@@ -38,6 +38,9 @@ class ImageSeqViewer(PygameFeedback):
             self.preload()
         PygameFeedback.on_interaction_event(self, data)
 
+    def on_control_event(self, data):
+        self.logger.info("got control event %s\n with type %s" % (data, type(data)))
+
     def pre_mainloop(self):
         """executed once after receiving play command"""
         #trigger preload (if enabled)
@@ -159,6 +162,13 @@ class ImageSeqViewer(PygameFeedback):
          self.screen.fill(self.backgroundColor)
          self.screen.blit(label, (int(self.screenSize[0]/2) - 100, int(self.screenSize[1]/2)))
          pygame.display.flip()
+
+
+    def tick(self):
+        # make sure we check input also in paused state
+        self.checkInput()
+        PygameFeedback.tick(self)
+        
         
     def play_tick(self):
         """exec actual event loop based on state"""
@@ -185,7 +195,6 @@ class ImageSeqViewer(PygameFeedback):
 #                self.logger.info("%f s for last 50 frame: FPS %f, should be %f" % (elapsed, (50.0 / elapsed), self.FPS))
 #                self.logger.info("pygame tells %f FPS" % self.clock.get_fps())
            
-
             if self.next_file_exists:
                 self.current_image = self.next_image
                 self.current_markers = self.next_markers
@@ -197,11 +206,20 @@ class ImageSeqViewer(PygameFeedback):
                 self.send_marker(Marker.trial_end)                
                 self.logger.info('new state: playback -> standby')
                 self.state = 'standby'
+            
                 
         else:
             self.logger.error("unknown state")
             sys.exit(1)
 
+    def checkInput(self):
+        if self.keypressed:
+            if self.state == "playback" and self.lastkey in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                self.send_marker(Marker.return_pressed)
+            if self.lastkey == pygame.K_SPACE:
+                self._paused = not self._paused
+                self.send_marker(Marker.playback_paused_toggled)
+            self.keypressed = False
     
     def send_marker(self,data):
         """send marker both to parallel and to UDP"""

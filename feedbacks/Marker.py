@@ -12,6 +12,10 @@ class Marker():
     # end of the trial (stimulus and cue vanish)
     trial_end = 65
 
+    #markers for user action
+    return_pressed = 1
+    playback_paused_toggled = 2
+    
     #markers for events in images
     child = 11
     cyclist = 12
