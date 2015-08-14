@@ -30,7 +30,12 @@ PROJECT_SETUP.markers.sync_50_frames = 50;
 PROJECT_SETUP.markers.classifier_trigger = 80;
 
 
+% feedback
+PROJECT_SETUP.FEEDBACK_NAME = 'ImageSeqViewer';
+
 PROJECT_SETUP.UDP_MARKER_PORT = 12344;
+PROJECT_SETUP.UDP_FEEDBACK_HOST = 'localhost';
+PROJECT_SETUP.UDP_FEEDBACK_PORT = 12345;
 
 
 %% directories

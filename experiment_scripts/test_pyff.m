@@ -2,43 +2,12 @@
 clear, clc, close all;
 project_setup();
 
-%% kill existing feedback process in case it's still running
-if isunix()
-    system('pkill -9 -f "python FeedbackController.py"');
-end
-
-%% Start pyff in background
-
-pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
-    ' && python FeedbackController.py --nogui'...
-    ' -a ' PROJECT_SETUP.FEEDBACKS_DIR ...
-    '  --loglevel=info --fb-loglevel=debug'...
-    ' 2> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stderr.log')...
-    ' 1> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stdout.log')...
-    '  &'];
+%% start feedback controller and init UDP connection
+pyff_start_feedback_controller()
 
 
-
-fprintf('Opening FeedbackController...')
-MatlabPath = getenv('LD_LIBRARY_PATH');
-setenv('LD_LIBRARY_PATH',getenv('PATH'));
-system(pyffStartupCmd,'-echo');
-setenv('LD_LIBRARY_PATH',MatlabPath);
-fprintf(' Done!\n')
-
-
-%% Setup UDP connection with the feedback
-bbci_feedback.host='localhost';
-bbci_feedback.port=12345;
-fprintf('Initializing UDP connection...')
-pyff_sendUdp('init',  bbci_feedback.host, bbci_feedback.port);
-fprintf('Done!\n')
-pause(0.1)
-
-fprintf('Initializing feedback...')
-pyff_sendUdp('interaction-signal', 's:_feedback', 'ImageSeqViewer', 'command','sendinit');
-fprintf(' Done!\n')
-%% Send parameters to the feedback
+%% Set feedback parameters
+% sequence file and FPS are added within the for loop
 fbsettings = struct;
 fbsettings.use_optomarker = true;
 fbsettings.image_width = 1242;
@@ -48,7 +17,7 @@ sequences = {
 %   sequence file                           FPS    
     'seq07a_hohenwetterbach_modified2.txt'  10
 %       'seq07b_hohenwettersbach.txt'         15
-    'seq08b_weiherfeld2_highlighted.txt'    10
+%     'seq08b_weiherfeld2_highlighted.txt'    10
     'seq03_kelterstr_modified.txt'          10
     'seq04_hardtwald_modified.txt'          10
 %     'seq06_weiherfeld_modified.txt'       20
@@ -59,52 +28,21 @@ sequences = {
 };
 
 
-%% Setup bbci toolbox
-bbci= struct;
-
-max_amp = 26.3;
+%% Setup bbci toolbox parameters
 fs = 100;
-
-bbci.source(1).acquire_fcn= @bbci_acquire_randomSignals;
-bbci.source(1).acquire_param= {'clab',{'Cz'}, 'amplitude', max_amp,...
-    'fs', fs, 'realtime', 1,...
-    'marker_mode', 'pyff_udp', 'marker_udp_port', PROJECT_SETUP.UDP_MARKER_PORT};
-bbci.source(1).min_blocklength = 10;
-bbci.source(1).clab = {'Cz'};
-bbci.source(1).record_signals = false;
-bbci.source(1).record_basename = '';
-bbci.log.output = 'screen&file';
-bbci.log.folder = PROJECT_SETUP.BBCI_TMP_DIR;
-
-
-bbci.signal(1).source = 1;
-bbci.signal(1).proc = {};
-bbci.signal(1).buffer_size = 25000;
-
-bbci.feature(1).signal = 1;
-bbci.feature(1).ival = [-10 0];
-
-
-C = struct('b', 0, 'w', ones(1,1));
-bbci.classifier(1).feature = 1;
-bbci.classifier(1).C = C;
-bbci.control.condition.marker = PROJECT_SETUP.markers.classifier_trigger; %currently not sent by pyff
-
-% defines, where control signals are *sent*
-bbci.feedback(1).host = 'localhost';
-bbci.feedback(1).port = 12345;
-bbci.feedback(1).receiver = 'pyff';
-
-bbci.quit_condition.marker= PROJECT_SETUP.markers.trial_end; 
+bbci = bbci_setup_random_signals(fs);
 
 
 %% loop over sequences
-%reset previous data
 for i = 1:size(sequences, 1)
    seqFileName = sequences{i,1};
    seqFPS = sequences{i,2};
    
    fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, seqFileName);
+   if exist(fbsettings.param_image_seq_file, 'file') == 0
+      % sequence file not accessible, so we don't bother starting the feedback
+      error(['Cannot access ', fbsettings.param_image_seq_file, ', aborting!'])
+   end
    fbsettings.FPS = seqFPS;
    fbOpts = fieldnames(fbsettings);
    
@@ -124,8 +62,7 @@ for i = 1:size(sequences, 1)
 %    
 %    waitForMarker(PROJECT_SETUP.markers.preload_completed)
    
-   fprintf('Press any key to start playing...\n')
-   if (input('Press a to abort, anything else to continue...\n', 's') == 'a')
+   if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
        break
    end
    
