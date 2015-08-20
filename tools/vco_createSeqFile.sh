@@ -28,7 +28,7 @@ do
     ln -f -s "../../${srcDir}/${fileName}" .
 done
 echo "currently in directory `pwd`"
-if [ "performFades" = true ] ; then
+if [ "$performFades" = true ] ; then
     echo "executing `dirname $0`/vco_fadeBlack.sh "in" $startNo $blendLength"
     `dirname $0`/vco_fadeBlack.sh "in" $startNo $blendLength
     fadeOutStartNo=`echo "$endNo - $blendLength" | bc`

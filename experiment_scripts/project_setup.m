@@ -4,6 +4,15 @@ global PROJECT_SETUP
 
 local_setup()
 
+%% configuration
+
+PROJECT_SETUP.logging.enabled = false;
+PROJECT_SETUP.validation.show_validation_stats = false;
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% from this point on, the configuration should [usually] not be changed
+
+
 %% marker definitions
 
 %user interactions

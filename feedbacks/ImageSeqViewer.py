@@ -92,6 +92,8 @@ class ImageSeqViewer(PygameFeedback):
             prefix = [chr(int(i)) for i in self.param_image_seq_file]
             self.image_seq_file = ''.join(prefix)
 
+        #normalize file path
+        self.image_seq_file = os.path.abspath(os.path.expanduser(self.image_seq_file))
         self._image_cache = {}
         self._loadSeqFile()
         if self.preload_images:
