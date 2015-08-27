@@ -2,6 +2,7 @@ function [ bbci ] = bbci_setup_random_signals( fs )
 %BBCI_SETUP_RANDOM_SIGNALS Builds config struct for random signals
 %   Markers are received via UDP.
 global PROJECT_SETUP
+global EXPERIMENT_CONFIG
 
 bbci= struct;
 
@@ -34,14 +35,14 @@ bbci.feature(1).ival = [-10 0];
 C = struct('b', 0, 'w', ones(1,1));
 bbci.classifier(1).feature = 1;
 bbci.classifier(1).C = C;
-bbci.control.condition.marker = PROJECT_SETUP.markers.classifier_trigger; %currently not sent by pyff
+bbci.control.condition.marker = EXPERIMENT_CONFIG.markers.classifier_trigger; %currently not sent by pyff
 
 % defines, where control signals are *sent*
 bbci.feedback(1).host = PROJECT_SETUP.UDP_FEEDBACK_HOST;
 bbci.feedback(1).port = PROJECT_SETUP.UDP_FEEDBACK_PORT;
 bbci.feedback(1).receiver = 'pyff';
 
-bbci.quit_condition.marker= PROJECT_SETUP.markers.trial_end;
+bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.trial_end;
 
 end
 

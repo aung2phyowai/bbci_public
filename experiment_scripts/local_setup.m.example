@@ -1,3 +1,5 @@
+function local_setup()
+
 global PROJECT_SETUP
 
 % setup:
@@ -7,6 +9,14 @@ global PROJECT_SETUP
 PROJECT_SETUP.BBCI_DIR = '~/repos/bbci_fork/';
 PROJECT_SETUP.PYFF_DIR = '~/repos/pyff/';
 PROJECT_SETUP.TCP_UDP_DIR = '~/software/tcp_udp_ip/';
-PROJECT_SETUP.DATA_DIR = '~/local_data/kitti';
+PROJECT_SETUP.VCO_DATA_DIR = '/mnt/blbt-fs1/projects/visual_complexity/data/kitti';
 PROJECT_SETUP.BBCI_DATA_DIR = fullfile(getenv('HOME'), 'local_data', 'bbci');
 PROJECT_SETUP.BBCI_TMP_DIR = fullfile(getenv('HOME'), 'local_data', 'tmp');
+PROJECT_SETUP.SCREEN_SIZE = [1920, 1080];
+
+% Settings for systems with actual experiment hardware
+PROJECT_SETUP.HARDWARE_AVAILABLE = false;
+PROJECT_SETUP.PARALLEL_PORT_ADDRESS = '0xD050';
+% should be committed to repo in directory experiment_scripts/extra_files
+PROJECT_SETUP.BV_WORKSPACE_FILE_NAME = 'somefile.rwksp';
+PROJECT_SETUP.BV_RECORDER_EXECUTABLE = 'c:\Vision\Recorder\Recorder.exe';

@@ -9,10 +9,16 @@ end
 
 %% Start pyff in background
 
+if PROJECT_SETUP.HARDWARE_AVAILABLE
+    parallelPortParam = ['--port=' PROJECT_SETUP.PARALLEL_PORT_ADDRESS];
+else
+    parallelPortParam = '';
+
 pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
     ' && python FeedbackController.py --nogui'...
     ' -a ' PROJECT_SETUP.FEEDBACKS_DIR ...
     '  --loglevel=info --fb-loglevel=debug'...
+    parallelPortParam...
     ' 2> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stderr.log')...
     ' 1> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stdout.log')...
     '  &'];
@@ -30,8 +36,8 @@ fprintf(' Done!\n')
 
 fprintf('Initializing UDP connection...')
 pyff_sendUdp('init',  PROJECT_SETUP.UDP_FEEDBACK_HOST, PROJECT_SETUP.UDP_FEEDBACK_PORT);
-fprintf('Done!\n')
 pause(0.1)
+fprintf('Done!\n')
 
 fprintf('Initializing feedback...')
 pyff_sendUdp('interaction-signal', 's:_feedback', PROJECT_SETUP.FEEDBACK_NAME, 'command','sendinit');
