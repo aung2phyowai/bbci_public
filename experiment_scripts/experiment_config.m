@@ -11,7 +11,7 @@ subject_config(); %source VP code etc
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date]
 EXPERIMENT_CONFIG.filePrefix = ['vco_pilot_run_' EXPERIMENT_CONFIG.VPcode_date];
 EXPERIMENT_CONFIG.logging.enabled = false;
-EXPERIMENT_CONFIG.validation.show_validation_stats = false;
+EXPERIMENT_CONFIG.validation.show_validation_stats = true;
 EXPERIMENT_CONFIG.sequences.randomize = true;
 
 EXPERIMENT_CONFIG.feedback.use_optomarker = true;

@@ -68,7 +68,7 @@ for i = seqOrder
     %% Stop!
    pyff_sendUdp('interaction-signal', 'command','stop');
    
-   if PROJECT_SETUP.validation.show_validation_stats
+   if EXPERIMENT_CONFIG.validation.show_validation_stats
        validation_stats(data(i))
    end
    

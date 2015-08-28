@@ -23,6 +23,10 @@ fbsettings = pyff_build_parameters();
 sequences = [...
     EXPERIMENT_CONFIG.complexSeqs; ...
     EXPERIMENT_CONFIG.simpleSeqs];
+% sequences = {
+%     'seq_c09_1-weiherfelda-mod5-v2.txt'  8
+%     'seq_c06_1-kelterstr-mod3-v1.txt'   8
+%     };
 
 
 
@@ -39,7 +43,7 @@ for i = seqOrder
     fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, seqFileName);
     if exist(fbsettings.param_image_seq_file, 'file') == 0
         % sequence file not accessible, so we don't bother starting the feedback
-        fprintf(['Cannot access ', fbsettings.param_image_seq_file, ', aborting!\n'])
+        fprintf(['Cannot access %s, aborting!\n'], fbsettings.param_image_seq_file)
         break;
     end
     fbsettings.FPS = seqFPS;
@@ -65,10 +69,10 @@ for i = seqOrder
     %% setup recording
     % Setup bbci toolbox parameters
     
-    bbci = bbci_setup_random_signals(100)% bbci_setup_bv_recording(seqFileName);
+    bbci = bbci_setup_bv_recording(seqFileName);
     bvr_sendcommand('stoprecording');
     bbci_acquire_bv('close')
-    bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
+    bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'extra_files', PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
     
     bvr_sendcommand('viewsignals')
     
@@ -82,8 +86,8 @@ for i = seqOrder
     %% Stop!
     pyff_sendUdp('interaction-signal', 'command','stop');
     
-    if PROJECT_SETUP.validation.show_validation_stats
-        validation_stats(data(i))
+    if EXPERIMENT_CONFIG.validation.show_validation_stats
+        validation_stats(data)
     end
     
 end

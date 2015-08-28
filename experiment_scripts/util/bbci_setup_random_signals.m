@@ -16,7 +16,7 @@ bbci.source(1).min_blocklength = 10;
 bbci.source(1).clab = {'Cz'};
 bbci.source(1).record_signals = false;
 bbci.source(1).record_basename = '';
-if PROJECT_SETUP.logging.enabled
+if EXPERIMENT_CONFIG.logging.enabled
     bbci.log.output = 'screen&file';
     bbci.log.folder = PROJECT_SETUP.BBCI_TMP_DIR;
 else

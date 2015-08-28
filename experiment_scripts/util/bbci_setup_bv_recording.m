@@ -5,7 +5,7 @@ global EXPERIMENT_CONFIG
 
 exp_base_dir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR,EXPERIMENT_CONFIG.VPcode_date);
 mkdir(exp_base_dir)
-full_rec_name = [EXPERIMENT_CONFIG.filePrefix rec_name,'_'];
+full_rec_name = [EXPERIMENT_CONFIG.filePrefix '_' rec_name];
 dir = fullfile(exp_base_dir, full_rec_name);
 
 bbci.source(1).record_basename = dir;
@@ -19,7 +19,7 @@ bbci.source(1).min_blocklength = 10;
 bbci.source(1).record_signals = true;
 
 bbci.signal(1).source = 1;
-bbci.signal(1).proc = {@get_force};
+bbci.signal(1).proc = {};
 bbci.signal(1).buffer_size = 10;
 
 bbci.feature(1).signal = 1;
@@ -29,9 +29,6 @@ C = struct('b', 0, 'w', ones(1,1));
 bbci.classifier(1).feature = 1;
 bbci.classifier(1).C = C;
 
-
-bbci.control(1).classifier = 1;
-bbci.control(1).fcn = @custom_control;
 
 bbci.feedback(1).host = PROJECT_SETUP.UDP_FEEDBACK_HOST;
 bbci.feedback(1).port = PROJECT_SETUP.UDP_FEEDBACK_PORT;

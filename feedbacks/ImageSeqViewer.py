@@ -187,7 +187,7 @@ class ImageSeqViewer(PygameFeedback):
     def _get_image(self, key):
        # self.logger.debug("retrieving image %s" % key)
         if key not in self._image_cache:
-            next_file_name = os.path.join(os.path.dirname(self.image_seq_file), key)
+            next_file_name = os.path.join(os.path.dirname(self.image_seq_file), os.path.normpath(key))
             self._image_cache[key] = pygame.image.load(next_file_name)
         return self._image_cache[key]
 

@@ -6,24 +6,31 @@ global PROJECT_SETUP
 if isunix()
     system('pkill -9 -f "python FeedbackController.py"');
 end
+if ispc()
+   % don't know about anything more selective than just killing all cmds
+   % ... so we better ask
+   if (input('Press "y" to kill all cmd.exe processes...\n', 's') == 'y')
+       system('taskkill /IM cmd.exe');
+   end
+end
 
 %% Start pyff in background
 
 if PROJECT_SETUP.HARDWARE_AVAILABLE
-    parallelPortParam = ['--port=' PROJECT_SETUP.PARALLEL_PORT_ADDRESS];
+    parallelPortParam = ['--port=', PROJECT_SETUP.PARALLEL_PORT_ADDRESS];
 else
     parallelPortParam = '';
-
+end
 pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
     ' && python FeedbackController.py --nogui'...
     ' -a ' PROJECT_SETUP.FEEDBACKS_DIR ...
     '  --loglevel=info --fb-loglevel=debug'...
-    parallelPortParam...
-    ' 2> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stderr.log')...
-    ' 1> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stdout.log')...
+    ' ' parallelPortParam ...
     '  &'];
 
 
+%     ' 2> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stderr.log')...
+%     ' 1> ' fullfile(PROJECT_SETUP.LOG_DIR, 'pyff.stdout.log')...
 
 fprintf('Opening FeedbackController...')
 dynamicLibLookupPath = getenv('LD_LIBRARY_PATH');
