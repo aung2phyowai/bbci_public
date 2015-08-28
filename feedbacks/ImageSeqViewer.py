@@ -55,6 +55,7 @@ class ImageSeqViewer(PygameFeedback):
 
         #init private state
         self._state = 'standby'
+        self._current_seq_no = -1
         self._last_marker_seq_no = -1 - self.optomarker_frame_length
 
     def on_interaction_event(self, data):
@@ -115,6 +116,9 @@ class ImageSeqViewer(PygameFeedback):
             self._readNextImage()
         else:
             self.logger.error("couldn't find first image from sequence file %s, quitting" % self.image_seq_file)
+            time.sleep(1) #we sleep a bit to make sure the marker gets caught
+            self.send_marker(Marker.trial_end)
+            time.sleep(1)
             sys.exit(10)
 
 
@@ -157,6 +161,15 @@ class ImageSeqViewer(PygameFeedback):
         def parseLine(line):
              fields = line.rstrip('\n').split('\t')
              return (fields[0], [processMarker(marker_string) for marker_string in fields[1:]])
+
+        if not os.path.isfile(self.image_seq_file):
+            self.logger.error("couldn't find sequence file %s, quitting" % self.image_seq_file)
+            time.sleep(1) #we sleep a bit to make sure the marker gets caught
+            self.send_marker(Marker.trial_end)
+            time.sleep(1)
+            sys.exit(2)
+
+        self.logger.debug("loading sequence file %s..." % self.image_seq_file)
         # do the actual work
         self._image_seq = [parseLine(l) for l in open(self.image_seq_file) if not l.lstrip().startswith('#') ]
 
@@ -193,6 +206,13 @@ class ImageSeqViewer(PygameFeedback):
        # self.logger.debug("retrieving image %s" % key)
         if key not in self._image_cache:
             next_file_name = os.path.join(os.path.dirname(self.image_seq_file), os.path.normpath(key))
+            self.logger.debug("loading image %s into memory" % next_file_name)
+            if not os.path.isfile(next_file_name):
+                self.logger.error("couldn't find image %s from sequence file %s, quitting" % (next_file_name, self.image_seq_file))
+                time.sleep(1) #we sleep a bit to make sure the marker gets caught
+                self.send_marker(Marker.trial_end)
+                time.sleep(1)
+                sys.exit(3)
             self._image_cache[key] = pygame.image.load(next_file_name)
         return self._image_cache[key]
 
@@ -250,8 +270,11 @@ class ImageSeqViewer(PygameFeedback):
             
                 
         else:
-            self.logger.error("unknown state")
+            self.logger.error("unknown state, exiting")
+            self.send_marker(Marker.trial_end)
+            time.sleep(1)
             sys.exit(1)
+            time.sleep(1)
 
 
     def _drawCurrentImage(self):
