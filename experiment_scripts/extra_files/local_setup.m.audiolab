@@ -13,7 +13,8 @@ PROJECT_SETUP.VCO_DATA_DIR = 'D:\home\henrich\visual_complexity\data\kitti';
 %TODO change to actual dir
 PROJECT_SETUP.BBCI_DATA_DIR = fullfile('D:\home\henrich\tmp_data', 'bbci');
 PROJECT_SETUP.BBCI_TMP_DIR = fullfile('D:\home\henrich\tmp_data',  'tmp');
-PROJECT_SETUP.SCREEN_SIZE = [1920, 1080];
+PROJECT_SETUP.SCREEN_SIZE = [1920, 1200];
+PROJECT_SETUP.SCREEN_POSITION = [-1920, 0];
 
 % Settings for systems with actual experiment hardware
 PROJECT_SETUP.HARDWARE_AVAILABLE = true;

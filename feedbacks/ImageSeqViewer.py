@@ -39,14 +39,15 @@ class ImageSeqViewer(PygameFeedback):
 
         #init public state (typically partially overriden by Matlab)
         self.caption = "Image Sequence Viewer"
-        self.screenPos = [400, 400]
         self.image_width = 1242
         self.image_height = 375
         # use separate variables to avoid type conversions
         #  when interacting with Matlab
         self.screen_width = self.image_width + 100
         self.screen_height = self.image_height + 200
-        self.screenSize = [int(self.screen_width), int(self.screen_height)]
+        self.screen_position_x = 400
+        self.screen_position_y = 400
+        self.fullscreen = False #fullscreen seems to be broken
         self.preload_images = True
         self.use_optomarker = True
         #for how many frames should the marker be displayed
@@ -75,7 +76,11 @@ class ImageSeqViewer(PygameFeedback):
 
     def pre_mainloop(self):
         """executed once after receiving play command"""
+        self.screenSize = [int(self.screen_width), int(self.screen_height)]
+        self.screenPos = [self.screen_position_x, self.screen_position_y]
+        
         PygameFeedback.pre_mainloop(self)
+        
         #trigger preload (if enabled)
         self._preload()
         self._state = 'playback'
@@ -252,8 +257,8 @@ class ImageSeqViewer(PygameFeedback):
     def _drawCurrentImage(self):
          curRect = self._current_image.get_rect()
          #center on screen
-         curRect.topleft = (int((self.screenSize[0] - self.image_width) / 2.0),
-                            int((self.screenSize[1] - self.image_height) / 2.0))
+         curRect.topleft = (int((self.screen.get_width() - self.image_width) / 2.0),
+                            int((self.screen.get_height() - self.image_height) / 2.0))
          self.screen.fill(self.backgroundColor)
          self.screen.blit(self._current_image, curRect)
          if (self.use_optomarker and
