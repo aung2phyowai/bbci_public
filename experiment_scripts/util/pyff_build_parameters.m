@@ -11,8 +11,6 @@ fbsettings.param_logging_dir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedback_l
 fbsettings.param_logging_prefix = EXPERIMENT_CONFIG.filePrefix;
 
 fbsettings.use_optomarker = EXPERIMENT_CONFIG.feedback.use_optomarker;
-fbsettings.image_width = EXPERIMENT_CONFIG.feedback.image_size(1);
-fbsettings.image_height = EXPERIMENT_CONFIG.feedback.image_size(2);
 fbsettings.screen_width = PROJECT_SETUP.SCREEN_SIZE(1);
 fbsettings.screen_height = PROJECT_SETUP.SCREEN_SIZE(2);
 fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);

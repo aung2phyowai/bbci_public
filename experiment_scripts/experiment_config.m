@@ -15,7 +15,6 @@ EXPERIMENT_CONFIG.validation.show_validation_stats = true;
 EXPERIMENT_CONFIG.sequences.randomize = true;
 
 EXPERIMENT_CONFIG.feedback.use_optomarker = true;
-EXPERIMENT_CONFIG.feedback.image_size = [1242, 375];
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed

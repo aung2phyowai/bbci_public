@@ -1,0 +1,9 @@
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[CLASSES]
+
+# List of method names used to declare (i.e. assign) instance attributes.
+defining-attr-methods=apply_default_settings,init_private_state,__init__,setUp
