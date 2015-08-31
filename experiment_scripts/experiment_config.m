@@ -9,7 +9,7 @@ subject_config(); %source VP code etc
 %% configuration
 
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date]
-EXPERIMENT_CONFIG.filePrefix = ['vco_pilot_run_' EXPERIMENT_CONFIG.VPcode_date];
+EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
 EXPERIMENT_CONFIG.logging.enabled = false;
 EXPERIMENT_CONFIG.validation.show_validation_stats = true;
 EXPERIMENT_CONFIG.sequences.randomize = true;
@@ -20,6 +20,7 @@ EXPERIMENT_CONFIG.feedback.image_size = [1242, 375];
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed
 
+EXPERIMENT_CONFIG.recordDir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR, EXPERIMENT_CONFIG.VPcode_date);
 
 EXPERIMENT_CONFIG.markers = marker_definitions();
 

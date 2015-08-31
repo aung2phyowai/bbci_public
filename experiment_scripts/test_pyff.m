@@ -17,14 +17,12 @@ fbsettings = pyff_build_parameters();
 sequences = EXPERIMENT_CONFIG.complexSeqs;
 % sequences = {
 % %   sequence file                           FPS    
-% 'seq_c10_1-weiherfeldb-mod4.txt'    5
+% 'seq_c10_1-weiherfeldb-mod4.txt'    10
 % };
 
 
 
-%% Setup bbci toolbox parameters
-fs = 100;
-bbci = bbci_setup_random_signals(fs);
+
 
 seqOrder = 1:size(sequences, 1);
 if EXPERIMENT_CONFIG.sequences.randomize
@@ -43,6 +41,7 @@ for i = seqOrder
       break;
    end
    fbsettings.FPS = seqFPS;
+   fbsettings.param_logging_prefix = [EXPERIMENT_CONFIG.filePrefix '_' seqFileName];
    fbOpts = fieldnames(fbsettings);
    
    fprintf('Sending feedback parameters...')
@@ -58,10 +57,13 @@ for i = seqOrder
        break
    end
    
+   %% Setup bbci toolbox parameters
+   fs = 100;
+   bbci = bbci_setup_random_signals(seqFileName, fs);
    
    %% Run!
    pyff_sendUdp('interaction-signal', 'command','play');
-   
+
    data(i) = bbci_apply(bbci);
    
 
@@ -81,5 +83,5 @@ end
 pyff_sendUdp('interaction-signal', 'command','close');
 pyff_sendUdp('interaction-signal', 'command','quitfeedbackcontroller');
 pyff_sendUdp('close');
-disp('UDP connection succesfully closed')
+disp('UDP connection successfully closed')
 

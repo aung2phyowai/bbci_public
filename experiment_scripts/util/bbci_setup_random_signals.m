@@ -1,4 +1,4 @@
-function [ bbci ] = bbci_setup_random_signals( fs )
+function [ bbci ] = bbci_setup_random_signals( rec_name, fs )
 %BBCI_SETUP_RANDOM_SIGNALS Builds config struct for random signals
 %   Markers are received via UDP.
 global PROJECT_SETUP
@@ -8,6 +8,12 @@ bbci= struct;
 
 max_amp = 26.3;
 
+mkdir(EXPERIMENT_CONFIG.recordDir)
+full_rec_name = fullfile(EXPERIMENT_CONFIG.recordDir,...
+    [EXPERIMENT_CONFIG.filePrefix '_' rec_name]);
+bbciLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'bbci_logs');
+mkdir(bbciLogDir)
+
 bbci.source(1).acquire_fcn= @bbci_acquire_randomSignals;
 bbci.source(1).acquire_param= {'clab',{'Cz'}, 'amplitude', max_amp,...
     'fs', fs, 'realtime', 1,...
@@ -15,10 +21,10 @@ bbci.source(1).acquire_param= {'clab',{'Cz'}, 'amplitude', max_amp,...
 bbci.source(1).min_blocklength = 10;
 bbci.source(1).clab = {'Cz'};
 bbci.source(1).record_signals = false;
-bbci.source(1).record_basename = '';
+bbci.source(1).record_basename = full_rec_name;
 if EXPERIMENT_CONFIG.logging.enabled
     bbci.log.output = 'screen&file';
-    bbci.log.folder = PROJECT_SETUP.BBCI_TMP_DIR;
+    bbci.log.folder = bbciLogDir;
 else
     bbci.log.output = 0;
 end

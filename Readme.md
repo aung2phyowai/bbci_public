@@ -13,7 +13,8 @@ For the subject config, just copy ``experiment_scripts/subject_config.m.example`
 ## Run the experiments
 
 The main file for running the experiment is ``experiment_scripts/experiment_main.m``. For testing ``experiment_scripts/test_pyff.m`` can be used.
-Additional information can be found in the corresponding [Readme](experiment_scripts/Readme.md)
+Data can be found on the fileserver at ``/mnt/blbt-fs1/projects/visual_complexity/data/kitti/``.
+Additional information can be found in the corresponding [Experiment Readme](experiment_scripts/Readme.md)
 
 ## Image sequence files
 

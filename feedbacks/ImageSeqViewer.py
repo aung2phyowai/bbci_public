@@ -9,6 +9,9 @@ import os
 import sys
 import logging
 import time
+import datetime
+import tempfile
+import pickle
 
 import pygame
 
@@ -51,12 +54,26 @@ class ImageSeqViewer(PygameFeedback):
         self.preload_images = True
         self.use_optomarker = True
         #for how many frames should the marker be displayed
-        self.optomarker_frame_length = 2
+        self.optomarker_frame_length = 1
+        self.logging_dir = tempfile.gettempdir()
+        self.logging_prefix = 'image_seq_view'
 
         #init private state
         self._state = 'standby'
         self._current_seq_no = -1
         self._last_marker_seq_no = -1 - self.optomarker_frame_length
+        self._start_date_string = datetime.datetime.now().isoformat().replace(":", "-")
+        #explicit logger for sequences
+        self._seqLoggingHandler = None
+        
+        #we have two handlers: one logs everything to temp dir
+        # the second one logs per sequence in dir specified by parameter
+        #log everything in temp directory
+        logFileName=os.path.join(tempfile.gettempdir(),
+                                 "image_seq_view_all_" + self._start_date_string + ".log")
+        self.logger.debug(logFileName)
+        self.logger.addHandler(logging.FileHandler(logFileName))
+       
 
     def on_interaction_event(self, data):
         # self.logger.info("got event: %s\n with type %s" % (data, type(data)))
@@ -65,7 +82,8 @@ class ImageSeqViewer(PygameFeedback):
         if ('screen_width' in data or
             'screen_height' in data):
             self.screenSize = [int(self.screen_width), int(self.screen_height)]
-                
+
+     
         # workaround - actually a command, but those don't cause an interaction event
         if 'trigger_preload' in data:
             self.logger.info("triggering preload")
@@ -81,10 +99,42 @@ class ImageSeqViewer(PygameFeedback):
         self.screenPos = [self.screen_position_x, self.screen_position_y]
         
         PygameFeedback.pre_mainloop(self)
-        
+
+        self._setup_seq_logger()
+        self._dump_settings()
         #trigger preload (if enabled)
         self._preload()
         self._state = 'playback'
+
+    def _setup_seq_logger(self):
+        loggingSetupChanged = False
+        # setup logger if we get a new logging dir
+        if  hasattr(self, 'param_logging_dir') and isinstance(self.param_logging_dir[0],float):
+            characters = [chr(int(i)) for i in self.param_logging_dir]
+            new_logging_dir = ''.join(characters)
+            if new_logging_dir != self.logging_dir:
+                self.logging_dir = new_logging_dir
+                loggingSetupChanged = True
+                if not os.path.exists(self.logging_dir):
+                    os.makedirs(self.logging_dir)
+
+        if hasattr(self, 'param_logging_prefix')  and isinstance(self.param_logging_prefix[0], float):
+            characters = [chr(int(i)) for i in self.param_logging_prefix]
+            new_logging_prefix = ''.join(characters)
+            if new_logging_prefix != self.logging_prefix:
+                self.logging_prefix = new_logging_prefix
+                loggingSetupChanged = True
+
+        # start logging per sequence
+        if loggingSetupChanged or self._seqLoggingHandler is None:
+            logFileName=os.path.join(self.logging_dir,
+                                     self.logging_prefix + "_" + self._start_date_string + ".log")
+            if self._seqLoggingHandler is not None:
+                self.logger.removeHandler(self._seqLoggingHandler)
+            self.logger.debug("writing sequence log to %s" % logFileName)
+            self._seqLoggingHandler = logging.FileHandler(logFileName)
+            self.logger.addHandler(self._seqLoggingHandler)
+       
         
     def _preload(self):
         """ loads image sequence from supplied file and resets the cache
@@ -206,7 +256,7 @@ class ImageSeqViewer(PygameFeedback):
        # self.logger.debug("retrieving image %s" % key)
         if key not in self._image_cache:
             next_file_name = os.path.join(os.path.dirname(self.image_seq_file), os.path.normpath(key))
-            self.logger.debug("loading image %s into memory" % next_file_name)
+            #self.logger.debug("loading image %s into memory" % next_file_name)
             if not os.path.isfile(next_file_name):
                 self.logger.error("couldn't find image %s from sequence file %s, quitting" % (next_file_name, self.image_seq_file))
                 time.sleep(1) #we sleep a bit to make sure the marker gets caught
@@ -298,6 +348,29 @@ class ImageSeqViewer(PygameFeedback):
                 self._paused = not self._paused
                 self.send_marker(Marker.playback_paused_toggled)
             self.keypressed = False #mark as handled
+
+    def _dump_settings(self):
+        # Determine the pickable attributes of the feedback and store them
+        attr_fb = dir(self)
+        attr_toPickle = {}
+        pickleFileName=os.path.join(self.logging_dir,
+                                     self.logging_prefix + "_" + self._start_date_string + ".p")
+
+        #filter out private attributes?
+        f = open(pickleFileName, 'wb')
+        valid_keys = []
+        for el in attr_fb:
+            val = getattr(self,el)
+            if not hasattr(val, '__call__'):
+                type(val)
+                try:
+                    attr_toPickle[el] = getattr(self,el)
+                    pickle.dump(attr_toPickle, f)
+                    valid_keys.append(el)
+                except:
+                    del attr_toPickle[el]
+        f.seek(0)
+        pickle.dump(attr_toPickle, f)
     
     def send_marker(self,data):
         """send marker both to parallel and to UDP"""

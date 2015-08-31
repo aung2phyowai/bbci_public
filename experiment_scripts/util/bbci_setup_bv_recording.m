@@ -3,12 +3,14 @@ function [ bbci ] = bbci_setup_bv_recording( rec_name )
 global PROJECT_SETUP
 global EXPERIMENT_CONFIG
 
-exp_base_dir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR,EXPERIMENT_CONFIG.VPcode_date);
-mkdir(exp_base_dir)
-full_rec_name = [EXPERIMENT_CONFIG.filePrefix '_' rec_name];
-dir = fullfile(exp_base_dir, full_rec_name);
+mkdir(EXPERIMENT_CONFIG.recordDir)
+full_rec_name = fullfile(EXPERIMENT_CONFIG.recordDir,...
+    [EXPERIMENT_CONFIG.filePrefix '_' rec_name]);
 
-bbci.source(1).record_basename = dir;
+bbciLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'bbci_logs');
+mkdir(bbciLogDir)
+
+bbci.source(1).record_basename = full_rec_name;
 bbci.source(1).record_signals = true;
 bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.trial_end;
 bbci.quit_condition.running_time=inf;
@@ -33,6 +35,14 @@ bbci.classifier(1).C = C;
 bbci.feedback(1).host = PROJECT_SETUP.UDP_FEEDBACK_HOST;
 bbci.feedback(1).port = PROJECT_SETUP.UDP_FEEDBACK_PORT;
 bbci.feedback(1).receiver = 'pyff';
+
+if EXPERIMENT_CONFIG.logging.enabled
+    bbci.log.output = 'screen&file';
+    bbci.log.folder = bbciLogDir;
+else
+    bbci.log.output = 0;
+end
+
 
 end
 

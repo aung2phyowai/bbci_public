@@ -7,6 +7,9 @@ global EXPERIMENT_CONFIG
 
 fbsettings = struct;
 
+fbsettings.param_logging_dir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedback_logs');
+fbsettings.param_logging_prefix = EXPERIMENT_CONFIG.filePrefix;
+
 fbsettings.use_optomarker = EXPERIMENT_CONFIG.feedback.use_optomarker;
 fbsettings.image_width = EXPERIMENT_CONFIG.feedback.image_size(1);
 fbsettings.image_height = EXPERIMENT_CONFIG.feedback.image_size(2);

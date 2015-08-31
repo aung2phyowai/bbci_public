@@ -47,6 +47,7 @@ for i = seqOrder
         break;
     end
     fbsettings.FPS = seqFPS;
+    fbsettings.param_logging_prefix = [EXPERIMENT_CONFIG.filePrefix '_' seqFileName];
     fbOpts = fieldnames(fbsettings);
     
     fprintf('Sending feedback parameters...')
@@ -99,5 +100,5 @@ end
 pyff_sendUdp('interaction-signal', 'command','close');
 pyff_sendUdp('interaction-signal', 'command','quitfeedbackcontroller');
 pyff_sendUdp('close');
-disp('UDP connection succesfully closed')
+disp('UDP connection successfully closed')
 
