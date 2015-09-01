@@ -1,6 +1,7 @@
 function [] = pyff_start_feedback_controller( )
 %pyff_start_feedback_controller Start the FeedbackController process
 global PROJECT_SETUP
+global EXPERIMENT_CONFIG
 
 %% kill existing feedback process in case it's still running
 if isunix()
@@ -21,12 +22,22 @@ if PROJECT_SETUP.HARDWARE_AVAILABLE
 else
     parallelPortParam = '';
 end
+if isunix()
+    outRedirects = [...
+        ' 2> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.stderr.log')...
+        ' 1> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.stdout.log')];
+    if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
+        mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
+    end
+else
+    outRedirects = '';
+end
 pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
     ' && python FeedbackController.py --nogui'...
     ' -a ' PROJECT_SETUP.FEEDBACKS_DIR ...
     '  --loglevel=info --fb-loglevel=debug'...
     ' ' parallelPortParam ...
-    '  &'];
+    outRedirects '  &'];
 
 
 

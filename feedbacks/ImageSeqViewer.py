@@ -47,13 +47,16 @@ class ImageSeqViewer(PygameFeedback):
         """ init private state """
         self._state = 'standby'
         self._current_image_no = -1
-        self._last_marker_seq_no = -1 - self.optomarker_frame_length
+        self._unshown_marker = False
         self._start_date_string = datetime.datetime.now().isoformat().replace(":", "-")
         #explicit logger for sequences
-        self._seq_logging_handler = None
+        self._block_logging_handler = None
+
+        self._seq_info_list = []
+        self._current_seq_index = -1
+
         self._image_cache = {}
-        self._image_seq = []
-        self.current_seq_file = None
+        self._current_image_seq = []
 
         #we have two handlers: one logs everything to temp dir
         # the second one logs per sequence in dir specified by parameter
@@ -78,20 +81,9 @@ class ImageSeqViewer(PygameFeedback):
         self.fullscreen = False #fullscreen seems to be broken
         self.preload_images = True
         self.use_optomarker = True
-        #for how many frames should the marker be displayed
-        self.optomarker_frame_length = 1
         self.logging_dir = tempfile.gettempdir()
         self.logging_prefix = 'image_seq_view'
 
-
-    def on_interaction_event(self, data):
-        # self.logger.info("got event: %s\n with type %s" % (data, type(data)))
-
-        # workaround - actually a command, but those don't cause an interaction event
-        if 'trigger_preload' in data:
-            self.logger.info("triggering preload")
-            self._preload()
-        PygameFeedback.on_interaction_event(self, data)
 
     def on_control_event(self, data):
         #self.logger.info("got control event %s\n with type %s" % (data, type(data)))
@@ -104,17 +96,21 @@ class ImageSeqViewer(PygameFeedback):
 
         PygameFeedback.pre_mainloop(self)
 
-        self._setup_seq_logger()
+        self._apply_settings()
+
+        self._current_seq_index = 0
+        self._init_current_sequence()
+
+        #save state before playback
         pickle_file_name = os.path.join(self.logging_dir,
                                         self.logging_prefix + "_" + self._start_date_string + ".p")
         vco_utils.dump_settings(self, pickle_file_name)
-        #trigger preload (if enabled)
-        self._preload()
+
         self._state = 'playback'
 
 
 
-    def _setup_seq_logger(self):
+    def _setup_block_logger(self):
         """create new logger for the sequence based on settings"""
         logging_setup_changed = False
         #param_ members are set by matlab, so pylint should be disabled
@@ -133,63 +129,90 @@ class ImageSeqViewer(PygameFeedback):
                 self.logging_prefix = new_logging_prefix
                 logging_setup_changed = True
 
-        # start logging per sequence
-        if logging_setup_changed or self._seq_logging_handler is None:
+        # start logging per block
+        if logging_setup_changed or self._block_logging_handler is None:
             log_file_name = os.path.join(self.logging_dir,
                                          self.logging_prefix + "_" + self._start_date_string + ".log")
-            if self._seq_logging_handler is not None:
-                self.logger.removeHandler(self._seq_logging_handler)
+            if self._block_logging_handler is not None:
+                self.logger.removeHandler(self._block_logging_handler)
             self.logger.debug("writing sequence log to %s", log_file_name)
-            self._seq_logging_handler = logging.FileHandler(log_file_name)
-            self.logger.addHandler(self._seq_logging_handler)
+            self._block_logging_handler = logging.FileHandler(log_file_name)
+            self.logger.addHandler(self._block_logging_handler)
 
-
-    def _preload(self):
-        """ loads image sequence from supplied file and resets the cache
-            if self.preload_images, all images from the seq file are loaded into memory
+    def _apply_settings(self):
+        """ apply all settings (sent by matlab) and reset state (including cache)
+            if preloading is activated, all images of all sequences [of the block] are loaded into memory
         """
         self._state = 'loading'
         self.play_tick() #update display since we're blocking from now on
 
-        #some fiddling with supplied matlab char-arrays
-        if hasattr(self, 'param_image_seq_file'):  #pylint: disable=no-member
-            seq_file = vco_utils.parse_matlab_char_array(self.param_image_seq_file)#pylint: disable=no-member
-            self.current_seq_file = os.path.abspath(os.path.expanduser(seq_file))
-
-        if not os.path.isfile(self.current_seq_file):
-            self.logger.error("couldn't find sequence file %s, quitting", self.current_seq_file)
-            time.sleep(1) #we sleep a bit to make sure the marker gets caught
-            self.send_marker(markers.trial_end)
-            time.sleep(1)
-            sys.exit(2)
-
-
         self._image_cache = {}
-        self.logger.debug("loading sequence file %s...", self.current_seq_file)
-        self._image_seq = vco_utils.load_seq_file(self.current_seq_file)
-        if not self._image_seq:
-            #be expect at least one image, so return error
-            self.logger.error("no images found in sequence file %s, quitting", self.current_seq_file)
+        self._setup_block_logger()
+
+        #load new sequence information if available
+        if hasattr(self, 'param_block_seq_file_fps_list'):  #pylint: disable=no-member
+            seq_fps_string = vco_utils.parse_matlab_char_array(self.param_block_seq_file_fps_list)#pylint: disable=no-member
+            #dangerous, but we expect to be in a trustworthy environment...
+            seq_fps_list = eval(seq_fps_string) #pylint: disable=eval-used
+
+            self._seq_info_list = []
+            self._current_seq_index = -1
+
+            #load and validate all sequences of the block
+            for seq_fps_tuple in seq_fps_list:
+                #expand seq file name to full path
+                seq_file = os.path.abspath(os.path.expanduser(seq_fps_tuple[0]))
+                seq_fps = seq_fps_tuple[1]
+                if not os.path.isfile(seq_file):
+                    self.logger.error("couldn't find sequence file %s, quitting", seq_file)
+                    time.sleep(1) #we sleep a bit to make sure the marker gets caught
+                    self.send_marker(markers.trial_end)
+                    time.sleep(1)
+                    sys.exit(2)
+
+                self.logger.debug("loading sequence file %s...", seq_file)
+                image_seq = vco_utils.load_seq_file(seq_file)
+                if not image_seq:
+                    #we expect at least one image, so return error
+                    self.logger.error("no images found in sequence file %s, quitting", seq_file)
+                    time.sleep(1) #we sleep a bit to make sure the marker gets caught
+                    self.send_marker(markers.trial_end)
+                    time.sleep(1)
+                    sys.exit(3)
+                if self.preload_images:
+                    for seq_element in image_seq:
+                        self._get_image(seq_element[0])
+                    self.logger.debug("finished preloading of %d images", len(image_seq))
+                self._seq_info_list.append((seq_file, seq_fps, image_seq))
+
+
+        if not self._seq_info_list:
+            #we expect at least one sequence file, so return error
+            self.logger.error("no sequence file found in parameter param_block_seq_file_fps_list, quitting")
             time.sleep(1) #we sleep a bit to make sure the marker gets caught
             self.send_marker(markers.trial_end)
             time.sleep(1)
-            sys.exit(3)
+            sys.exit(1)
 
-        if self.preload_images:
-            for seq_element in self._image_seq:
-                self._get_image(seq_element[0])
-            self.logger.debug("finished preloading of %d images", len(self._image_seq))
-
-        self._current_image_no = 0
-        #make sure at least the next image is preloaded
-        self._get_image((self._image_seq[0])[0])
-
-        self._state = 'standby'
-#        self._last_clock_value = 0.0
-        self.play_tick()
         #unfortunately, we cannot send the marker since pyff doesn't initialize
         # the socket until ._on_play() is called
         #self.send_marker(marker.preload_completed)
+
+
+        self._state = 'standby'
+        self.play_tick()
+
+
+
+    def _init_current_sequence(self):
+        """initialize playback state for the sequence with index self._current_seq_index"""
+        current_seq_info = self._seq_info_list[self._current_seq_index]
+        self._current_image_seq = current_seq_info[2]
+        self._current_image_no = 0
+        self.FPS = current_seq_info[1]
+        #make sure at least the next image is preloaded
+        self._get_image((self._current_image_seq[0])[0])
+        self.logger.debug("initialized sequence file %s", current_seq_info[0])
 
 
     def on_stop(self):
@@ -210,8 +233,8 @@ class ImageSeqViewer(PygameFeedback):
         if file_name not in self._image_cache:
             #self.logger.debug("loading image %s into memory", file_name)
             if not os.path.isfile(file_name):
-                self.logger.error("couldn't find image %s from sequence file %s, quitting",
-                                  file_name, self.current_seq_file)
+                self.logger.error("couldn't find image %s, quitting",
+                                  file_name)
                 time.sleep(1) #we sleep a bit to make sure the marker gets caught
                 self.send_marker(markers.trial_end)
                 time.sleep(1)
@@ -244,39 +267,46 @@ class ImageSeqViewer(PygameFeedback):
             # first, send markers for current image
             # second, draw (including opto-marker)
             # third, advance state
-            assert self._current_image_no < len(self._image_seq)
-            current_element = self._image_seq[self._current_image_no]
+            assert self._current_image_no < len(self._current_image_seq)
+            current_element = self._current_image_seq[self._current_image_no]
             current_image_name = current_element[0]
             current_markers = current_element[1]
 
             if self._current_image_no == 0:
-                self.logger.info('starting playback of %s', self.current_seq_file)
-                self.send_marker(markers.trial_start)
+                if self._current_seq_index == 0:
+                    #complete start, not only new sequence
+                    self.send_marker(markers.trial_start)
+                self.logger.info('starting playback of sequence %d with %dFPS (file: %s)',
+                                 self._current_seq_index, self.FPS,
+                                 (self._seq_info_list[self._current_seq_index])[0])
+                self.send_marker(markers.seq_start)
             for marker in current_markers:
                 self.send_marker(marker)
             if self._current_image_no % 50 == 0:
                 self.send_marker(markers.sync_50_frames)
-#                elapsed = time.clock() - self._last_clock_value
-#                self._last_clock_value = time.clock()
-#                self.logger.info("%f s for last 50 frame: FPS %f, should be %f" %
-#                                 (elapsed, (50.0 / elapsed), self.FPS))
-#                self.logger.info("pygame tells %f FPS" % self.clock.get_fps())
+
+            #advance state, current image is still in local variable for later drawing
+            # we do this before display to make sure that optomarkers are drawn
+            next_seq_no = self._current_image_no + 1
+            if next_seq_no < len(self._current_image_seq):
+                #force preload of next image (if not already done)
+                self._get_image((self._current_image_seq[next_seq_no])[0])
+                self._current_image_no = next_seq_no
+            else: # sequence is over
+                self.send_marker(markers.seq_end)
+                if self._current_seq_index + 1 < len(self._seq_info_list):
+                    # the block has another sequence
+                    self._current_seq_index += 1
+                    self._init_current_sequence()
+                else:
+                    self.send_marker(markers.trial_end)
+                    self.logger.info('finished playback, going to standby')
+                    self._state = 'standby'
 
             #draw and display
             self._draw_image(current_image_name)
             self._draw_optomarker()
             pygame.display.flip()
-
-            next_seq_no = self._current_image_no + 1
-            if next_seq_no < len(self._image_seq):
-                #force preload of next image (if not already done)
-                self._get_image((self._image_seq[next_seq_no])[0])
-                self._current_image_no = next_seq_no
-            else:
-                self.send_marker(markers.trial_end)
-                self.logger.info('finished playback, going to standby')
-                self._state = 'standby'
-
 
         else:
             self.logger.error("unknown state, exiting")
@@ -297,16 +327,16 @@ class ImageSeqViewer(PygameFeedback):
         self.screen.blit(image, cur_rect)
 
 
-
+#TODO
     def _draw_optomarker(self):
         """ draw optomarker onto screen
-           make sure this method is called after send_marker with the same _current_image_no
+           make sure this method is called after send_marker
         """
-        if (self.use_optomarker and
-                self._current_image_no - self._last_marker_seq_no < self.optomarker_frame_length):
+        if self.use_optomarker and self._unshown_marker:
             pygame.draw.rect(self.screen, (255, 255, 255),
                              (0.49*self.screen.get_width(),
                               0.02*self.screen.get_height(), 20, 20))
+            self._unshown_marker = False
 
     def _check_input(self):
         """ check for pause and enter events """
@@ -320,7 +350,7 @@ class ImageSeqViewer(PygameFeedback):
 
     def send_marker(self, data):
         """send marker both to parallel and to UDP"""
-        self._last_marker_seq_no = self._current_image_no
+        self._unshown_marker = True
         self.send_parallel(data)
         try:
             self.send_udp(str(data))
@@ -334,13 +364,11 @@ def _run_example():
     logging.getLogger().setLevel(logging.INFO)
     feedback = ImageSeqViewer()
     feedback.on_init()
-    seq_file = '/mnt/blbt-fs1/backups/cake-hk1032/data/kitti/seqs/seq03_kelterstr.txt'
-    feedback.param_image_seq_file = [ord(c) for c in seq_file]  #pylint: disable=attribute-defined-outside-init
+    seq_fps_list = '[("/mnt/blbt-fs1/backups/cake-hk1032/data/kitti/seqs/seq03_kelterstr.txt", 10)]'
+    feedback.param_block_seq_file_fps_list = [ord(c) for c in seq_fps_list]  #pylint: disable=attribute-defined-outside-init
     feedback.udp_markers_host = '127.0.0.1' #pylint: disable=attribute-defined-outside-init
     feedback.udp_markers_port = 12344 #pylint: disable=attribute-defined-outside-init
-    feedback.pre_mainloop()
-    feedback._state = 'playback' #pylint: disable=protected-access
-    feedback._on_play() #pylint: disable=protected-access
+    feedback.on_play() #pylint: disable=protected-access
 
 if __name__ == "__main__":
     _run_example()

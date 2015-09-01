@@ -1,8 +1,9 @@
 %% Test feedback without BV hardware
-clear, clc, close all;
+%delete everything, including UDP connections and persistent variables
+clear all;
+clc, close all; 
 project_setup();
 
-%don't care about subject settings, only loading seqs
 experiment_config();
 
 %% start feedback controller and init UDP connection
@@ -11,69 +12,52 @@ pyff_start_feedback_controller()
 % pyff_sendUdp call from the main file, despite the socket being persistent
 pyff_sendUdp('interaction-signal', 'command','stop');
 
-%% Set feedback parameters
-% sequence file and FPS are added within the for loop
-fbsettings = pyff_build_parameters();
-sequences = EXPERIMENT_CONFIG.complexSeqs;
-% sequences = {
-% %   sequence file                           FPS    
+%% Create blocks of sequences
+
+blocks = build_block_structure();
+
+
+%override for manual testing
+% blocks = cell(1,1,2);
+% blocks(1,:,:) = {
+% %   sequence file                           FPS
 % 'seq_c10_1-weiherfeldb-mod4.txt'    10
 % };
 
 
-
-
-
-seqOrder = 1:size(sequences, 1);
-if EXPERIMENT_CONFIG.sequences.randomize
-    seqOrder = randperm(size(sequences, 1));
-end
-
-%% loop over sequences
-for i = seqOrder
-   seqFileName = sequences{i,1};
-   seqFPS = sequences{i,2};
-   
-   fbsettings.param_image_seq_file = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, seqFileName);
-   if exist(fbsettings.param_image_seq_file, 'file') == 0
-      % sequence file not accessible, so we don't bother starting the feedback
-      fprintf(['Cannot access ', fbsettings.param_image_seq_file, ', aborting!\n'])
-      break;
-   end
-   fbsettings.FPS = seqFPS;
-   fbsettings.param_logging_prefix = [EXPERIMENT_CONFIG.filePrefix '_' seqFileName];
-   fbOpts = fieldnames(fbsettings);
-   
-   fprintf('Sending feedback parameters...')
-   for optId = 1:length(fbOpts),
-       pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId})); %#ok<GFLD>
-   end
-   fprintf(' Done!\n')
-   
-   %% Loading data.
-   
-   fprintf([' Next sequence file ', seqFileName, '\n'])
-   if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
-       break
-   end
-   
-   %% Setup bbci toolbox parameters
-   fs = 100;
-   bbci = bbci_setup_random_signals(seqFileName, fs);
-   
-   %% Run!
-   pyff_sendUdp('interaction-signal', 'command','play');
-
-   data(i) = bbci_apply(bbci);
-   
-
+%% loop over blocks
+for blockIdx = 1:size(blocks, 1)
+    current_block = blocks(blockIdx,:,:);
+    
+    block_name = sprintf('block%02d', blockIdx);
+    
+    pyff_send_parameters(current_block, block_name);
+    
+       
+    %% Loading data.
+    
+    fprintf([' Next block: ', block_name, '\n'])
+    if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
+        break
+    end
+    
+    %% Setup bbci toolbox parameters
+    fs = 100;
+    bbci = bbci_setup_random_signals(block_name, fs);
+    
+    %% Run!
+    pyff_sendUdp('interaction-signal', 'command','play');
+    fprintf('Sent play signal\n')
+    data = bbci_apply(bbci);
+    
+    
     %% Stop!
-   pyff_sendUdp('interaction-signal', 'command','stop');
-   
-   if EXPERIMENT_CONFIG.validation.show_validation_stats
-       validation_stats(data(i))
-   end
-   
+    pyff_sendUdp('interaction-signal', 'command','stop');
+    
+    if EXPERIMENT_CONFIG.validation.show_validation_stats
+        validation_stats(data)
+    end
+    
 end
 
 

@@ -6,10 +6,14 @@
 # preload completed
 preload_completed = 40
 
-# start video
+# start of playback
 trial_start = 60
 
-# end of the trial (stimulus and cue vanish)
+# start and end of individual sequence
+seq_start = 62
+seq_end = 63
+
+# end of playback
 trial_end = 65
 
 #markers for user action

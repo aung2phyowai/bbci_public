@@ -3,12 +3,16 @@ function [ bbci ] = bbci_setup_bv_recording( rec_name )
 global PROJECT_SETUP
 global EXPERIMENT_CONFIG
 
-mkdir(EXPERIMENT_CONFIG.recordDir)
+if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
+    mkdir(EXPERIMENT_CONFIG.recordDir)
+end
 full_rec_name = fullfile(EXPERIMENT_CONFIG.recordDir,...
     [EXPERIMENT_CONFIG.filePrefix '_' rec_name]);
 
 bbciLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'bbci_logs');
-mkdir(bbciLogDir)
+if ~exist(bbciLogDir, 'dir')
+    mkdir(bbciLogDir)
+end
 
 bbci.source(1).record_basename = full_rec_name;
 bbci.source(1).record_signals = true;

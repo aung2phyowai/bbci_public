@@ -23,6 +23,9 @@ markers.from_right = 23;
 markers.preload_completed = 40;
 markers.trial_start = 60;
 markers.trial_end = 65;
+%start and end of individual sequence
+markers.seq_start = 62;
+markers.seq_end = 63;
 markers.sync_50_frames = 50;
 markers.classifier_trigger = 80;
 

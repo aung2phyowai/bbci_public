@@ -8,11 +8,15 @@ bbci= struct;
 
 max_amp = 26.3;
 
-mkdir(EXPERIMENT_CONFIG.recordDir)
+if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
+    mkdir(EXPERIMENT_CONFIG.recordDir)
+end
 full_rec_name = fullfile(EXPERIMENT_CONFIG.recordDir,...
     [EXPERIMENT_CONFIG.filePrefix '_' rec_name]);
 bbciLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'bbci_logs');
-mkdir(bbciLogDir)
+if ~exist(bbciLogDir, 'dir')
+    mkdir(bbciLogDir)
+end
 
 bbci.source(1).acquire_fcn= @bbci_acquire_randomSignals;
 bbci.source(1).acquire_param= {'clab',{'Cz'}, 'amplitude', max_amp,...
