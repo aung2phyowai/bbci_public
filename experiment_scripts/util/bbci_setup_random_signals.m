@@ -1,4 +1,4 @@
-function [ bbci ] = bbci_setup_random_signals( rec_name, fs )
+function [ bbci ] = bbci_setup_random_signals( rec_name )
 %BBCI_SETUP_RANDOM_SIGNALS Builds config struct for random signals
 %   Markers are received via UDP.
 global PROJECT_SETUP
@@ -6,6 +6,7 @@ global EXPERIMENT_CONFIG
 
 bbci= struct;
 
+fs = 1000;
 max_amp = 26.3;
 
 if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')

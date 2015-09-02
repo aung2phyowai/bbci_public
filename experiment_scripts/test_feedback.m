@@ -15,7 +15,8 @@ pyff_sendUdp('interaction-signal', 'command','stop');
 %% Create blocks of sequences
 
 blocks = build_block_structure();
-
+block_log_file = fullfile(EXPERIMENT_CONFIG.recordDir, 'block_structure.txt');
+write_block_structure(blocks, block_log_file)
 
 %override for manual testing
 % blocks = cell(1,1,2);
@@ -42,8 +43,7 @@ for blockIdx = 1:size(blocks, 1)
     end
     
     %% Setup bbci toolbox parameters
-    fs = 100;
-    bbci = bbci_setup_random_signals(block_name, fs);
+    bbci = bbci_setup_random_signals(block_name);
     
     %% Run!
     pyff_sendUdp('interaction-signal', 'command','play');

@@ -19,6 +19,8 @@ pause(3);
 %% Create blocks of sequences
 
 blocks = build_block_structure();
+block_log_file = fullfile(EXPERIMENT_CONFIG.recordDir, 'block_structure.txt');
+write_block_structure(blocks, block_log_file)
 
 
 %override for manual testing

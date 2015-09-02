@@ -101,4 +101,3 @@ for currentBlockNo = 1:totalBlockNo
     
     blocks(currentBlockNo,:,:) = currentBlock;
 end
-
