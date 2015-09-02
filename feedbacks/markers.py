@@ -1,46 +1,25 @@
 """
     The marker constants used for visual complexity feedback.
+    Definitions are loaded from the ini file on import of the module
 
+    Each section of the ini file is an attribute of the module and contains a dictionary with the corresponding item.
+
+    Example
+     import markers
+     send_marker(markers.technical['trial_start']))
 """
-#pylint: disable=invalid-name
-# preload completed
-preload_completed = 40
-
-# start of playback
-trial_start = 60
-
-# start and end of individual sequence
-seq_start = 62
-seq_end = 63
-
-# end of playback
-trial_end = 65
-
-#markers for user action
-return_pressed = 1
-playback_paused_toggled = 2
-
-#markers for events in images
-child = 11
-cyclist = 12
-runner = 13
-#in case we find an unknown marker name
-generic_event = 19
-
-#modifier for events
-hazard = 20
-highlighted = 21
-from_left = 22
-from_right = 23
-
-# sync marker sent every 50th frame
-sync_50_frames = 50
-
-#trigger bbci online calculation (not used)
-classifier_trigger = 80
-
-# general markers
-feedback_initialized = 100
-state_changed_to_running = 110
-state_changed_to_paused = 119
-feedback_quit = 127
+import os
+import ConfigParser
+def _load_marker_ini(marker_file):
+    """ loads marker definitions from ini file
+         each section of the ini file is converted to an attribute of the current module
+    """
+    config = ConfigParser.ConfigParser()
+    config.read(marker_file)
+    for section_name in config.sections():
+        items = config.items(section_name)
+        items = [(name, int(value)) for name, value in items]
+        globals()[section_name] = dict(items)
+# executed on first access
+_load_marker_ini(os.path.normpath(os.path.join(
+    os.path.dirname(__file__), "../config/markers.ini")))

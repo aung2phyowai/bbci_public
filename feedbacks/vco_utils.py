@@ -1,6 +1,7 @@
 """Utility functions for ImageSeqViewer"""
 import os
 import pickle
+import ConfigParser
 
 import markers
 def load_seq_file(image_seq_file):
@@ -19,10 +20,10 @@ def load_seq_file(image_seq_file):
         try:
             return int(marker_str)
         except ValueError:
-            if hasattr(markers, marker_str):
-                return getattr(markers, marker_str)
+            if marker_str in markers.stimuli:
+                return markers.stimuli[marker_str]
             else:
-                return markers.generic_event
+                return markers.stimuli['generic_event']
     def parse_line(line):
         """process single line in sequence file"""
         fields = line.rstrip('\n').split('\t')

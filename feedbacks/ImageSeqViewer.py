@@ -30,7 +30,7 @@ class ImageSeqViewer(PygameFeedback):
        Relative paths are resolved relative to the sequence file's
         location (semantics of os.path.join).
        Markers can either be integers or names of attributes in
-        markers.py.
+        config/markers.ini (stimuli section only).
 
        If preload_images is true (as is the default), all images are
         loaded into memory at once.
@@ -166,7 +166,7 @@ class ImageSeqViewer(PygameFeedback):
                 if not os.path.isfile(seq_file):
                     self.logger.error("couldn't find sequence file %s, quitting", seq_file)
                     time.sleep(1) #we sleep a bit to make sure the marker gets caught
-                    self.send_marker(markers.trial_end)
+                    self.send_marker(markers.technical['trial_end'])
                     time.sleep(1)
                     sys.exit(2)
 
@@ -176,7 +176,7 @@ class ImageSeqViewer(PygameFeedback):
                     #we expect at least one image, so return error
                     self.logger.error("no images found in sequence file %s, quitting", seq_file)
                     time.sleep(1) #we sleep a bit to make sure the marker gets caught
-                    self.send_marker(markers.trial_end)
+                    self.send_marker(markers.technical['trial_end'])
                     time.sleep(1)
                     sys.exit(3)
                 if self.preload_images:
@@ -190,7 +190,7 @@ class ImageSeqViewer(PygameFeedback):
             #we expect at least one sequence file, so return error
             self.logger.error("no sequence file found in parameter param_block_seq_file_fps_list, quitting")
             time.sleep(1) #we sleep a bit to make sure the marker gets caught
-            self.send_marker(markers.trial_end)
+            self.send_marker(markers.technical['trial_end'])
             time.sleep(1)
             sys.exit(1)
 
@@ -222,7 +222,7 @@ class ImageSeqViewer(PygameFeedback):
 
     def on_quit(self):
         """ Handler after receiving quit signal"""
-        self.send_marker(markers.feedback_quit)
+        self.send_marker(markers.technical['feedback_quit'])
         PygameFeedback.on_quit(self)
 
     def _get_image(self, file_name):
@@ -236,7 +236,7 @@ class ImageSeqViewer(PygameFeedback):
                 self.logger.error("couldn't find image %s, quitting",
                                   file_name)
                 time.sleep(1) #we sleep a bit to make sure the marker gets caught
-                self.send_marker(markers.trial_end)
+                self.send_marker(markers.technical['trial_end'])
                 time.sleep(1)
                 sys.exit(3)
             self._image_cache[file_name] = pygame.image.load(file_name)
@@ -275,15 +275,15 @@ class ImageSeqViewer(PygameFeedback):
             if self._current_image_no == 0:
                 if self._current_seq_index == 0:
                     #complete start, not only new sequence
-                    self.send_marker(markers.trial_start)
+                    self.send_marker(markers.technical['trial_start'])
                 self.logger.info('starting playback of sequence %d with %dFPS (file: %s)',
                                  self._current_seq_index, self.FPS,
                                  (self._seq_info_list[self._current_seq_index])[0])
-                self.send_marker(markers.seq_start)
+                self.send_marker(markers.technical['seq_start'])
             for marker in current_markers:
                 self.send_marker(marker)
             if self._current_image_no % 50 == 0:
-                self.send_marker(markers.sync_50_frames)
+                self.send_marker(markers.technical['sync_50_frames'])
 
             #advance state, current image is still in local variable for later drawing
             # we do this before display to make sure that optomarkers are drawn
@@ -293,13 +293,13 @@ class ImageSeqViewer(PygameFeedback):
                 self._get_image((self._current_image_seq[next_seq_no])[0])
                 self._current_image_no = next_seq_no
             else: # sequence is over
-                self.send_marker(markers.seq_end)
+                self.send_marker(markers.technical['seq_end'])
                 if self._current_seq_index + 1 < len(self._seq_info_list):
                     # the block has another sequence
                     self._current_seq_index += 1
                     self._init_current_sequence()
                 else:
-                    self.send_marker(markers.trial_end)
+                    self.send_marker(markers.technical['trial_end'])
                     self.logger.info('finished playback, going to standby')
                     self._state = 'standby'
 
@@ -342,10 +342,10 @@ class ImageSeqViewer(PygameFeedback):
         """ check for pause and enter events """
         if self.keypressed:
             if self._state == "playback" and self.lastkey in (pygame.K_RETURN, pygame.K_KP_ENTER): #pylint: disable=no-member
-                self.send_marker(markers.return_pressed)
+                self.send_marker(markers.interactions['return_pressed'])
             if self.lastkey == pygame.K_SPACE: #pylint: disable=no-member
                 self._paused = not self._paused #from MainloopFeedback pylint: disable=attribute-defined-outside-init
-                self.send_marker(markers.playback_paused_toggled)
+                self.send_marker(markers.interactions['playback_paused_toggled'])
             self.keypressed = False #mark as handled pylint: disable=attribute-defined-outside-init
 
     def send_marker(self, data):

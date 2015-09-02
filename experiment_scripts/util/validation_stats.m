@@ -15,7 +15,7 @@ marker_stats(bbci_data.marker)
         uiwait(h)
         % calculate FPS based on 50-frame markers
         % 50 frames * 1000 ms/s / delta ms
-        plot(diff(marker.time(marker.desc == EXPERIMENT_CONFIG.markers.sync_50_frames)).^-1.*50.*1000)
+        plot(diff(marker.time(marker.desc == EXPERIMENT_CONFIG.markers.technical.sync_50_frames)).^-1.*50.*1000)
         title('FPS based on 50-frame-markers')
     end
 end

@@ -45,14 +45,13 @@ bbci.feature(1).ival = [-10 0];
 C = struct('b', 0, 'w', ones(1,1));
 bbci.classifier(1).feature = 1;
 bbci.classifier(1).C = C;
-bbci.control.condition.marker = EXPERIMENT_CONFIG.markers.classifier_trigger; %currently not sent by pyff
 
 % defines, where control signals are *sent*
 bbci.feedback(1).host = PROJECT_SETUP.UDP_FEEDBACK_HOST;
 bbci.feedback(1).port = PROJECT_SETUP.UDP_FEEDBACK_PORT;
 bbci.feedback(1).receiver = 'pyff';
 
-bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.trial_end;
+bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.technical.trial_end;
 
 end
 

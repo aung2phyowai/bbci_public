@@ -45,7 +45,7 @@ end
 EXPERIMENT_CONFIG.recordDir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR, EXPERIMENT_CONFIG.VPcode_date);
 EXPERIMENT_CONFIG.feedbackLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedback_logs');
 
-EXPERIMENT_CONFIG.markers = marker_definitions();
+EXPERIMENT_CONFIG.markers = ini2struct(fullfile(PROJECT_SETUP.CONFIG_DIR, 'markers.ini'));
 
 %initialize RNG based on VPcode and date -> identical order on each run
 reset_rng()

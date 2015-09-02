@@ -16,7 +16,7 @@ end
 
 bbci.source(1).record_basename = full_rec_name;
 bbci.source(1).record_signals = true;
-bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.trial_end;
+bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.technical.trial_end;
 bbci.quit_condition.running_time=inf;
 
 bbci.source(1).acquire_fcn= @bbci_acquire_bv;
