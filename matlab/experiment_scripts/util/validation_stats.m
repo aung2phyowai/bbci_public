@@ -1,6 +1,5 @@
 function [] = validation_stats( bbci_data )
-%VALIDATION_STATS Summary of this function goes here
-%   Detailed explanation goes here
+%VALIDATION_STATS Display marker statistics
 
 global EXPERIMENT_CONFIG
 

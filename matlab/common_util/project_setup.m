@@ -2,8 +2,6 @@ function project_setup()
 
 global PROJECT_SETUP
 
-local_setup()
-
 
 %% feedback
 PROJECT_SETUP.FEEDBACK_NAME = 'ImageSeqViewer';
@@ -15,18 +13,24 @@ PROJECT_SETUP.UDP_FEEDBACK_PORT = 12345;
 
 %% directories
 
-PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR= fileparts(which(mfilename));
-PROJECT_SETUP.BASE_DIR=fileparts(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR);
+
+PROJECT_SETUP.COMMON_UTIL_DIR = fileparts(which(mfilename));
+PROJECT_SETUP.MATLAB_DIR = fileparts(PROJECT_SETUP.COMMON_UTIL_DIR);
+PROJECT_SETUP.BASE_DIR=fileparts(PROJECT_SETUP.MATLAB_DIR);
+
+%for local setup
+addpath(PROJECT_SETUP.MATLAB_DIR)
+local_setup()
+
+
+PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR= fullfile(PROJECT_SETUP.MATLAB_DIR, 'experiment_scripts');
 PROJECT_SETUP.CONFIG_DIR= fullfile(PROJECT_SETUP.BASE_DIR, 'config');
 PROJECT_SETUP.FEEDBACKS_DIR=fullfile(PROJECT_SETUP.BASE_DIR, 'feedbacks');
 PROJECT_SETUP.SEQ_DATA_DIR=fullfile(PROJECT_SETUP.VCO_DATA_DIR, 'seqs');
-PROJECT_SETUP.LOG_DIR=fullfile(PROJECT_SETUP.BASE_DIR, 'logs');
 
-
-addpath(PROJECT_SETUP.TCP_UDP_DIR);
-addpath(fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'util'));
-addpath(fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'lib'));
+%common_util should be already added
 addpath(PROJECT_SETUP.BBCI_DIR);
+addpath(fullfile(PROJECT_SETUP.MATLAB_DIR, 'lib'));
 
 startup_bbci_toolbox(...
     'DataDir', PROJECT_SETUP.BBCI_DATA_DIR,...

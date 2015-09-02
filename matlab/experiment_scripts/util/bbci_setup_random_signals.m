@@ -6,7 +6,7 @@ global EXPERIMENT_CONFIG
 
 bbci= struct;
 
-fs = 1000;
+fs = 100;
 max_amp = 26.3;
 
 if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')

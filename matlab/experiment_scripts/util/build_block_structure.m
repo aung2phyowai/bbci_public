@@ -11,17 +11,8 @@ global EXPERIMENT_CONFIG
 %reset RNG to create same block structure despite different previous calls
 %to rand...
 reset_rng()
-% 
-% %number of scenes to play per complexity type
-% EXPERIMENT_CONFIG.scenesPerType = 13;
-% %number of scenes per block
-% EXPERIMENT_CONFIG.blockSize = 2;
-% %whether scenes of different complexity should be mixed in a block
-% EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks = true;
 
-
-
-totalBlockNo = 2*EXPERIMENT_CONFIG.seqsPerType / EXPERIMENT_CONFIG.blockSize;
+totalBlockNo = 2 * EXPERIMENT_CONFIG.seqsPerType / EXPERIMENT_CONFIG.blockSize;
 
 complexSeqs = EXPERIMENT_CONFIG.complexSeqs;
 simpleSeqs = EXPERIMENT_CONFIG.simpleSeqs;

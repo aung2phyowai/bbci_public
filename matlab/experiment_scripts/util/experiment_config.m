@@ -40,8 +40,6 @@ if ~EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks && mod(totalBlockNo, 2) ~= 0
     error('need to have even block size if complexitites are not mixed')
 end
 
-
-
 EXPERIMENT_CONFIG.recordDir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR, EXPERIMENT_CONFIG.VPcode_date);
 EXPERIMENT_CONFIG.feedbackLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedback_logs');
 
@@ -63,6 +61,9 @@ if size(EXPERIMENT_CONFIG.complexSeqs, 1) < EXPERIMENT_CONFIG.seqsPerType
     error(['not enough complex scenes ', ...
         num2str(size(EXPERIMENT_CONFIG.complexSeqs, 1)), '/', num2str(EXPERIMENT_CONFIG.scenesPerType)])
 end
+
+% build the actual structure
+EXPERIMENT_CONFIG.blockStructure = build_block_structure();
 
 evalin('base', 'global EXPERIMENT_CONFIG');
 
