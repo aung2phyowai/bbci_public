@@ -16,7 +16,7 @@ seqFileDir="seqs" #directory with sequence files
 targetSeqDir="combined/${targetSeqName}" #directory with images (/links) for the target sequence
 imageFilePattern='%010d'
 targetSeqFileName="seq_${targetSeqName}.txt"
-modifiedEventMarker=19
+modifiedEventMarker="generic_stimulus"
 
 mkdir -p $targetSeqDir
 echo "cp -rv "${baseSeqDir%/}/*" ${targetSeqDir%/}/"

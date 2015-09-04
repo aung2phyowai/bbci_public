@@ -23,7 +23,7 @@ def load_seq_file(image_seq_file):
             if marker_str in markers.stimuli:
                 return markers.stimuli[marker_str]
             else:
-                return markers.stimuli['generic_event']
+                return markers.stimuli['generic_stimulus']
     def parse_line(line):
         """process single line in sequence file"""
         fields = line.rstrip('\n').split('\t')
@@ -34,6 +34,23 @@ def load_seq_file(image_seq_file):
     # do the actual work
     return [parse_line(l) for l in open(image_seq_file) if not l.lstrip().startswith('#')]
 
+def validate_seq_file(image_seq_file):
+    """validates a seq file by trying to parse it and prints errors"""
+    if len(markers.stimuli.values()) != len(set(markers.stimuli.values())):
+        print("ERROR duplicate marker values in marker.ini")
+        print("      found values %s in dictionary %s" % (sorted(markers.stimuli.values()), markers.stimuli))
+    stimulus_marker_to_name = {marker: name for name, marker in markers.stimuli.items()}
+    image_marker_list = load_seq_file(image_seq_file)
+    for frame in image_marker_list:
+        image_file = frame[0]
+        image_markers = frame[1]
+        if not os.path.isfile(image_file):
+            print("%s ERROR: cannot find image %s" % (image_seq_file, image_file))
+        for marker in image_markers:
+            if marker not in stimulus_marker_to_name:
+                print("%s ERROR: unknown stimulus marker %d at frame %s" % (image_seq_file, marker, image_file))
+            if marker == markers.stimuli['generic_stimulus']:
+                print("%s  WARN: using 'generic_stimulus' marker for frame %s" % (image_seq_file, image_file))
 
 def parse_matlab_char_array(char_array):
     """convert char array to string"""
