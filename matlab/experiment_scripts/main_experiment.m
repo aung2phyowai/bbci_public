@@ -2,7 +2,7 @@
 clear, clc, close all;
 
 % path config, start up bbci toolbox
-project_setup();
+init_experiment_setup();
 % config for this experimental run
 experiment_config();
 

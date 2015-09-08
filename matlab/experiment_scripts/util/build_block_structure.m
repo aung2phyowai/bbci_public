@@ -12,8 +12,6 @@ global EXPERIMENT_CONFIG
 %to rand...
 reset_rng()
 
-totalBlockNo = 2 * EXPERIMENT_CONFIG.seqsPerType / EXPERIMENT_CONFIG.blockSize;
-
 complexSeqs = EXPERIMENT_CONFIG.complexSeqs;
 simpleSeqs = EXPERIMENT_CONFIG.simpleSeqs;
 
@@ -24,12 +22,12 @@ if EXPERIMENT_CONFIG.sequences.randomize
     simpleSeqs = simpleSeqs(randSimpleOrder, :);
 end
 
-blocks = cell(totalBlockNo, EXPERIMENT_CONFIG.blockSize, 2);
+blocks = cell(EXPERIMENT_CONFIG.block_count, EXPERIMENT_CONFIG.blockSize, 2);
 
 nextComplexSeqIdx = 1;
 nextSimpleSeqIdx = 1;
 
-for currentBlockNo = 1:totalBlockNo
+for currentBlockNo = 1:EXPERIMENT_CONFIG.block_count
     currentBlock = cell(EXPERIMENT_CONFIG.blockSize, 2);
     
     %we alternate between simple and complex sequences,

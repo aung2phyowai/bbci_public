@@ -1,4 +1,4 @@
-function [ output_args ] = init_experiment_setup( input_args )
+function [  ] = init_experiment_setup( )
 %INIT_EXPERIMENT_SETUP Initialize (local) setup for experiment
 %   Delegates to ../common_util/project_setup.m
 

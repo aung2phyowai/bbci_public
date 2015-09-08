@@ -1,4 +1,5 @@
 function experiment_config()
+% set and generate configuration settings for this experiment
 
 global EXPERIMENT_CONFIG
 global PROJECT_SETUP %read-only, not being modified
@@ -29,14 +30,15 @@ EXPERIMENT_CONFIG.feedback.use_optomarker = true;
 % from this point on, the configuration should [usually] not be changed
 
 %validation of block structure
+EXPERIMENT_CONFIG.block_count = 2*EXPERIMENT_CONFIG.seqsPerType / EXPERIMENT_CONFIG.blockSize;
 if EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks && mod(2*EXPERIMENT_CONFIG.seqsPerType, EXPERIMENT_CONFIG.blockSize) ~= 0
     error('block size is not divisor of total seq number')
 end
 if ~EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks && mod(EXPERIMENT_CONFIG.seqsPerType, EXPERIMENT_CONFIG.blockSize) ~= 0
     error('block size is not divisor of seq number per type')
 end
-totalBlockNo = 2*EXPERIMENT_CONFIG.seqsPerType / EXPERIMENT_CONFIG.blockSize;
-if ~EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks && mod(totalBlockNo, 2) ~= 0
+
+if ~EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks && mod(EXPERIMENT_CONFIG.block_count, 2) ~= 0
     error('need to have even block size if complexitites are not mixed')
 end
 
