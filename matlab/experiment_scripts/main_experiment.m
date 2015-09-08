@@ -26,6 +26,9 @@ pause(3);
 % };
 
 %save config
+if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
+    mkdir(EXPERIMENT_CONFIG.recordDir)
+end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
 %% loop over blocks

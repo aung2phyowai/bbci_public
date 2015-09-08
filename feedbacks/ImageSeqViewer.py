@@ -152,8 +152,8 @@ class ImageSeqViewer(PygameFeedback):
         #load new sequence information if available
         if hasattr(self, 'param_block_seq_file_fps_list'):  #pylint: disable=no-member
             seq_fps_string = vco_utils.parse_matlab_char_array(self.param_block_seq_file_fps_list)#pylint: disable=no-member
-            #dangerous, but we expect to be in a trustworthy environment...
-            seq_fps_list = eval(seq_fps_string) #pylint: disable=eval-used
+            #dangerous, but we expect to be i	n a trustworthy environment...
+            seq_fps_list = eval(seq_fps_string.replace('\\', '\\\\')) #pylint: disable=eval-used
 
             self._seq_info_list = []
             self._current_seq_index = -1
@@ -161,7 +161,7 @@ class ImageSeqViewer(PygameFeedback):
             #load and validate all sequences of the block
             for seq_fps_tuple in seq_fps_list:
                 #expand seq file name to full path
-                seq_file = os.path.abspath(os.path.expanduser(seq_fps_tuple[0]))
+                seq_file = os.path.abspath(os.path.expanduser(os.path.normpath(seq_fps_tuple[0])))
                 seq_fps = seq_fps_tuple[1]
                 if not os.path.isfile(seq_file):
                     self.logger.error("couldn't find sequence file %s, quitting", seq_file)
