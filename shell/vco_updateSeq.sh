@@ -23,7 +23,7 @@ echo "cp -rv "${baseSeqDir%/}/*" ${targetSeqDir%/}/"
 cp -rv ${baseSeqDir%/}/* $targetSeqDir
 cd $targetSeqDir
 
-updateFrameCount=`echo "${updateEndFrameNo} - ${updateStartFrameNo}" | bc`
+updateFrameCount=`echo "${updateEndFrameNo} - ${updateStartFrameNo} + 1" | bc`
 for (( i=0; i < $updateFrameCount; i++ ))
 do
     updateFileNo=`echo "${updateStartFrameNo} + ${i}" | bc`

@@ -28,7 +28,7 @@ def load_seq_file(image_seq_file):
         """process single line in sequence file"""
         fields = line.rstrip('\n').split('\t')
         #resolve image path relative to file
-        file_name = os.path.join(os.path.dirname(image_seq_file), os.path.normpath(fields[0]))
+        file_name = os.path.abspath(os.path.join(os.path.dirname(image_seq_file), os.path.normpath(fields[0])))
         return (file_name, [process_marker(marker_string) for marker_string in fields[1:]])
 
     # do the actual work
@@ -46,6 +46,10 @@ def validate_seq_file(image_seq_file):
         image_markers = frame[1]
         if not os.path.isfile(image_file):
             print("%s ERROR: cannot find image %s" % (image_seq_file, image_file))
+        try:
+            open(image_file)
+        except IOError, e:
+            print("%s ERROR: cannot open image %s (%s)" % (image_seq_file, image_file, e))
         for marker in image_markers:
             if marker not in stimulus_marker_to_name:
                 print("%s ERROR: unknown stimulus marker %d at frame %s" % (image_seq_file, marker, image_file))

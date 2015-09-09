@@ -32,7 +32,7 @@ if [ ! -d "$targetCombinedDir" ]; then
 fi
 cp -v "$1" "$seqDir"
 #copy all combined directories, so we need to find them first
-dirsToSync=`cat ${seqFile} | sed "s/^.*combined\\///" | sed "s/\\/[0-9]*\\.png.*//" | uniq`
+dirsToSync=`cat ${seqFile} | sed "s/^.*combined\\///" | sed "s/\\/[0-9]*\\.png.*//" | grep -v "#" | sort -u`
 echo "syncing the following directories of combined"
 echo $dirsToSync
 #exit 0

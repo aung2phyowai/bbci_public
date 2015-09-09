@@ -12,10 +12,10 @@ subject_config(); %source VP code etc
 %type of block structure:
 
 %number of sequences to play per complexity type
-EXPERIMENT_CONFIG.seqsPerType = 12;
+EXPERIMENT_CONFIG.seqsPerType = 20;
 %number of sequences per block
-EXPERIMENT_CONFIG.blockSize = 2;
-EXPERIMENT_CONFIG.sequences.randomize = false;
+EXPERIMENT_CONFIG.blockSize = 5;
+EXPERIMENT_CONFIG.sequences.randomize = true;
 %whether scenes of different complexity should be mixed in a block
 EXPERIMENT_CONFIG.mixComplexitiesWithinBlocks = true;
 

@@ -43,6 +43,9 @@ for blockIdx = 1:size(EXPERIMENT_CONFIG.blockStructure, 1)
     %% Loading data.
     
     fprintf([' Next block: ', block_name, '\n'])
+    for seqIdx = 1:size(current_block, 2)
+        fprintf(['  ' current_block{1,seqIdx, 1} '\n'])
+    end
     if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
         break
     end

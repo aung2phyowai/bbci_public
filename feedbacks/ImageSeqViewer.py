@@ -57,6 +57,7 @@ class ImageSeqViewer(PygameFeedback):
 
         self._image_cache = {}
         self._current_image_seq = []
+        self._last_interaction_image_no = -10
 
         #we have two handlers: one logs everything to temp dir
         # the second one logs per sequence in dir specified by parameter
@@ -83,6 +84,8 @@ class ImageSeqViewer(PygameFeedback):
         self.use_optomarker = True
         self.logging_dir = tempfile.gettempdir()
         self.logging_prefix = 'image_seq_view'
+        self.inter_sequence_delay = 5 #in seconds
+        self.interaction_overlay_frame_count = 1
 
 
     def on_control_event(self, data):
@@ -209,6 +212,7 @@ class ImageSeqViewer(PygameFeedback):
         current_seq_info = self._seq_info_list[self._current_seq_index]
         self._current_image_seq = current_seq_info[2]
         self._current_image_no = 0
+        self._last_interaction_image_no = -1 - self.interaction_overlay_frame_count
         self.FPS = current_seq_info[1]
         #make sure at least the next image is preloaded
         self._get_image((self._current_image_seq[0])[0])
@@ -263,6 +267,14 @@ class ImageSeqViewer(PygameFeedback):
             self._display_message("Standby")
         elif self._state == "loading":
             self._display_message("Loading...")
+        elif self._state == "waiting":
+            self.screen.fill(self.backgroundColor)
+            pygame.display.flip()
+            self._current_image_no += 1
+            waitingFrameCount = self.inter_sequence_delay * self.FPS
+            if self._current_image_no >= waitingFrameCount:                
+                self._init_current_sequence()
+                self._state = "playback"
         elif self._state == "playback":
             # first, send markers for current image
             # second, draw (including opto-marker)
@@ -297,17 +309,21 @@ class ImageSeqViewer(PygameFeedback):
                 if self._current_seq_index + 1 < len(self._seq_info_list):
                     # the block has another sequence
                     self._current_seq_index += 1
-                    self._init_current_sequence()
+                    self._current_image_no = 0 #use this for counting of break duration
+                    self._state = 'waiting'
                 else:
                     self.send_marker(markers.technical['trial_end'])
                     self.logger.info('finished playback, going to standby')
                     self._state = 'standby'
 
             #draw and display
-            self._draw_image(current_image_name)
+            if self._current_image_no - 1 - self._last_interaction_image_no  < self.interaction_overlay_frame_count:
+                self._draw_interaction_overlay()
+            else:
+                self._draw_image(current_image_name)
             self._draw_optomarker()
             pygame.display.flip()
-
+            
         else:
             self.logger.error("unknown state, exiting")
             self.send_marker(markers.trial_end)
@@ -319,15 +335,17 @@ class ImageSeqViewer(PygameFeedback):
     def _draw_image(self, image_name):
         """ draws the supplied image [file name] centered on the screen """
         image = self._get_image(image_name)
-        cur_rect = image.get_rect()
+        self._cur_image_rect = image.get_rect() #save, so we have the dimensions of the last drawn image
         #center on screen
-        cur_rect.topleft = (int((self.screen.get_width() - cur_rect.width) / 2.0),
-                            int((self.screen.get_height() - cur_rect.height) / 2.0))
+        self._cur_image_rect.topleft = (int((self.screen.get_width() - self._cur_image_rect.width) / 2.0),
+                            int((self.screen.get_height() - self._cur_image_rect.height) / 2.0))
         self.screen.fill(self.backgroundColor)
-        self.screen.blit(image, cur_rect)
+        self.screen.blit(image, self._cur_image_rect)
 
 
-#TODO
+    def _draw_interaction_overlay(self):
+        self.screen.fill((255, 255, 255), rect=self._cur_image_rect)
+
     def _draw_optomarker(self):
         """ draw optomarker onto screen
            make sure this method is called after send_marker
@@ -343,6 +361,7 @@ class ImageSeqViewer(PygameFeedback):
         if self.keypressed:
             if self._state == "playback" and self.lastkey in (pygame.K_RETURN, pygame.K_KP_ENTER): #pylint: disable=no-member
                 self.send_marker(markers.interactions['return_pressed'])
+                self._last_interaction_image_no = self._current_image_no
             if self.lastkey == pygame.K_SPACE: #pylint: disable=no-member
                 self._paused = not self._paused #from MainloopFeedback pylint: disable=attribute-defined-outside-init
                 self.send_marker(markers.interactions['playback_paused_toggled'])
