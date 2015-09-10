@@ -24,8 +24,8 @@ else
 end
 if isunix()
     outRedirects = [...
-        ' 2> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.stderr.log')...
-        ' 1> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.stdout.log')];
+        ' > ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.log')...
+        ' 2>&1'];
     if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
         mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
     end
@@ -49,14 +49,15 @@ setenv('LD_LIBRARY_PATH',dynamicLibLookupPath);
 fprintf(' Done!\n')
 
 %% Setup UDP connection with the feedback
-
+pause(0.1)
 fprintf('Initializing UDP connection...')
 pyff_sendUdp('init',  PROJECT_SETUP.UDP_FEEDBACK_HOST, PROJECT_SETUP.UDP_FEEDBACK_PORT);
-pause(0.1)
+pause(0.2)
 fprintf('Done!\n')
 
 fprintf('Initializing feedback...')
 pyff_sendUdp('interaction-signal', 's:_feedback', PROJECT_SETUP.FEEDBACK_NAME, 'command','sendinit');
+pause(0.2)
 fprintf(' Done!\n')
 
 end

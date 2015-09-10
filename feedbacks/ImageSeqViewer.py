@@ -2,8 +2,8 @@
 
 # ImageSeqViewer.py -
 
-"""Displays a ``video'' from a sequence of images."""
-
+"""!!!DEPRECATED!!!, image_sequence_playback.ImageSeqFeedback instead
+   Displays a ``video'' from a sequence of images."""
 
 import os
 import sys
@@ -59,6 +59,9 @@ class ImageSeqViewer(PygameFeedback):
         self._image_cache = {}
         self._current_image_seq = []
         self._last_interaction_image_no = -10
+
+        #global counter incremented on each frame playback
+        self._frame_counter = 0L
 
         #we have two handlers: one logs everything to temp dir
         # the second one logs per sequence in dir specified by parameter
@@ -160,7 +163,7 @@ class ImageSeqViewer(PygameFeedback):
         #load new sequence information if available
         if hasattr(self, 'param_block_seq_file_fps_list'):  #pylint: disable=no-member
             seq_fps_string = vco_utils.parse_matlab_char_array(self.param_block_seq_file_fps_list)#pylint: disable=no-member
-            #dangerous, but we expect to be i	n a trustworthy environment...
+            #dangerous, but we expect to be in a trustworthy environment...
             seq_fps_list = eval(seq_fps_string.replace('\\', '\\\\')) #pylint: disable=eval-used
 
             self._seq_info_list = []
@@ -279,9 +282,30 @@ class ImageSeqViewer(PygameFeedback):
         pygame.display.flip()
 
 
+    def tick(self):
+        current_state_handler = lambda s: ImageSeqViewer.handle_standby(s, "test")
+        current_state_handler = ImageSeqViewer.handle_loading
+
+        self.process_pygame_events()
+
+        self.elapsed = self.clock.tick(self.FPS)
+        
+        current_state_handler(self)
+        PygameFeedback.tick(self)
+        self._frame_counter += 1
+
     def pause_tick(self):
         """ frame update when paused"""
         self._check_input() #listen for unpause
+
+    def handle_standby(self, message):
+        self._display_message(message)
+
+    def handle_loading(self):
+        print('loading...')
+
+    def handle_delay(self, delay, next_handler):
+        pass
 
     def play_tick(self):
         """exec actual event loop based on state"""
@@ -407,17 +431,5 @@ class ImageSeqViewer(PygameFeedback):
             self.logger.error("could not send UDP marker %s", data)
 
 
-def _run_example():
-    """run feedback for test purposes"""
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.getLogger().setLevel(logging.INFO)
-    feedback = ImageSeqViewer()
-    feedback.on_init()
-    seq_fps_list = '[("/mnt/blbt-fs1/backups/cake-hk1032/data/kitti/seqs/seq03_kelterstr.txt", 10)]'
-    feedback.param_block_seq_file_fps_list = [ord(c) for c in seq_fps_list]  #pylint: disable=attribute-defined-outside-init
-    feedback.udp_markers_host = '127.0.0.1' #pylint: disable=attribute-defined-outside-init
-    feedback.udp_markers_port = 12344 #pylint: disable=attribute-defined-outside-init
-    feedback.on_play() #pylint: disable=protected-access
 
-if __name__ == "__main__":
-    _run_example()
+

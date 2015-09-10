@@ -1,3 +1,6 @@
+[MASTER]
+init-hook='import sys; import os; sys.path.append(os.path.expanduser("~/repos/pyff/src/"))'
+
 [FORMAT]
 
 # Maximum number of characters on a single line.

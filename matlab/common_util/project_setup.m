@@ -4,7 +4,7 @@ global PROJECT_SETUP
 
 
 %% feedback
-PROJECT_SETUP.FEEDBACK_NAME = 'ImageSeqViewer';
+PROJECT_SETUP.FEEDBACK_NAME = 'ImageSeqFeedback';
 
 PROJECT_SETUP.UDP_MARKER_PORT = 12344;
 PROJECT_SETUP.UDP_FEEDBACK_HOST = 'localhost';
@@ -18,14 +18,15 @@ PROJECT_SETUP.COMMON_UTIL_DIR = fileparts(which(mfilename));
 PROJECT_SETUP.MATLAB_DIR = fileparts(PROJECT_SETUP.COMMON_UTIL_DIR);
 PROJECT_SETUP.BASE_DIR=fileparts(PROJECT_SETUP.MATLAB_DIR);
 
-%for local setup
-addpath(PROJECT_SETUP.MATLAB_DIR)
-local_setup()
-
-
 PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR= fullfile(PROJECT_SETUP.MATLAB_DIR, 'experiment_scripts');
 PROJECT_SETUP.CONFIG_DIR= fullfile(PROJECT_SETUP.BASE_DIR, 'config');
 PROJECT_SETUP.FEEDBACKS_DIR=fullfile(PROJECT_SETUP.BASE_DIR, 'feedbacks');
+
+%for local setup
+addpath(PROJECT_SETUP.CONFIG_DIR)
+local_setup()
+
+
 PROJECT_SETUP.SEQ_DATA_DIR=fullfile(PROJECT_SETUP.VCO_DATA_DIR, 'seqs');
 
 %common_util should be already added

@@ -1,8 +1,11 @@
 """Utility functions for dealing with sequence files """
 
+import collections
 import os
 import markers
 
+
+Marker = collections.namedtuple('Marker', ['value', 'name'])
 
 class SeqFileEntry(object):
     """ class representing a single line in the sequence file"""
@@ -19,23 +22,23 @@ class SeqFileEntry(object):
         """ converts this instance back to a sequence file line"""
         columns = [self.file_name]
         columns.extend(self.event_names)
-        for marker_tuple in self.marker_tuples:
-            if marker_tuple[1] is not None:
-                columns.append(marker_tuple[1])
+        for marker in self.marker_tuples:
+            if marker.name is not None:
+                columns.append(marker.name)
             else:
-                columns.append(marker_tuple[0])
+                columns.append(marker.value)
         return '\t'.join(columns)
 
     @staticmethod
     def _process_marker(marker_str):
         """process markers (integers or names) in sequence file"""
         if marker_str in markers.stimuli:
-            return (markers.stimuli[marker_str], marker_str)
+            return Marker(markers.stimuli[marker_str], marker_str)
         else:
             try:
-                return (int(marker_str), None)
+                return Marker(int(marker_str), None)
             except ValueError:
-                return (markers.stimuli['generic_stimulus'], 'generic_stimulus')
+                return Marker(markers.stimuli['generic_stimulus'], 'generic_stimulus')
 
     @staticmethod
     def parse_line(line, path_reference):
@@ -84,11 +87,11 @@ def validate_seq_file(image_seq_file):
         except IOError, e:
             print("%s ERROR: cannot open image %s (%s)" % (image_seq_file, image_file, e))
         for marker in image_markers:
-            if marker[0] not in stimulus_marker_to_name:
+            if marker.value not in stimulus_marker_to_name:
                 print("%s ERROR: unknown stimulus marker %d at frame %s" % (image_seq_file, marker[0], image_file))
-            if marker[0] == markers.stimuli['generic_stimulus']:
+            if marker.value == markers.stimuli['generic_stimulus']:
                 print("%s  WARN: using 'generic_stimulus' marker for frame %s" % (image_seq_file, image_file))
-            if marker[1] is None:
+            if marker.name is None:
                 print("%s  WARN: using purely numeric marker %d for frame %s" % (image_seq_file, marker[0], image_file))
 
 def write_seq_file(seq_file_data, target_file):

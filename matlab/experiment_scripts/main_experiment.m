@@ -1,5 +1,7 @@
 %% Run experiment with BV hardware
-clear, clc, close all;
+%delete everything, including UDP connections and persistent variables
+clear all; %#ok<CLSCR>
+clc, close all;
 
 % path config, start up bbci toolbox
 init_experiment_setup();
@@ -12,18 +14,10 @@ pyff_start_feedback_controller()
 % pyff_sendUdp call from the main file, despite the socket being persistent
 pyff_sendUdp('interaction-signal', 'command','stop');
 
-system([PROJECT_SETUP.BV_RECORDER_EXECUTABLE ' &'])
-
-pause(3);
-
-%% Create blocks of sequences
-
-%override for manual testing
-% EXPERIMENT_CONFIG.blockStructure = cell(1,1,2);
-% EXPERIMENT_CONFIG.blockStructure(1,:,:) = {
-% %   sequence file                           FPS
-% 'seq_c10_1-weiherfeldb-mod4.txt'    10
-% };
+if PROJECT_SETUP.HARDWARE_AVAILABLE
+    system([PROJECT_SETUP.BV_RECORDER_EXECUTABLE ' &'])
+    pause(3);
+end
 
 %save config
 if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
@@ -31,53 +25,55 @@ if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
 end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
+%technically, we start playing here, although the feedback will still be in
+%standby
+pyff_sendUdp('interaction-signal', 'command','play');
 %% loop over blocks
 for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     
     block_name = sprintf('block%02d', block_no);
-    
-    pyff_send_parameters(current_block, block_name);
-    
+
     
     %% Loading data.
-    
+    pyff_send_parameters(current_block, block_name);
+    fprintf('Preloading...')
+    wait_for_marker(EXPERIMENT_CONFIG.markers.technical.preload_completed)
+    fprintf('complete\n')
+
     fprintf([' Next block: ', block_name, '\n'])
     for seqIdx = 1:size(current_block, 1)
         fprintf(['  ' current_block.seqName{seqIdx} '\n'])
     end
+
     if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
         break
     end
     
-    
-    
-    
     %% setup recording
     % Setup bbci toolbox parameters
+    bbci = bbci_setup(block_name);
+    %configure brain vision recorder
+    if PROJECT_SETUP.HARDWARE_AVAILABLE
+        bvr_sendcommand('stoprecording');
+        bbci_acquire_bv('close')
+        bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
+        
+        bvr_sendcommand('viewsignals')
+    end
     
-    bbci = bbci_setup_bv_recording(block_name);
-    bvr_sendcommand('stoprecording');
-    bbci_acquire_bv('close')
-    bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'extra_files', PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
-    
-    bvr_sendcommand('viewsignals')
-    
-    
-    %% Run feedback
-    pyff_sendUdp('interaction-signal', 'command','play');
+    %% Run!
+    pyff_sendUdp('interaction-signal', 'state_command','start_playback');
     fprintf('Sent play signal\n')
     
     data = bbci_apply(bbci);
-    
-    %% Stop!
-    pyff_sendUdp('interaction-signal', 'command','stop');
-    
+
     if ~any(data.marker.desc == EXPERIMENT_CONFIG.markers.technical.seq_start)
-        fprintf('%s\n', ['Playback did not start, consult look in ' EXPERIMENT_CONFIG.feedbackLogDir])
+        fprintf('%s\n', ['Playback did not start, consult log in ' EXPERIMENT_CONFIG.feedbackLogDir])
     end
-    
+
+    %% some validation
     if EXPERIMENT_CONFIG.validation.show_validation_stats
         validation_stats(data)
     end
@@ -85,6 +81,7 @@ for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
 end
 
 
+pyff_sendUdp('interaction-signal', 'command','stop');
 
 
 %% close

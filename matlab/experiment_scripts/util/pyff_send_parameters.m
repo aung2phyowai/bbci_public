@@ -27,26 +27,31 @@ end
 seqNameFpsTupleList = [seqNameFpsTupleList, ']'];
 
 fbsettings = struct;
-
-fbsettings.param_logging_dir = EXPERIMENT_CONFIG.feedbackLogDir;
-fbsettings.param_logging_prefix = EXPERIMENT_CONFIG.filePrefix;
-
-fbsettings.use_optomarker = EXPERIMENT_CONFIG.feedback.use_optomarker;
+fbsettings.optomarker_enabled = EXPERIMENT_CONFIG.feedback.use_optomarker;
 fbsettings.screen_width = PROJECT_SETUP.SCREEN_SIZE(1);
 fbsettings.screen_height = PROJECT_SETUP.SCREEN_SIZE(2);
 fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);
 fbsettings.screen_position_y = PROJECT_SETUP.SCREEN_POSITION(2);
+fbsettings.overlay_duration = EXPERIMENT_CONFIG.feedback.overlay_duration;
+fbsettings.display_debug_information = EXPERIMENT_CONFIG.feedback.show_debug_infos;
 
-fbsettings.param_block_seq_file_fps_list = seqNameFpsTupleList;
-fbsettings.param_logging_prefix = [EXPERIMENT_CONFIG.filePrefix '_' block_name];
+
+fbsettings.log_dir = EXPERIMENT_CONFIG.feedbackLogDir;
+fbsettings.log_prefix = EXPERIMENT_CONFIG.filePrefix;
+fbsettings.log_prefix_block = [EXPERIMENT_CONFIG.filePrefix '_' block_name];
+
+fbsettings.next_block_info = seqNameFpsTupleList;
+
+
 fbOpts = fieldnames(fbsettings);
 
 fprintf('Sending feedback parameters:...\n')
 fbsettings %#ok<NOPRT>
 for optId = 1:length(fbOpts),
     pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId})); %#ok<GFLD>
+    pause(0.1)
 end
+pyff_sendUdp('interaction-signal', 'state_command','start_preload');
 fprintf('... Done!\n')
-
 end
 

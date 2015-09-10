@@ -19,6 +19,8 @@ EXPERIMENT_CONFIG.logging.enabled = false;
 EXPERIMENT_CONFIG.validation.show_validation_stats = true;
 
 EXPERIMENT_CONFIG.feedback.use_optomarker = true;
+EXPERIMENT_CONFIG.feedback.overlay_duration = 1.0;
+EXPERIMENT_CONFIG.feedback.show_debug_infos = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed
