@@ -12,7 +12,6 @@ seq_s06_2-b3ettlingen.txt	8
 seq_s07_1-rommelstr.txt	8
 seq_s07_2-rommelstr.txt	8
 seq_s08_1-durlacherallee.txt	8
-seq_s08_2-durlacherallee.txt	8
 seq_s08_3-durlacherallee.txt	8
 seq_s08_4-durlacherallee.txt	8
 seq_s09_1-b10nord.txt	8
