@@ -10,6 +10,11 @@
 """
 import os
 import ConfigParser
+
+#define placeholders to prevent pylint errors in using code
+stimuli = {}
+technical = {}
+
 def _load_marker_ini(marker_file):
     """ loads marker definitions from ini file
          each section of the ini file is converted to an attribute of the current module

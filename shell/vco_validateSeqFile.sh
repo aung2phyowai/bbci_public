@@ -5,5 +5,5 @@ export PYTHONPATH="${feedbackDir}"
 for seqFile in $*
 do
 #    echo "validating $seqFile"
-    python -c "import vco_utils; vco_utils.validate_seq_file('${seqFile}')"
+    python -c "import seq_file_utils; seq_file_utils.validate_seq_file('${seqFile}')"
 done

@@ -18,6 +18,7 @@ from FeedbackBase.PygameFeedback import PygameFeedback
 
 
 import markers
+import seq_file_utils
 import vco_utils
 
 class ImageSeqViewer(PygameFeedback):
@@ -184,7 +185,7 @@ class ImageSeqViewer(PygameFeedback):
                     sys.exit(3)
                 if self.preload_images:
                     for seq_element in image_seq:
-                        self._get_image(seq_element[0])
+                        self._get_image(seq_element.file_name)
                     self.logger.debug("finished preloading of %d images", len(image_seq))
                 self._seq_info_list.append((seq_file, seq_fps, image_seq))
 
@@ -215,7 +216,7 @@ class ImageSeqViewer(PygameFeedback):
         self._last_interaction_image_no = -1 - self.interaction_overlay_frame_count
         self.FPS = current_seq_info[1]
         #make sure at least the next image is preloaded
-        self._get_image((self._current_image_seq[0])[0])
+        self._get_image((self._current_image_seq[0]).file_name)
         self.logger.debug("initialized sequence file %s", current_seq_info[0])
 
 
@@ -281,8 +282,8 @@ class ImageSeqViewer(PygameFeedback):
             # third, advance state
             assert self._current_image_no < len(self._current_image_seq)
             current_element = self._current_image_seq[self._current_image_no]
-            current_image_name = current_element[0]
-            current_markers = current_element[1]
+            current_image_name = current_element.file_name
+            current_markers = [marker[0] for marker in current_element.marker_tuples]
 
             if self._current_image_no == 0:
                 if self._current_seq_index == 0:
@@ -302,7 +303,7 @@ class ImageSeqViewer(PygameFeedback):
             next_seq_no = self._current_image_no + 1
             if next_seq_no < len(self._current_image_seq):
                 #force preload of next image (if not already done)
-                self._get_image((self._current_image_seq[next_seq_no])[0])
+                self._get_image((self._current_image_seq[next_seq_no]).file_name)
                 self._current_image_no = next_seq_no
             else: # sequence is over
                 self.send_marker(markers.technical['seq_end'])
@@ -326,7 +327,7 @@ class ImageSeqViewer(PygameFeedback):
             
         else:
             self.logger.error("unknown state, exiting")
-            self.send_marker(markers.trial_end)
+            self.send_marker(markers.technical['trial_end'])
             time.sleep(1)
             sys.exit(1)
             time.sleep(1)

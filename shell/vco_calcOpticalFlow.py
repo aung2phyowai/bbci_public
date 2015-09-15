@@ -9,7 +9,7 @@ import os
 #import utils from feedback folder, so we need to add it to the path
 feedback_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../feedbacks"))
 sys.path.append(feedback_path)
-import vco_utils
+import seq_file_utils
 
 parser = argparse.ArgumentParser(description='calculate optical flow for sequence files')
 #parser.add_argument('seqFiles', nargs='*', default=[ '~/local_data/kitti/seqs/seq_s03_1-hardtwaldb.txt'])
@@ -24,8 +24,8 @@ args = parser.parse_args()
 
 for seqFile in args.seqFiles:
 
-    seqInfo = vco_utils.load_seq_file(seqFile)
-    files = [f for f, markers in seqInfo]
+    seqInfo = seq_file_utils.load_seq_file(seqFile)
+    files = [f.file_name for f in seqInfo]
 
     #remove first and last 10 frame (fading)
     files = files[10:-10]
