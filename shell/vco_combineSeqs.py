@@ -2,11 +2,12 @@
 """ combines two sequences by updating a range of frames of a base sequence with modified frames """
 
 import argparse
+import copy
+import logging
 import os
 import re
 import sys
 import subprocess
-import logging
 
 feedback_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../feedbacks"))
 sys.path.append(feedback_path)
@@ -36,6 +37,18 @@ def _is_ancestor_directory(ancestor, descendant):
 
 def process_arguments(args):
     """ checks arguments for validity and fills in non-specified values with defaults/calculated ones """
+    #version information
+    if args.base_version is not None:
+        args.base_seq_dir += '-v' + args.base_version
+        args.target_seq_name += '-v' + args.base_version
+    if args.target_version is not None:
+        if re.search("-v\d+$", args.target_seq_name) is not None:
+            # we already have version information, so we only append
+            args.target_seq_name += args.target_version
+        else:
+            args.target_seq_name += '-v' + args.target_version
+
+
     args.base_seq_dir = os.path.realpath(os.path.expanduser(args.base_seq_dir))
     if not os.path.isdir(args.base_seq_dir):
         logging.error("cannot find base directory %s", args.base_seq_dir)
@@ -69,19 +82,21 @@ def process_arguments(args):
     if args.update_end_frame_no is None:
         args.update_end_frame_no = max(args.modified_frame_files_numbers)
 
-    if args.target_start_frame_no is None:
-        args.target_start_frame_no = args.update_end_frame_no
-
     args.base_frame_file_numbers = _get_frame_numbers_from_dir(args.base_seq_dir, args.image_file_pattern)
-    if args.target_start_frame_no not in args.base_frame_file_numbers:
-        logging.error("cannot find start frame %d in base dir %s", args.target_start_frame_no, args.base_seq_dir)
+    if args.update_start_frame_no not in args.base_frame_file_numbers:
+        logging.error("cannot find start frame %d in base dir %s", args.update_start_frame_no, args.base_seq_dir)
         return None
 
     if args.modified_event_marker not in markers.stimuli:
         logging.error("cannot find stimulus marker with name '%s'", args.modified_event_marker)
         return None
-    if not args.update_label.startswith("E"):
-        args.update_label = "E-" + args.update_label
+
+    #build update label
+    args.target_seq_label = args.target_seq_name.split('-')[0]
+    args.update_label = '-'.join(["E", args.update_label_type,
+                                  args.target_seq_label,
+                                  str(args.update_start_frame_no)])
+
 
     args.target_seq_dir = os.path.realpath(os.path.join(args.images_dir, args.sequence_type, args.target_seq_name))
     if os.path.exists(args.target_seq_dir):
@@ -135,6 +150,9 @@ def combine_sequences(args):
 
         rel_path_to_source = os.path.relpath(source_file, args.target_seq_dir)
         logging.debug("linking %s to %s", target_file, rel_path_to_source)
+        if os.path.lexists(target_file):
+            logging.warn("replacing existing file %s", target_file)
+            os.unlink(target_file)
         os.symlink(rel_path_to_source, target_file)
 
         seq_file_data[i].file_name = os.path.relpath(target_file, args.seq_file_target_dir)
@@ -142,33 +160,48 @@ def combine_sequences(args):
     seq_file_utils.write_seq_file(seq_file_data, args.seq_file_target)
 
 if __name__ == "__main__":
+    expected_label_prefixes = ['safe', 'uncertain', 'hazard']
+
     parser = argparse.ArgumentParser(description="combine a sequence with a modified image folder to create an updated one")
     parser.add_argument('target_seq_name', help='name of the newly created sequence')
-    parser.add_argument('update_label', help='label of the update, e.g., safe-c01_1-1 or hazard-c01_1-2')
+    parser.add_argument('-l', '--category-label', required=True, dest='update_label_type',
+                        help='label of the update, should usually be one of %s' % expected_label_prefixes)
     parser.add_argument('base_seq_dir', help='directory of the sequence to be updated')
     parser.add_argument('modified_frames_dir', help='directory with the updated frames')
     parser.add_argument('-t', '--sequence-type', dest='sequence_type', default='intermediate',
                         choices=['base', 'intermediate', 'final'], help='type of the newly generated sequence')
+    parser.add_argument('-bv', '--base-version', dest='base_versions', action='append',
+                        help='combine with each of these versions of the base sequence')
+    parser.add_argument('-tv', '--target-version', dest='target_version',
+                        help='add this version information to the output name, combining it with possible base versions')
     parser.add_argument('-m', '--modified-event-marker', dest='modified_event_marker',
                         default='generic_stimulus', help='marker to be placed at the first frame of the updated part')
     parser.add_argument('--update-start-frame-no', dest='update_start_frame_no',
                         type=int, help='frame number of the first update frame')
     parser.add_argument('--update-end-frame-no', dest='update_end_frame_no',
                         type=int, help='frame number of the last update frame')
-    parser.add_argument('--target-start-frame-no', dest='target_start_frame_no',
-                        type=int, help='frame number of the target sequence where the updated part should start')
     parser.add_argument('--image-file-pattern', dest='image_file_pattern',
                         default='%010d.png', help='pattern for image file names in printf format')
     parser.add_argument('--data-root-dir', dest='data_root_dir',
-                        help="data directory with images and seqs as subfolders. inferred from base_seq_dir if not specified")
-    
+                        help="data directory with images and seqs as subfolders." +
+                        " inferred from base_seq_dir if not specified")
+
 
     shell_args = parser.parse_args()
-    expected_label_prefixes = ['safe', 'hazard']
-    if not any([shell_args.update_label.startswith(p) for p in expected_label_prefixes]):
-        logging.warning('label %s does not start with expected prefix %s', shell_args.update_label, expected_label_prefixes)
-
-    combine_sequences(shell_args)
+    if shell_args.update_label_type not in expected_label_prefixes:
+        logging.warning('label type %s is not one of the expected:  %s',
+                        shell_args.update_label_type, expected_label_prefixes)
 
 
-    seq_file_utils.validate_seq_file(shell_args.seq_file_target)
+    if shell_args.base_versions:
+        for base_version in shell_args.base_versions:
+            cur_args = copy.deepcopy(shell_args)
+            cur_args.base_version = base_version
+            combine_sequences(cur_args)
+            seq_file_utils.validate_seq_file(cur_args.seq_file_target)
+            print "generated sequence %s" % cur_args.target_seq_name
+    else:
+        shell_args.base_version = None
+        combine_sequences(shell_args)
+        seq_file_utils.validate_seq_file(shell_args.seq_file_target)
+        print "generated sequence %s" % shell_args.target_seq_name

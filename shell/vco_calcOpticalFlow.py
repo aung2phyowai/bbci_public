@@ -20,7 +20,6 @@ parser.add_argument('-m', '--method', choices=['sparse', 'dense'], default='spar
 
 args = parser.parse_args()
 
-#args.method = 'dense'
 
 for seqFile in args.seqFiles:
 

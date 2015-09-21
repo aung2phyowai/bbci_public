@@ -94,7 +94,7 @@ This is just for reference and shouldn't be needed again
 ```
 	ssh cake.informatik.uni-freiburg.de
 	cd /export/backup/henkolk/repos
-	git clone git@github.com:bsdlab/visual_complexity_observation.git repo
+	git clone git@github.com:bsdlab/visual_complexity_observation.git
 	cd visual_complexity_observation/
 	git annex init cake
 	git annex sync

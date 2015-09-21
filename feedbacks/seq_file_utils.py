@@ -24,7 +24,6 @@ class SeqFileEntry(object):
                 columns.append(marker_tuple[1])
             else:
                 columns.append(marker_tuple[0])
-        columns.extend(markers)
         return '\t'.join(columns)
 
     @staticmethod
