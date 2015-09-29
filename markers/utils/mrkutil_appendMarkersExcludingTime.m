@@ -1,15 +1,11 @@
-function mrk= mrk_mergeMarkers(mrk1, mrk2, varargin)
-%MRK_MERGEMARKERS - Merge Marker Structs
+function mrk= mrkutil_appendMarkersExcludingTime(mrk1, mrk2)
+% MRKUTIL_APPENDMARKERSEXCLUDINGTIME
 %
-%Description:
-% This function merges two or more marker structs into one.
-%
-%Synopsis:
-% MRK= mrk_mergeMarkers(MRK1, MRK2, ...)
+% This functions is used in mrk_mergeMarkers and proc_appendEpochs
 
 
-misc_checkType(mrk1, 'STRUCT(time)');
-misc_checkType(mrk2, 'STRUCT(time)');
+misc_checkType(mrk1, 'STRUCT');
+misc_checkType(mrk2, 'STRUCT');
 
 if isempty(mrk1),
   mrk= mrk2;
@@ -20,12 +16,8 @@ elseif isempty(mrk2),
 end
 
 mrk= mrkutil_appendEventInfo(mrk1, mrk2);
-mrk.time= cat(2, mrk1.time(:)', mrk2.time(:)');
 
 %% Labels (mrk.y) and class names (mrk.className)
-if xor(isfield(mrk1, 'y'), isfield(mrk2, 'y')),
-  error('either none or both marker structres must have field ''y''.');
-end 
 if isfield(mrk1, 'y'),
   s1= size(mrk1.y);
   s2= size(mrk2.y);
@@ -47,9 +39,4 @@ if isfield(mrk1, 'y'),
   else
     mrk.y= [[mrk1.y; zeros(s2(1), s1(2))], [zeros(s1(1), s2(2)); mrk2.y]];
   end
-end
-
-%% Recursion
-if length(varargin)>0,
-  mrk= mrk_mergeMarkers(mrk, varargin{1}, varargin{2:end});
 end
