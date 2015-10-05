@@ -65,34 +65,39 @@ def process_arguments(args):
         logging.error("missing images and seq directory. make sure, your data root (%s) is correct", args.data_root_dir)
         return None
 
-    args.modified_frames_dir = os.path.realpath(os.path.expanduser(args.modified_frames_dir))
-    if not os.path.isdir(args.modified_frames_dir):
-        logging.error("cannot find modified frames directory %s", args.modified_frames_dir)
-        return None
-
-    args.modified_frame_files_numbers = _get_frame_numbers_from_dir(args.modified_frames_dir, args.image_file_pattern)
-    if not args.modified_frame_files_numbers:
-        logging.error("cannot find any files matching the pattern %s in modified frames directory %s",
-                      args.image_file_pattern, args.modified_frames_dir)
-        return None
-
-    if args.update_start_frame_no is None:
-        args.update_start_frame_no = min(args.modified_frame_files_numbers)
-
-    if args.update_end_frame_no is None:
-        args.update_end_frame_no = max(args.modified_frame_files_numbers)
-
     args.base_frame_file_numbers = _get_frame_numbers_from_dir(args.base_seq_dir, args.image_file_pattern)
-    if args.update_start_frame_no not in args.base_frame_file_numbers:
-        logging.error("cannot find start frame %d in base dir %s", args.update_start_frame_no, args.base_seq_dir)
-        return None
+
+    if args.modified_frames_dir == "identity":
+        logging.warn("performing no modifications, just copying")
+        args.modified_frame_files_numbers = []
+    else: # we expect a proper folder with valid files
+        args.modified_frames_dir = os.path.realpath(os.path.expanduser(args.modified_frames_dir))
+        if not os.path.isdir(args.modified_frames_dir):
+            logging.error("cannot find modified frames directory %s", args.modified_frames_dir)
+            return None
+        else: #we have a valid directory parameter
+            args.modified_frame_files_numbers = _get_frame_numbers_from_dir(args.modified_frames_dir, args.image_file_pattern)
+            if not args.modified_frame_files_numbers:
+                logging.error("cannot find any files matching the pattern %s in modified frames directory %s", args.image_file_pattern, args.modified_frames_dir)
+                return None
+
+            if args.update_start_frame_no is None:
+                args.update_start_frame_no = min(args.modified_frame_files_numbers)
+
+            if args.update_end_frame_no is None:
+                args.update_end_frame_no = max(args.modified_frame_files_numbers)
+
+
+            if args.update_start_frame_no not in args.base_frame_file_numbers:
+                logging.error("cannot find start frame %d in base dir %s", args.update_start_frame_no, args.base_seq_dir)
+                return None
 
     if args.modified_event_marker not in markers.stimuli:
         logging.error("cannot find stimulus marker with name '%s'", args.modified_event_marker)
         return None
 
     #build update label
-    args.target_seq_label = args.target_seq_name.split('-')[0]
+    args.target_seq_label = args.target_seq_name
     args.update_label = '-'.join(["E", args.update_label_type,
                                   args.target_seq_label,
                                   str(args.update_start_frame_no)])
@@ -167,7 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--category-label', required=True, dest='update_label_type',
                         help='label of the update, should usually be one of %s' % expected_label_prefixes)
     parser.add_argument('base_seq_dir', help='directory of the sequence to be updated')
-    parser.add_argument('modified_frames_dir', help='directory with the updated frames')
+    parser.add_argument('modified_frames_dir', help='directory with the updated frames; pass identity if a pure copy of the base sequence should be generated (i.e., renaming only)')
     parser.add_argument('-t', '--sequence-type', dest='sequence_type', default='intermediate',
                         choices=['base', 'intermediate', 'final'], help='type of the newly generated sequence')
     parser.add_argument('-bv', '--base-version', dest='base_versions', action='append',

@@ -14,6 +14,7 @@ def calculate_single_seq_file_stat(seq_file, seen_frame_files):
     parsed_seq = seq_file_utils.load_seq_file(seq_file)
     event_names = {name for frame in parsed_seq for name in frame.event_names}
     hazard_count = len([e for e in event_names if e.startswith('E-hazard')])
+    uncertain_count = len([e for e in event_names if e.startswith('E-uncertain')])
     safe_count = len([e for e in event_names if e.startswith('E-safe')])
 
     frame_files = {os.path.realpath(frame.file_name) for frame in parsed_seq}
@@ -21,22 +22,30 @@ def calculate_single_seq_file_stat(seq_file, seen_frame_files):
     seen_frame_files |= new_files
     return {'name' : seq_file,
             'hazard_count' : hazard_count,
+            'uncertain_count' : uncertain_count,
             'safe_count' : safe_count,
+            'frame_count' : len(frame_files),
             'new_frames' :  len(new_files)}
 
 def calculate_full_stat(seq_file_list):
     """calculates individual and total statics for all supplied seq files """
     total_hazard_count = 0
     total_safe_count = 0
+    total_uncertain_count = 0
+    total_frame_count = 0
     seen_frame_files = set()
     single_file_stats = []
     for seq_file in seq_file_list:
         seq_file_stats = calculate_single_seq_file_stat(seq_file, seen_frame_files)
         single_file_stats.append(seq_file_stats)
         total_hazard_count += seq_file_stats['hazard_count']
+        total_uncertain_count += seq_file_stats['uncertain_count']
         total_safe_count += seq_file_stats['safe_count']
+        total_frame_count += seq_file_stats['frame_count']
     total_stats = {'total_hazard_count': total_hazard_count,
+                   'total_uncertain_count' : total_uncertain_count,
                    'total_safe_count': total_safe_count,
+                   'total_frame_count' : total_frame_count,
                    'seen_frame_files_no' : len(seen_frame_files)}
     return {'single_stats' : single_file_stats,
             'total_stats' : total_stats}
@@ -50,11 +59,11 @@ if __name__ == "__main__":
 
     stats = calculate_full_stat(args.seqFiles)
 
-    print "|{:^50}|{:^8}|{:^8}|{:^8}|".format('sequence', 'E-hazard', 'E-safe', 'uniq fr')
-    print "|{:-<50}+{:-<8}+{:-<8}+{:-<8}|".format('', '', '', '')
+    print "|{:^50}|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|".format('sequence', 'E-hazard', 'E-uncert', 'E-safe', 'uniq fr', 'tot fr')
+    print "|{:-<50}+{:-<8}+{:-<8}+{:-<8}+{:-<8}+{:-<8}|".format('', '', '', '', '', '')
 
     for file_stat in stats['single_stats']:
-        print "|{name:<50}|{hazard_count:>8d}|{safe_count:>8d}|{new_frames:>8d}|".format(**file_stat)
+        print "|{name:<50}|{hazard_count:>8d}|{uncertain_count:>8d}|{safe_count:>8d}|{new_frames:>8d}|{frame_count:>8d}|".format(**file_stat)
 
-    print "|{:-<50}+{:-<8}+{:-<8}+{:-<8}|".format('', '', '', '')
-    print "|{:<50}|{total_hazard_count:>8d}|{total_safe_count:>8d}|{seen_frame_files_no:>8d}|".format('Sum', **stats['total_stats'])
+    print "|{:-<50}+{:-<8}+{:-<8}+{:-<8}+{:-<8}+{:-<8}|".format('', '', '', '', '', '')
+    print "|{:<50}|{total_hazard_count:>8d}|{total_uncertain_count:>8d}|{total_safe_count:>8d}|{seen_frame_files_no:>8d}|{total_frame_count:>8d}|".format('Sum', **stats['total_stats'])
