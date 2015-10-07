@@ -1,4 +1,5 @@
 function [ blocks ] = build_block_structure()
+%% deprecated, for reference only, use python script instead %%
 %BUILD_BLOCK_STRUCTURE Creates a block structure for the experiment based
 % on the configuration
 %   Returns a list of tables, each element of the list constitutes a block

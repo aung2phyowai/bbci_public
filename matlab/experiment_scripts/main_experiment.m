@@ -32,10 +32,11 @@ end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
 %% loop over blocks
-for blockIdx = 1:size(EXPERIMENT_CONFIG.blockStructure, 1)
-    current_block = EXPERIMENT_CONFIG.blockStructure(blockIdx,:,:);
+for block_no = 1:EXPERIMENT_CONFIG.block_count
+    block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
+    current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     
-    block_name = sprintf('block%02d', blockIdx);
+    block_name = sprintf('block%02d', block_no);
     
     pyff_send_parameters(current_block, block_name);
     

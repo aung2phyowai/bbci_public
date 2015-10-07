@@ -9,16 +9,16 @@ global EXPERIMENT_CONFIG
 
 %convert to ``python'' list of tuples - slow implementation, but legible
 seqNameFpsTupleList = '[';
-for seqIdx = 1:size(block_info, 2)
-    seqFileName = block_info{1, seqIdx, 1};
-    seqFileFps = block_info{1, seqIdx, 2};
-    seqFile = fullfile(PROJECT_SETUP.SEQ_DATA_DIR, seqFileName);
+for seqIdx = 1:size(block_info, 1)
+    %convert to platform-specific path
+    seqFileParts = strsplit(block_info.seqName{seqIdx}, '/');
+    seqFile = fullfile(PROJECT_SETUP.BASE_DIR, seqFileParts{:});
     if exist(seqFile, 'file') == 0
         % sequence file not accessible, so we don't bother starting the feedback
         fprintf(['Cannot access ', seqFile, ', aborting!\n'])
         break;
     end
-    nameFpsTuple = sprintf('("%s", %d)', seqFile, seqFileFps);
+    nameFpsTuple = sprintf('("%s", %d)', seqFile, block_info.FPS(seqIdx));
     if seqIdx ~= 1
         nameFpsTuple = [','  nameFpsTuple]; %#ok<AGROW>
     end

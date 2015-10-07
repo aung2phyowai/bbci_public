@@ -14,6 +14,7 @@ import ConfigParser
 #define placeholders to prevent pylint errors in using code
 stimuli = {}
 technical = {}
+interactions = {}
 
 def _load_marker_ini(marker_file):
     """ loads marker definitions from ini file

@@ -175,7 +175,7 @@ class ImageSeqViewer(PygameFeedback):
                     sys.exit(2)
 
                 self.logger.debug("loading sequence file %s...", seq_file)
-                image_seq = vco_utils.load_seq_file(seq_file)
+                image_seq = seq_file_utils.load_seq_file(seq_file)
                 if not image_seq:
                     #we expect at least one image, so return error
                     self.logger.error("no images found in sequence file %s, quitting", seq_file)
