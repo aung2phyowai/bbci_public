@@ -11,7 +11,7 @@ subject_config(); %source VP code etc
 
 %type of block structure:
 
-EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'block_structure.tsv');
+EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'test_block_structure.tsv');
 
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date];
 EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];

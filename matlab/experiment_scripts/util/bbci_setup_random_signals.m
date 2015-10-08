@@ -52,6 +52,10 @@ bbci.feedback(1).host = PROJECT_SETUP.UDP_FEEDBACK_HOST;
 bbci.feedback(1).port = PROJECT_SETUP.UDP_FEEDBACK_PORT;
 bbci.feedback(1).receiver = 'pyff';
 
+bbci.control(1).condition.marker = EXPERIMENT_CONFIG.markers.interactions.button_pressed;
+bbci.control(1).fcn = @control_fcn_button_press;
+% #bbci_apply_structures bbci_apply_queryMarker
+
 bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.technical.trial_end;
 
 end

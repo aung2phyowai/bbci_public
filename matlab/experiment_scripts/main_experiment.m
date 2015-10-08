@@ -32,7 +32,7 @@ end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
 %% loop over blocks
-for block_no = 1:EXPERIMENT_CONFIG.block_count
+for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     
@@ -44,8 +44,8 @@ for block_no = 1:EXPERIMENT_CONFIG.block_count
     %% Loading data.
     
     fprintf([' Next block: ', block_name, '\n'])
-    for seqIdx = 1:size(current_block, 2)
-        fprintf(['  ' current_block{1,seqIdx, 1} '\n'])
+    for seqIdx = 1:size(current_block, 1)
+        fprintf(['  ' current_block.seqName{seqIdx} '\n'])
     end
     if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
         break
@@ -73,6 +73,10 @@ for block_no = 1:EXPERIMENT_CONFIG.block_count
     
     %% Stop!
     pyff_sendUdp('interaction-signal', 'command','stop');
+    
+    if ~any(data.marker.desc == EXPERIMENT_CONFIG.markers.technical.seq_start)
+        fprintf('%s\n', ['Playback did not start, consult look in ' EXPERIMENT_CONFIG.feedbackLogDir])
+    end
     
     if EXPERIMENT_CONFIG.validation.show_validation_stats
         validation_stats(data)

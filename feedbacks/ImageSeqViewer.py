@@ -90,8 +90,12 @@ class ImageSeqViewer(PygameFeedback):
 
 
     def on_control_event(self, data):
-        #self.logger.info("got control event %s\n with type %s" % (data, type(data)))
-        pass
+        try:
+            curFrame = self._current_image_no
+        except:
+            curFrame = -1
+        self.logger.info("%d got control event %s\n with type %s",curFrame, data, type(data))
+        #pass
 
     def pre_mainloop(self):
         """executed once after receiving play command"""
@@ -361,7 +365,7 @@ class ImageSeqViewer(PygameFeedback):
         """ check for pause and enter events """
         if self.keypressed:
             if self._state == "playback" and self.lastkey in (pygame.K_RETURN, pygame.K_KP_ENTER): #pylint: disable=no-member
-                self.send_marker(markers.interactions['return_pressed'])
+                self.send_marker(markers.interactions['button_pressed'])
                 self._last_interaction_image_no = self._current_image_no
             if self.lastkey == pygame.K_SPACE: #pylint: disable=no-member
                 self._paused = not self._paused #from MainloopFeedback pylint: disable=attribute-defined-outside-init

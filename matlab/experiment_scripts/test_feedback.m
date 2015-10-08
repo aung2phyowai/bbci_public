@@ -23,7 +23,7 @@ pyff_sendUdp('interaction-signal', 'command','stop');
 
 
 %% loop over blocks
-for block_no = 1:EXPERIMENT_CONFIG.block_count
+for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     

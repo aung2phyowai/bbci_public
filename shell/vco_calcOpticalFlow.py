@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import cv2
 import sys
+import logging
 import os
 
 #import utils from feedback folder, so we need to add it to the path
@@ -11,19 +12,19 @@ feedback_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../fee
 sys.path.append(feedback_path)
 import seq_file_utils
 
-parser = argparse.ArgumentParser(description='calculate optical flow for sequence files')
-#parser.add_argument('seqFiles', nargs='*', default=[ '~/local_data/kitti/seqs/seq_s03_1-hardtwaldb.txt'])
-parser.add_argument('seqFiles', nargs='+')
-parser.add_argument('-d', '--display', action='store_true')
-parser.add_argument('-m', '--method', choices=['sparse', 'dense'], default='sparse',
-                    help='type of flow calculation: sparse (Lucas-Kanade) or dense (Farneback)')
+# def plot_flow(flow):
+#     import matplotlib.pyplot as plt
+#     X,Y,U,V = zip(*soa)p
+# lt.figure()
+# ax = plt.gca()
+# ax.quiver(X,Y,U,V,angles='xy',scale_units='xy',scale=1)
+# ax.set_xlim([-1,10])
+# ax.set_ylim([-1,10])
+# plt.draw()
+# plt.show()
 
-args = parser.parse_args()
-
-
-for seqFile in args.seqFiles:
-
-    seqInfo = seq_file_utils.load_seq_file(seqFile)
+def calc_optical_flow_stats(seq_file, method):
+    seqInfo = seq_file_utils.load_seq_file(seq_file)
     files = [f.file_name for f in seqInfo]
 
     #remove first and last 10 frame (fading)
@@ -68,7 +69,7 @@ for seqFile in args.seqFiles:
 
         # calculate optical flow
         try:
-            if args.method == 'sparse':
+            if method == 'sparse':
                 p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
                 # Select good points
                 good_new = p1[st == 1]
@@ -76,25 +77,34 @@ for seqFile in args.seqFiles:
 
                 flow = good_new.reshape(-1, 2) - good_old.reshape(-1, 2)        
                 #flowVectorNorms = [np.linalg.norm(flow[i]) for i in xrange(flow.shape[0])]
-                flowVectorNorms = np.linalg.norm(flow, axis=1)
-                meanFlowVectorNorm = np.mean(flowVectorNorms)
-               
-            else:
+            elif method == 'dense':
                 flow = cv2.calcOpticalFlowFarneback(old_gray, frame_gray, **fb_params)
                 #reshape, so we have rows of vectors
                 flow = np.reshape(flow, (-1, 2))
                 
                # flowVectorNorms =  [np.linalg.norm(flow[i]) for i in xrange(flow.shape[0])]
-                flowVectorNorms = np.linalg.norm(flow, axis=1)
-                        
-                meanFlowVectorNorm = np.mean(flowVectorNorms)
+               
+            else:
+                logging.error("unknown method %s", method)
         except:
             print("error calculating between frames %d and %d with shapes %s and %s" %
                   ((i-1), i, old_gray.shape, frame_gray.shape))
         else:
-         
+            #calculate norm as a measure of flow magnitude
+            flowVectorNorms = np.linalg.norm(flow, axis=1)                       
+            meanFlowVectorNorm = np.mean(flowVectorNorms)
             flowNorms.append(meanFlowVectorNorm)
-            if args.display:
+
+            #calculate homogeniety of flow
+            #angle to (1,0)
+            angleCosines = np.divide(flow[:,0], flowVectorNorms)
+            # angles 
+            angleCosinesVar = np.var(angleCosines)
+            meanFlow = np.mean(flow, axis=0)
+            #normalize mean
+            
+            
+            if args.display and method == 'sparse':
                 print("norm of flow %1.2f" % meanFlowVectorNorm)
                 mask = np.zeros_like(frame)
                 # draw the tracks
@@ -115,6 +125,29 @@ for seqFile in args.seqFiles:
         #p0 = good_new.reshape(-1,1,2)
         p0 = cv2.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
 
-    print('%s mean flow norm %1.6f' % (seqFile, (sum(flowNorms) / len(flowNorms))))
-if args.display:
-    cv2.destroyAllWindows()
+    return {'meanFlowNorm': (sum(flowNorms) / len(flowNorms))}
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='calculate optical flow for sequence files')
+   # parser.add_argument('seqFiles', nargs='*', default=[ '~/local_data/kitti/seqs/final/seq_c07_1-erbprinzenstr.txt'])
+    parser.add_argument('seqFiles', nargs='+')
+    parser.add_argument('-d', '--display', action='store_true')
+    parser.add_argument('-m', '--method', choices=['sparse', 'dense'],
+                        action='append', default=[],
+                        help='type of flow calculation: sparse (Lucas-Kanade) or dense (Farneback)')
+
+    args = parser.parse_args()
+
+    print "|{:^50}|{:^7}|{:^20}|{:^8}|".format("Sequence", "type", "metric", "value")
+    print "|{:-^50}+{:-^7}+{:-^20}+{:-^8}|".format('', '', '', '')
+
+    for seqFile in args.seqFiles:
+        for method in args.method:
+            flowStats = calc_optical_flow_stats(seqFile, method)
+            for metric, value in flowStats.items():
+                print "|{:<50}|{:<7}|{:<20}|{:>8.6}|".format(seqFile, method, metric, value)
+
+    if args.display:
+        cv2.destroyAllWindows()

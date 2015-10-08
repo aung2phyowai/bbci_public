@@ -47,6 +47,8 @@ else
     bbci.log.output = 0;
 end
 
+bbci.control(1).condition.marker = -1;
+bbci.control(1).fcn = @control_fcn_button_press;
 
 end
 
