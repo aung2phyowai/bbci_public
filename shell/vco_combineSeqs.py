@@ -110,6 +110,9 @@ def process_arguments(args):
         logging.debug("creating target directory: %s", args.target_seq_dir)
         os.makedirs(args.target_seq_dir)
     args.seq_file_target_dir = os.path.join(args.seq_file_root_dir, args.sequence_type)
+    if not os.path.exists(args.seq_file_target_dir):
+        logging.warning("creating seq file target dir %s", args.seq_file_target_dir)
+        os.makedirs(args.seq_file_target_dir)
     args.seq_file_target = os.path.join(args.seq_file_target_dir,
                                         'seq_' + args.target_seq_name + '.txt')
 
@@ -174,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument('base_seq_dir', help='directory of the sequence to be updated')
     parser.add_argument('modified_frames_dir', help='directory with the updated frames; pass identity if a pure copy of the base sequence should be generated (i.e., renaming only)')
     parser.add_argument('-t', '--sequence-type', dest='sequence_type', default='intermediate',
-                        choices=['base', 'intermediate', 'final'], help='type of the newly generated sequence')
+                        choices=['base', 'intermediate', 'final', 'test'], help='type of the newly generated sequence')
     parser.add_argument('-bv', '--base-version', dest='base_versions', action='append',
                         help='combine with each of these versions of the base sequence')
     parser.add_argument('-tv', '--target-version', dest='target_version',
