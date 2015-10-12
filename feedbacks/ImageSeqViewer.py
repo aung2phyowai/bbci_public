@@ -241,14 +241,32 @@ class ImageSeqViewer(PygameFeedback):
         # self.logger.debug("retrieving image %s", file_name)
         if file_name not in self._image_cache:
             #self.logger.debug("loading image %s into memory", file_name)
-            if not os.path.isfile(file_name):
-                self.logger.error("couldn't find image %s, quitting",
-                                  file_name)
-                time.sleep(1) #we sleep a bit to make sure the marker gets caught
-                self.send_marker(markers.technical['trial_end'])
-                time.sleep(1)
-                sys.exit(3)
-            self._image_cache[file_name] = pygame.image.load(file_name)
+            try:
+                self._image_cache[file_name] = pygame.image.load(file_name)
+            except BaseException as e:
+                self.logger.error(e)
+                #maybe we're on windows and encountered a symbolic link
+                #this means we can read the target as a text
+                self.logger.error("couldn't directly load %s", file_name)
+                try:
+                    with open(file_name, "r") as txt_file:
+                        rel_target = txt_file.read()
+                        abs_target = os.path.normpath(os.path.join(os.path.dirname(file_name), rel_target))
+                        self.logger.debug("found target: %s", abs_target)
+                        #prevent infinite loop
+                        if os.path.exists(abs_target) and abs_target != file_name:
+                            return self._get_image(abs_target)
+                        else:
+                            raise ValueError("non-existing target or infinite loop trying to load %s" % abs_target)
+                except BaseException as f:
+                    self.logger.error(f)
+                    self.logger.error("couldn't open image %s, quitting",
+                                      file_name)
+                    #time.sleep(1) #we sleep a bit to make sure the marker gets caught
+                    #self.send_marker(markers.technical['trial_end'])
+                    #time.sleep(1)
+                    #sys.exit(3)
+                    return None
         return self._image_cache[file_name]
 
     def _display_message(self, message):
@@ -292,7 +310,9 @@ class ImageSeqViewer(PygameFeedback):
             if self._current_image_no == 0:
                 if self._current_seq_index == 0:
                     #complete start, not only new sequence
-                    self.send_marker(markers.technical['trial_start'])
+                    #yet this causes duplicate markers on same frame
+                    #self.send_marker(markers.technical['trial_start'])
+                    pass
                 self.logger.info('starting playback of sequence %d with %dFPS (file: %s)',
                                  self._current_seq_index, self.FPS,
                                  (self._seq_info_list[self._current_seq_index])[0])
@@ -355,11 +375,16 @@ class ImageSeqViewer(PygameFeedback):
         """ draw optomarker onto screen
            make sure this method is called after send_marker
         """
-        if self.use_optomarker and self._unshown_marker:
-            pygame.draw.rect(self.screen, (255, 255, 255),
-                             (0.49*self.screen.get_width(),
-                              0.02*self.screen.get_height(), 20, 20))
-            self._unshown_marker = False
+        if self.use_optomarker:
+            marker_rect_coords = (0.49*self.screen.get_width(),
+                                  0.02*self.screen.get_height(), 20, 20)
+            if self._unshown_marker:
+                pygame.draw.rect(self.screen, (255, 255, 255),
+                                 marker_rect_coords)
+                self._unshown_marker = False
+            else: #black out screen
+                 pygame.draw.rect(self.screen, (0, 0, 0),
+                                 marker_rect_coords)
 
     def _check_input(self):
         """ check for pause and enter events """
