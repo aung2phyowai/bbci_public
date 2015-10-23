@@ -27,7 +27,7 @@ save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT
 
 %technically, we start playing here, although the feedback will still be in
 %standby
-pyff_send_parameters(EXPERIMENT_CONFIG.block_structure(false,:), 'standby'); %send base parameters with empty block
+pyff_send_parameters(current_block, block_name); 
 pyff_sendUdp('interaction-signal', 'command','play');
 %% loop over blocks
 for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
@@ -39,7 +39,6 @@ for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     
     %% Loading data.
     pyff_send_parameters(current_block, block_name);
-    pyff_sendUdp('interaction-signal', 'state_command','start_preload');
     fprintf('Preloading...')
 %     wait_for_marker(EXPERIMENT_CONFIG.markers.technical.preload_completed)
     fprintf('complete\n')

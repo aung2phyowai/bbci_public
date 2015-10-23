@@ -187,6 +187,14 @@ class StateMachineFeedback(PygameFeedback):
         """ updates pygame screen position and size based on config value"""
         self.screenSize = [self.config['screen_width'], self.config['screen_height']]
         self.screenPos = [self.config['screen_position_x'], self.config['screen_position_y']]
+        self.logger.debug(self.screenPos)
+        #self.quit_pygame()
+        #self.init_pygame()
+        #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (self.screenPos[0],
+        #                                                self.screenPos[1])
+        #self.screen = pygame.display.set_mode((self.config['screen_width'],
+        #                                           self.config['screen_height']),
+        #                                           pygame.RESIZABLE)
     def on_stop(self):
         """leaves current state if stop is requested"""
         self._cur_state.handle_event('command', 'stop')

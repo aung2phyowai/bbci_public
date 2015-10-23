@@ -7,6 +7,11 @@ function fbsettings = pyff_send_parameters(block_info, block_name)
 global PROJECT_SETUP
 global EXPERIMENT_CONFIG
 
+if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
+    mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
+end
+
+
 %convert to ``python'' list of tuples - slow implementation, but legible
 seqNameFpsTupleList = '[';
 for seqIdx = 1:size(block_info, 1)
@@ -51,7 +56,6 @@ for optId = 1:length(fbOpts),
     pyff_sendUdp('interaction-signal', fbOpts{optId}, getfield(fbsettings, fbOpts{optId})); %#ok<GFLD>
     pause(0.1)
 end
-pyff_sendUdp('interaction-signal', 'state_command','start_preload');
 fprintf('... Done!\n')
 end
 

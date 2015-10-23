@@ -264,6 +264,7 @@ class BlockPreloadState(FrameState):
         #do actual work
         self._load_images_blocking()
         #control state
+        #TODO check for errors
         if self.block_data.caching_progress() == 1: #updated since last check
             if not self.caching_complete: #first check after completion -> marker
                 new_markers.append(markers.technical['preload_completed'])
