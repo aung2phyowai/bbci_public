@@ -42,6 +42,7 @@ for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     pyff_sendUdp('interaction-signal', 'state_command','start_preload');
     fprintf('Preloading...')
 %     wait_for_marker(EXPERIMENT_CONFIG.markers.technical.preload_completed)
+    stimutil_waitForMarker(bbci_setup('loading'), EXPERIMENT_CONFIG.markers.technical.preload_completed)
     fprintf('complete\n')
 
     fprintf([' Next block: ', block_name, '\n'])

@@ -69,6 +69,7 @@ bbci.control(1).fcn = @control_fcn_button_press;
 % #bbci_apply_structures bbci_apply_queryMarker
 
 bbci.quit_condition.marker= EXPERIMENT_CONFIG.markers.technical.standby_start;
+%based on stimutil_waitForMarker
 
 end
 
