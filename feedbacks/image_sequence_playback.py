@@ -23,7 +23,7 @@ class ImageSeqFeedback(StateMachineFeedback):
        "cmd" transitions means waiting for the corresponding state_command interaction signal
        "time" means the transition is automatically performed after playback/timeout
 
-           [playback start]
+           [feedback play]
                |
                v
         +->StandbyState
@@ -51,7 +51,7 @@ class ImageSeqFeedback(StateMachineFeedback):
                              'overlay_color': pygame.Color('black'),
                              'next_block_info' : [],
                              #minimal delay to wait before playback after receiving command
-                             'playback_delay' : 1.0,
+                             'playback_delay' : 2.0,
                              'log_prefix_block' : "defaultblock"
                             })
         return default_conf
@@ -92,7 +92,7 @@ class StandbyState(FrameState):
             self._unhandled_commands.remove('start_preload')
             seq_fps_list = self.controller.config['next_block_info']
             if len(seq_fps_list) > 0:
-                frame_markers.append(markers.technical['standby_end'])
+                #frame_markers.append(markers.technical['standby_end'])
                 return StateOutput(frame_markers,
                                    BlockPreloadState(self.controller, seq_fps_list))
             else:
@@ -123,7 +123,7 @@ class IntraBlockPauseState(FrameState):
 
             return StateOutput(new_markers, self)
         else:
-            new_markers.append(markers.technical['pre_seq_start'])
+            #new_markers.append(markers.technical['pre_seq_start'])
             return StateOutput(new_markers, self._next_state)
 
 
@@ -201,7 +201,7 @@ class SequencePlaybackState(FrameState):
         if self._state_frame_count + 1 < self.seq_frame_count:
             return StateOutput(new_markers, self)
         else: #we're at the last frame of the sequence
-            new_markers.append(markers.technical['seq_end'])
+            #new_markers.append(markers.technical['seq_end'])
             if self.seq_no + 1 < len(self.block_data.seq_fps_list):
                 next_playback_state = SequencePlaybackState(self.controller,
                                                             self.seq_no + 1,
@@ -270,7 +270,9 @@ class BlockPreloadState(FrameState):
                 new_markers.append(markers.technical['preload_completed'])
             self.caching_complete = True
         if self.caching_complete and self._state_frame_count >= self._earliest_playback_start:
-            new_markers.append(markers.technical['pre_seq_start'])
+            #could be possible to send pre_seq_start marker to increase redundancy
+            # however, markers on consecutive frames often cause only one optical response (for the first one), so currently disabled
+            #new_markers.append(markers.technical['pre_seq_start'])
              #logging/serialization of config
             conf_dump_file = os.path.join(config['log_dir'],
                                           config['log_prefix_block'] + "_config.p")
