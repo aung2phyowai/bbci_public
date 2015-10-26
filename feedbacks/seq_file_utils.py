@@ -65,9 +65,9 @@ def load_seq_file(image_seq_file):
      lines starting with # are ignored
     """
 
-    # do the actual work
-    return [SeqFileEntry.parse_line(l, os.path.dirname(image_seq_file))
-            for l in open(image_seq_file) if not l.lstrip().startswith('#')]
+    resolved_seq_file = os.path.normpath(os.path.expanduser(image_seq_file))
+    return [SeqFileEntry.parse_line(l, os.path.dirname(resolved_seq_file))
+            for l in open(resolved_seq_file) if not l.lstrip().startswith('#')]
 
 
 def validate_seq_file(image_seq_file):
