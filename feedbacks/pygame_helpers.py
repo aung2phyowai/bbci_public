@@ -29,8 +29,11 @@ def draw_optomarker(surface, unshown_marker, config):
     if config['optomarker_enabled']:
         size = config['optomarker_width']
         #use top margin identical to side length
-        marker_rect_coords = (int((surface.get_width() - size) / 2), size,
+        marker_rect_coords = (int(0.485*config['screen_width']), int(0.01*config['screen_width']),
                               size, size)
+        #currently on audio lab: (931, 19, 30, 30)
+        #line from famox:
+        #pygame.draw.rect(self.screen, (255,255,255), (0.485*self.screen.get_width(), 0.01*self.screen.get_width(), 30, 30))
         if unshown_marker:
             pygame.draw.rect(surface, (255, 255, 255),
                              marker_rect_coords)

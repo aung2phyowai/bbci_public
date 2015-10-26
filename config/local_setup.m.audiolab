@@ -9,7 +9,8 @@ global PROJECT_SETUP
 PROJECT_SETUP.BBCI_DIR = 'D:\git\bbci_public';
 PROJECT_SETUP.PYFF_DIR = 'D:\git\pyff';
 PROJECT_SETUP.TCP_UDP_DIR = 'D:\pnet\tcp_udp_ip';
-PROJECT_SETUP.VCO_DATA_DIR = 'D:\home\henrich\visual_complexity\data\kitti';
+PROJECT_SETUP.VCO_DATA_DIR = 'D:\home\henrich\final_data';
+PROJECT_SETUP.PYTHON_EXECUTABLE = 'C:\Python27_64\python.exe';
 %TODO change to actual dir
 PROJECT_SETUP.BBCI_DATA_DIR = fullfile('D:\home\henrich\tmp_data', 'bbci');
 PROJECT_SETUP.BBCI_TMP_DIR = fullfile('D:\home\henrich\tmp_data',  'tmp');
@@ -20,5 +21,5 @@ PROJECT_SETUP.SCREEN_POSITION = [-1920, 0];
 PROJECT_SETUP.HARDWARE_AVAILABLE = true;
 PROJECT_SETUP.PARALLEL_PORT_ADDRESS = '0xD050';
 % should be committed to repo in directory experiment_scripts/extra_files
-PROJECT_SETUP.BV_WORKSPACE_FILE_NAME = 'SVIPT.rwksp';
+PROJECT_SETUP.BV_WORKSPACE_FILE_NAME = 'vco_bv_workspace.rwksp';
 PROJECT_SETUP.BV_RECORDER_EXECUTABLE = 'c:\Vision\Recorder\Recorder.exe';

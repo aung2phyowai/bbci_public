@@ -17,6 +17,10 @@ pyff_sendUdp('interaction-signal', 'command','stop');
 if PROJECT_SETUP.HARDWARE_AVAILABLE
     system([PROJECT_SETUP.BV_RECORDER_EXECUTABLE ' &'])
     pause(3);
+    bvr_sendcommand('stoprecording');
+    bbci_acquire_bv('close')
+    bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
+    bvr_sendcommand('viewsignals')
 end
 
 %save config

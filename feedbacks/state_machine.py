@@ -65,7 +65,7 @@ class StateMachineFeedback(PygameFeedback):
             'screen_position_y': 400,
             'background_color' : pygame.Color('black'),
             'optomarker_enabled' : True,
-            'optomarker_width' : 24,
+            'optomarker_width' : 30,
             'display_debug_information' : False,
             'screen_fps': 10,
             'log_dir' : tempfile.gettempdir(),
