@@ -150,7 +150,7 @@ else
   occurrences= cellfun(@(x)(length(strmatch(x,hdr.unitOfClab,'exact'))), ...
                        units);
   [mm, midx]= max(occurrences);
-  hdr.unit= units{midx};
+  unit= units{midx};
 end
 
 check= getEntry(fid, '[Coordinates]', 0, -1);

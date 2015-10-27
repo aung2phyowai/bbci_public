@@ -371,17 +371,7 @@ for filePos = firstFileToRead:lastFileToRead
   % read the data, read_bv will set the data in cnt.x because of the
   % read_opt.data options
   read_bv([fileNames{filePos} '.eeg'], read_hdr, read_opt);
-  if isfield(hdr{filePos},'unit')     
-    cnt.yUnit= hdr{filePos}.unit;
- end
- if isfield(hdr{filePos},'unitOfClab')
-    cnt.yUnit= hdr{filePos}.unitOfClab;
- end
- 
- if ~isfield(cnt, 'yUnit')
-     ME = MException('InvalidUnits','Could not read units of the channels from the header file');
-     throw(ME);
- end
+  cnt.yUnit= hdr{filePos}.unit;
 
   %% Markers
   if nargout>1,

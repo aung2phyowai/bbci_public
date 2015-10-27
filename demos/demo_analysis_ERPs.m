@@ -1,9 +1,12 @@
-eeg_file= fullfile(BTB.DataDir, 'demoMat', 'VPiac_10_10_13', ...
-                   'calibration_CenterSpellerMVEP_VPiac');
+BTB_memo= BTB;
+BTB.MatDir= fullfile(BTB.DataDir, 'demoMat');
+
+file= fullfile('VPiac_10_10_13', ...
+               'calibration_CenterSpellerMVEP_VPiac');
 
 % Load data
 try
-  [cnt, mrk, mnt] = file_loadMatlab(eeg_file);
+  [cnt, mrk, mnt] = file_loadMatlab(file);
 catch
   error('You need to run ''demo_convert_ERPSpeller'' first');
 end
@@ -64,3 +67,5 @@ grid_addBars(epo_r);
 fig_set(4, 'Resize',[1 2/3]);
 plot_scalpEvolutionPlusChannel(epo_r, mnt, clab, ival_scalps, defopt_scalp_r);
 %printFigure(['erp_topo_r'], [20 9]);
+
+BTB= BTB_memo;
