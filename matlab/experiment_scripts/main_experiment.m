@@ -1,8 +1,9 @@
-%% Run experiment with BV hardware
+%% Run experiment
 %delete everything, including UDP connections and persistent variables
 clear all; %#ok<CLSCR>
 clc, close all;
 
+%% init global variables PROJECT_SETUP and EXPERIMENT_CONFIG
 % path config, start up bbci toolbox
 init_experiment_setup();
 % config for this experimental run
@@ -33,6 +34,7 @@ save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT
 %standby
 pyff_send_parameters(EXPERIMENT_CONFIG.block_structure(false,:), 'standby'); %send base parameters with empty block
 pyff_sendUdp('interaction-signal', 'command','play');
+
 %% loop over blocks
 for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
@@ -82,7 +84,7 @@ for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
 
     %% some validation
     if EXPERIMENT_CONFIG.validation.show_validation_stats
-        validation_stats(data)
+        marker_stats(data.marker)
     end
     
 end

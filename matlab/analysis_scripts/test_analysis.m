@@ -17,7 +17,7 @@ tmp = load(fullfile(data_dir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 used_config = tmp.EXPERIMENT_CONFIG;
 clear tmp
 
-current_block_index = 1;
+current_block_index = 0;
 block_name = sprintf('block%02d', current_block_index);
 file_prefix = [experiment_run, '_', experiment_name, '_', block_name];
 file_pattern = fullfile(data_dir, [file_prefix '*']);
@@ -31,25 +31,27 @@ tmp_mrk(:,4) = num2cell([0 diff(mrk_orig.time)]);
 
 hist(mrk_orig.event.desc)
 
-scatter(mrk_orig.time, mrk_orig.event.desc, 64, 'x')
+% scatter(mrk_orig.time, mrk_orig.event.desc, 64, 'x')
 
 mrk_timed = vco_mrk_timeFromOptic(mrk_orig, used_config);
 
 scatter(mrk_timed.time, mrk_timed.event.desc, 64, 'x')
 
+validation_stats
+
 % idx = util_chanind(cnt, 'x_Optic')
-% figure, plot(cnt.x(1:2600,util_chanind(cnt,idx)))
+% figure, plot(cnt.x(1:600,util_chanind(cnt,idx)))
 % grid on
 % hold
-% line(2286, [0, 2e6])
+% 
 % %grid_markTimePoint(2286)
 % %      plot([22862/10 - 2200, 22862/10 - 2200], [2600 2750])
 % xlabel('Time [samples]')
 % ylabel('Potential [µVolt]')
 % legend('x_Optic')
 % title('Raw Channel')
-% 
-% 
+
+
 
 
 

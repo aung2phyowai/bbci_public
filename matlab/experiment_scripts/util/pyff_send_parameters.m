@@ -39,6 +39,7 @@ fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);
 fbsettings.screen_position_y = PROJECT_SETUP.SCREEN_POSITION(2);
 fbsettings.overlay_duration = EXPERIMENT_CONFIG.feedback.overlay_duration;
 fbsettings.display_debug_information = EXPERIMENT_CONFIG.feedback.show_debug_infos;
+fbsettings.playback_delay = EXPERIMENT_CONFIG.feedback.playback_delay;
 
 
 fbsettings.log_dir = EXPERIMENT_CONFIG.feedbackLogDir;

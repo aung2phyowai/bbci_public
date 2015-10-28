@@ -20,6 +20,7 @@ EXPERIMENT_CONFIG.validation.show_validation_stats = true;
 
 EXPERIMENT_CONFIG.feedback.use_optomarker = true;
 EXPERIMENT_CONFIG.feedback.overlay_duration = 1.0;
+EXPERIMENT_CONFIG.feedback.playback_delay = 5.0; %after receiving play state command
 EXPERIMENT_CONFIG.feedback.show_debug_infos = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%

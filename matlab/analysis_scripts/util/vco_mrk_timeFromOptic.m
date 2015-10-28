@@ -32,8 +32,11 @@ function [ mrk_updated ] = vco_mrk_timeFromOptic( mrk_orig, used_config )
        error('matching failed with different numbers of feedback and optical markers')
     end
     if size(mrk_fbopt_matched.time, 2) ~= size(mrk_feedback_markers.time, 2)
+        i_missing = ~ismember(1:size(mrk_feedback_markers.time, 2), i_matched_feedback);
         warning(['found ' num2str(size(mrk_fbopt_matched.time, 2)) ' matches with optical markers for '...
-            num2str(size(mrk_feedback_markers.time, 2)) ' feedback markers'])
+            num2str(size(mrk_feedback_markers.time, 2)) ' feedback markers;'...
+            ' optical missing for markers ' strcat(num2str(mrk_feedback_markers.event.desc(i_missing)'))...
+            ' at time ' strcat(num2str(mrk_feedback_markers.time(i_missing)))])
     end
     
     mrk_interactions = mrk_defineClasses(mrk_orig,...
@@ -47,6 +50,8 @@ function [ mrk_updated ] = vco_mrk_timeFromOptic( mrk_orig, used_config )
     
     %add interactions
     mrk_updated = mrk_mergeMarkers(mrk_updated, mrk_interactions);
+    
+    %inspect manually, e.g., with [mrk_orig.event.desc(1:20),mrk_orig.time(1:20)',mrk_timed.event.desc(1:20), mrk_timed.time(1:20)']
 end
 
 %References
