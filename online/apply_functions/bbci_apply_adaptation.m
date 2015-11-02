@@ -54,7 +54,7 @@ if length(BA)==1 && ...
     [bbci, data]= BA.fcn(bbci, data, 'init', BA.param{:}, 'tag',tag);
   else
     [bbci_new, data]= BA.fcn(bbci, data);
-    if BA.save_everytime && data.last_update == data.lastcheck,
+    if BA.save_everytime && data.adaptation{1}.last_update == data.adaptation{1}.lastcheck,
       bbci= bbci_new;
       fields= {'calibrate','signal','feature','classifier','control'};
       save(fullfile(BA.folder, BA.file), '-STRUCT', 'bbci', fields{:});
