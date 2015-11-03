@@ -64,7 +64,12 @@ end
 state= source.record;
  
 % Write data to *.eeg file
+% plot(state.factor*source.x)
+% pause(0.01)
+% fwrite(state.fid_eeg, state.factor*source.x', 'single');
+
 fwrite(state.fid_eeg, state.factor*source.x', state.precision);
+
 
 % Write (the last #nMarkers) markers to *.vmrk file
 for i= 1:nMarkers,

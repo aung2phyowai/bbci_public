@@ -25,7 +25,7 @@ if ischar(varargin{1}),
     DS_record= struct('recording', 1);
     DS_record.opt= opt_proplistToStruct(BS.record_param{:});
     props= {'Internal'           0            'BOOL'
-            'CheckImpedances'    0            'BOOL'
+            'checkimpedances'    0            'BOOL'
             'Folder',            BTB.Tp.Dir   'CHAR'};
     DS_record.opt= opt_setDefaults(DS_record.opt, props);
     filebase= BS.record_basename;
