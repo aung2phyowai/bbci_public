@@ -4,16 +4,16 @@ This repository contains experimental (Matlab and Python/Pyff) code to display i
 
 ## Steps to perform after checkout
 
-All local configuration is performed in ``matlab/local_setup.m`` and, for the experiment run, the subject config is performed in ``matlab/experiment_scripts/subject_config.m``.
+All local configuration is performed in ``config/local_setup.m`` and, for the experiment run, the subject config is performed in ``config/subject_config.m``.
 These file *need to be created* after checkout.
-Examples can be found in [matlab/local_setup.m.example](matlab/local_setup.m.example). Adapt the content to your system's filepaths.
-For the subject config, just copy [matlab/experiment_scripts/subject_config.m.example](matlab/experiment_scripts/subject_config.m.example).
+Examples can be found in [config/local_setup.m.example](config/local_setup.m.example). Adapt the content to your system's filepaths.
+For the subject config, just copy [config/subject_config.m.example](config/subject_config.m.example).
 
 
 ## Run the experiments
 
-The main file for running the experiment is [matlab/experiment_scripts/main_experiment.m](matlab/experiment_scripts/main_experiment.m). For testing [matlab/experiment_scripts/test_feedback.m](matlab/experiment_scripts/test_feedback.m) can be used.
-Data can be found on the fileserver at ``/mnt/blbt-fs1/projects/visual_complexity/data/kitti/`` (your mountpoint may vary).
+The main file for running the experiment is [matlab/experiment_scripts/main_experiment.m](matlab/experiment_scripts/main_experiment.m). Depending on your local config, either the BV recorder or a random signal generator is used
+Data can be found on the fileserver at ``/mnt/blbt-fs1/projects/visual_complexity/data/kitti/`` (your mountpoint may vary). It is recommended to copy the data to the local disk to improve loading times.
 Additional information can be found in the corresponding [Experiment Readme](matlab/experiment_scripts/Readme.md)
 
 ## Image sequence files
