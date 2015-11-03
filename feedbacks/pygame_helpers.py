@@ -17,9 +17,12 @@ def draw_image(surface, image):
 def draw_interaction_overlay(surface, config):
     """ draws an overlay at the center of screen (outside of optomarker region) """
     top_margin = 3 * config['optomarker_width']
-    overlay_rect = (0, top_margin,
-                    surface.get_width(), surface.get_height() - top_margin)
-    surface.fill(config['overlay_color'], rect=overlay_rect)
+    # overlay_rect = (0, top_margin,
+    #                 surface.get_width(), surface.get_height() - top_margin)
+    # surface.fill(config['overlay_color'], rect=overlay_rect)
+    overlay_surface = pygame.Surface((surface.get_width(), surface.get_height()), pygame.SRCALPHA, 32)
+    overlay_surface.fill(config['overlay_color'])
+    surface.blit(overlay_surface, (0, top_margin))
 
 
 def draw_optomarker(surface, unshown_marker, config):
@@ -55,6 +58,12 @@ def draw_center_cross(surface, color=(100, 100, 100)):
     pygame.draw.rect(surface, color, (abs_width / 2 - 30, abs_height / 2 - 3, 60, 6))
     pygame.draw.rect(surface, color, (abs_width / 2 - 3, abs_height / 2 - 30, 6, 60))
 
+def draw_abstract_stimulus(surface, color=(100, 100, 100), width=80):
+    """draws a box centered on the screen"""
+    center_x = surface.get_width() / 2
+    center_y = surface.get_height() / 2
+    pygame.draw.rect(surface, color, (center_x - width/2, center_y - width/2, width, width))
+    
 def load_image(filename, max_depth=10):
     """loads an image and returns the corresponding object
        if filename points to a text file containing another file path (as occurs when checking out symbolic links on Windows), this file path is loaded (recursively)"""

@@ -10,6 +10,6 @@ project_setup();
 global PROJECT_SETUP
 
 addpath(PROJECT_SETUP.TCP_UDP_DIR);
-addpath(fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'util'));
+addpath(genpath(fullfile(PROJECT_SETUP.EXPERIMENT_SCRIPTS_DIR, 'util')));
 end
 

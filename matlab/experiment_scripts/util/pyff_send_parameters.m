@@ -7,9 +7,7 @@ function fbsettings = pyff_send_parameters(block_info, block_name)
 global PROJECT_SETUP
 global EXPERIMENT_CONFIG
 
-if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
-    mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
-end
+pyff_send_base_parameters()
 
 
 %convert to ``python'' list of tuples - slow implementation, but legible
@@ -32,18 +30,11 @@ end
 seqNameFpsTupleList = [seqNameFpsTupleList, ']'];
 
 fbsettings = struct;
-fbsettings.optomarker_enabled = EXPERIMENT_CONFIG.feedback.use_optomarker;
-fbsettings.screen_width = PROJECT_SETUP.SCREEN_SIZE(1);
-fbsettings.screen_height = PROJECT_SETUP.SCREEN_SIZE(2);
-fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);
-fbsettings.screen_position_y = PROJECT_SETUP.SCREEN_POSITION(2);
-fbsettings.overlay_duration = EXPERIMENT_CONFIG.feedback.overlay_duration;
-fbsettings.display_debug_information = EXPERIMENT_CONFIG.feedback.show_debug_infos;
-fbsettings.playback_delay = EXPERIMENT_CONFIG.feedback.playback_delay;
+fbsettings.overlay_duration = EXPERIMENT_CONFIG.fb.img_seq.overlay_duration;
+fbsettings.overlay_duration = EXPERIMENT_CONFIG.fb.img_seq.overlay_duration;
+fbsettings.playback_delay = EXPERIMENT_CONFIG.fb.img_seq.playback_delay;
 
 
-fbsettings.log_dir = EXPERIMENT_CONFIG.feedbackLogDir;
-fbsettings.log_prefix = EXPERIMENT_CONFIG.filePrefix;
 fbsettings.log_prefix_block = [EXPERIMENT_CONFIG.filePrefix '_' block_name];
 
 fbsettings.next_block_info = seqNameFpsTupleList;

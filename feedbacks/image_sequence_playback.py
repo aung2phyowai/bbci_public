@@ -48,7 +48,7 @@ class ImageSeqFeedback(StateMachineFeedback):
                              #seconds between seqs in same block
                              'inter_sequence_delay': 3.0, #in seconds
                              'overlay_duration' : 1.0, #in seconds
-                             'overlay_color': pygame.Color('black'),
+                             'overlay_color': pygame.Color('0x00000088'),
                              'next_block_info' : [],
                              #minimal delay to wait before playback after receiving command
                              'playback_delay' : 2.0,
@@ -66,6 +66,7 @@ class ImageSeqFeedback(StateMachineFeedback):
             #dangerous, but we expect to be in a trustworthy environment...
             new_value = eval(str_value.replace('\\', '\\\\')) #pylint: disable=eval-used
             if (isinstance(new_value, list)
+                and new_value #non-empty
                 and isinstance(new_value[0], tuple)
                 and isinstance(new_value[0][0], str) #filename
                 and isinstance(new_value[0][1], int)): #fps

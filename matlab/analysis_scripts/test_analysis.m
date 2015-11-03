@@ -6,7 +6,7 @@ clc, close all;
 init_analysis_setup();
 
 experiment_name = 'vco_pilot_run';
-experiment_run = 'VPtest_15-10-26'; %'VPtest_15-09-09';
+experiment_run = 'VPtest_15-10-28'; %'VPtest_15-09-09';
 block_count = 0;
 
 data_dir = fullfile('/home/henkolk/local_data/audiolab', experiment_run);
@@ -17,7 +17,7 @@ tmp = load(fullfile(data_dir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 used_config = tmp.EXPERIMENT_CONFIG;
 clear tmp
 
-current_block_index = 0;
+current_block_index = 5;
 block_name = sprintf('block%02d', current_block_index);
 file_prefix = [experiment_run, '_', experiment_name, '_', block_name];
 file_pattern = fullfile(data_dir, [file_prefix '*']);
@@ -37,10 +37,10 @@ mrk_timed = vco_mrk_timeFromOptic(mrk_orig, used_config);
 
 scatter(mrk_timed.time, mrk_timed.event.desc, 64, 'x')
 
-validation_stats
+% marker_stats(mrk_timed)
 
 % idx = util_chanind(cnt, 'x_Optic')
-% figure, plot(cnt.x(1:600,util_chanind(cnt,idx)))
+% figure, plot(cnt.x(700:750,util_chanind(cnt,idx)))
 % grid on
 % hold
 % 

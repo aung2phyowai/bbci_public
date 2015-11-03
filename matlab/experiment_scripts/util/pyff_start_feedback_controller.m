@@ -24,7 +24,7 @@ else
 end
 if isunix()
     outRedirects = [...
-        ' > ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.log')...
+        ' >> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.log')...
         ' 2>&1'];
     if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
         mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
@@ -55,10 +55,6 @@ pyff_sendUdp('init',  PROJECT_SETUP.UDP_FEEDBACK_HOST, PROJECT_SETUP.UDP_FEEDBAC
 pause(0.2)
 fprintf('Done!\n')
 
-fprintf('Initializing feedback...')
-pyff_sendUdp('interaction-signal', 's:_feedback', PROJECT_SETUP.FEEDBACK_NAME, 'command','sendinit');
-pause(0.2)
-fprintf(' Done!\n')
 
 end
 
