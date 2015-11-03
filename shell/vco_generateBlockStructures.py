@@ -194,6 +194,10 @@ def generate_block_structure(seqfiles_dir, block_count, block_size):
   #  print '\n'.join([seq['label'] + "\t" +  seq['version'] for seq in selected_complex_seqs])
    # print '\n'.join([seq['label'] + "\t" +  seq['version'] for seq in selected_simple_seqs])
 
+    #make deterministic
+    random.seed(0)
+
+
     #v1 simple
     for i in range(block_count):
         cur_block = []
@@ -201,8 +205,6 @@ def generate_block_structure(seqfiles_dir, block_count, block_size):
         end_idx_per_type = start_idx_per_type + (block_size / 2)
         cur_block.extend(selected_simple_seqs[start_idx_per_type:end_idx_per_type])
         cur_block.extend(selected_complex_seqs[start_idx_per_type:end_idx_per_type])
-        #make deterministic
-        random.seed(0)
         random.shuffle(cur_block)
 
         #some heuristic reodering
@@ -253,7 +255,8 @@ def write_block_structure(blocks, target_file, fps, resolve_relative_to):
     for block_no, block in enumerate(blocks):
         for seq in block:
             resolved_file = os.path.relpath(seq['file_path'], resolve_relative_to)
-            line = [str(block_no), resolved_file, str(fps), seq['type']]
+            #start first block with 1 to leave room for manual insertion of block 0 for familarization
+            line = [str(block_no + 1), resolved_file, str(fps), seq['type']]
             target_file.write('\t'.join(line) + '\n')
 
 if __name__ == "__main__":
@@ -261,9 +264,9 @@ if __name__ == "__main__":
     parser.add_argument('seqfiles_dir', help="directory with sequence files to be used. Type is inferred from the naming scheme")
     parser.add_argument('-o', '--out_file', help="output file for block structure", default=sys.stdout, type=argparse.FileType('w'))
     parser.add_argument('-r', '--relative_to', help="output sequence file names relative to this directory (default: working directory)", default=os.getcwd())
-    parser.add_argument('-bc', '--block_count', help="number of blocks", default=20)
-    parser.add_argument('-bl', '--block_length', help="length of (number of sequences in) each block", default=12)
-    parser.add_argument('-fps', help="FPS rate for sequence playback", default=10)
+    parser.add_argument('-bc', '--block_count', help="number of blocks", type=int, default=20)
+    parser.add_argument('-bl', '--block_length', help="length of (number of sequences in) each block", type=int, default=12)
+    parser.add_argument('-fps', help="FPS rate for sequence playback", type=int, default=10)
     parser.add_argument('-q', '--quiet', help="do not print statistics", action='store_true')
     args = parser.parse_args()
     

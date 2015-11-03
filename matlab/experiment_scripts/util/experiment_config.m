@@ -12,12 +12,12 @@ subject_config(); %source VP code etc
 %type of block structure:
 
 
-EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'test_block_structure.tsv');
+EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'block_structure.tsv');
 
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date];
 EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
 EXPERIMENT_CONFIG.logging.enabled = false;
-EXPERIMENT_CONFIG.validation.show_validation_stats = true;
+EXPERIMENT_CONFIG.validation.show_validation_stats = false;
 
 % feedback settings
 EXPERIMENT_CONFIG.fb.show_debug_infos = false;
@@ -28,13 +28,13 @@ EXPERIMENT_CONFIG.fb.img_seq.overlay_duration = 1.0;
 EXPERIMENT_CONFIG.fb.img_seq.playback_delay = 5.0; %after receiving play state command
 
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
-EXPERIMENT_CONFIG.fb.reaction_time.enabled = true;
+EXPERIMENT_CONFIG.fb.reaction_time.enabled = false;
 EXPERIMENT_CONFIG.fb.reaction_time.max_reaction_time = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.inter_stimulus_delay = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 1.0;
 EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 2.0;
-EXPERIMENT_CONFIG.fb.reaction_time.block_length = 1;
-EXPERIMENT_CONFIG.fb.reaction_time.block_count = 2;
+EXPERIMENT_CONFIG.fb.reaction_time.block_length = 2;
+EXPERIMENT_CONFIG.fb.reaction_time.block_count = 5;
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed

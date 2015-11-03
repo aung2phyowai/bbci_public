@@ -91,6 +91,7 @@ pyff_send_parameters(EXPERIMENT_CONFIG.block_structure(false,:), 'standby'); %se
 pyff_sendUdp('interaction-signal', 'command','play');
 
 %% loop over blocks
+%convention: block 0 is familarization
 for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
