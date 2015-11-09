@@ -26,6 +26,8 @@ EXPERIMENT_CONFIG.fb.img_seq.python_class_name = 'ImageSeqFeedback';
 EXPERIMENT_CONFIG.fb.img_seq.use_optomarker = true;
 EXPERIMENT_CONFIG.fb.img_seq.overlay_duration = 1.0;
 EXPERIMENT_CONFIG.fb.img_seq.playback_delay = 5.0; %after receiving play state command
+EXPERIMENT_CONFIG.fb.img_seq.question_duration = 8.0;
+EXPERIMENT_CONFIG.fb.img_seq.inter_sequence_delay = 2.0;  %between scenes in same block, after question
 
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
 EXPERIMENT_CONFIG.fb.reaction_time.enabled = false;

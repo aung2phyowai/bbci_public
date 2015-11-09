@@ -47,6 +47,7 @@ class ImageSeqFeedback(StateMachineFeedback):
         default_conf.update({'sync_markers_enabled' : True,
                              #seconds between seqs in same block
                              'inter_sequence_delay': 3.0, #in seconds
+                             'question_duration' : 8.0, #if complexity question is displayed
                              'overlay_duration' : 1.0, #in seconds
                              'overlay_color': pygame.Color('0x00000088'),
                              'next_block_info' : [],
@@ -105,34 +106,44 @@ class IntraBlockPauseState(FrameState):
     """
        Pause between two sequences within the same block
     """
-    def __init__(self, controller, delay_seconds, next_state):
+    def __init__(self, controller, next_state):
         super(IntraBlockPauseState, self).__init__(controller)
-        self._time_delay = delay_seconds
-        self._next_state = next_state
-        self._delay_frame_no = delay_seconds * self.controller.config['screen_fps']
+        conf = self.controller.config
+        self._time_delay = conf['inter_sequence_delay']
+        self._subsequent_state = next_state
+        self._frame_pause_start = conf['question_duration'] * conf['screen_fps']
+        self._frame_pause_end = (self._frame_pause_start
+                                + conf['inter_sequence_delay'] * conf['screen_fps'])
 
     def _handle_state(self, screen):
         new_markers = []
         if self._state_frame_count == 0:
             new_markers.append(markers.technical['intra_block_pause_start'])
 
-        pygame_helpers.draw_center_cross(screen)
+        #screen content
+        if self._state_frame_count < self._frame_pause_start:
+            pygame_helpers.draw_questionaire_scale(screen,
+                                                   "Wie komplex fanden Sie die Szene?",
+                                                   labels=("gering", "hoch"))
+        else:
+            pygame_helpers.draw_center_cross(screen)
 
-        if self._state_frame_count < self._delay_frame_no:
+        #state output
+        if self._state_frame_count < self._frame_pause_end:
             #still delaying
             #self.logger.debug("%d of %d frames elapsed, delaying", self._state_frame_count, self._delay_frame_no)
 
             return StateOutput(new_markers, self)
         else:
             #new_markers.append(markers.technical['pre_seq_start'])
-            return StateOutput(new_markers, self._next_state)
+            return StateOutput(new_markers, self._subsequent_state)
 
 
 class SequencePlaybackState(FrameState):
     """ state for actual sequence playback
     all playback state (progress) is captured at this place
-    After playback finishes, the follow-up state is either
-     - an IntraBlockPauseState before the next sequence in the block
+    After playback finishes, the follow-up state is the IntraBlockPauseState after which the next state is
+     - a playback state before the next sequence in the block
      - StandbyState if no more sequences in the block
     """
 
@@ -204,14 +215,14 @@ class SequencePlaybackState(FrameState):
         else: #we're at the last frame of the sequence
             #new_markers.append(markers.technical['seq_end'])
             if self.seq_no + 1 < len(self.block_data.seq_fps_list):
-                next_playback_state = SequencePlaybackState(self.controller,
-                                                            self.seq_no + 1,
-                                                            self.block_data)
-                next_state = IntraBlockPauseState(self.controller,
-                                                  conf['inter_sequence_delay'],
-                                                  next_playback_state)
+                state_after_pause = SequencePlaybackState(self.controller,
+                                                          self.seq_no + 1,
+                                                          self.block_data)
             else: #we're done with the last sequence of the block
-                next_state = StandbyState(self.controller)
+                state_after_pause = StandbyState(self.controller)
+
+            next_state = IntraBlockPauseState(self.controller,
+                                              state_after_pause)
             return StateOutput(new_markers, next_state)
 
 

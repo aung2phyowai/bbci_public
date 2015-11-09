@@ -29,10 +29,8 @@ for seqIdx = 1:size(block_info, 1)
 end
 seqNameFpsTupleList = [seqNameFpsTupleList, ']'];
 
-fbsettings = struct;
-fbsettings.overlay_duration = EXPERIMENT_CONFIG.fb.img_seq.overlay_duration;
-fbsettings.overlay_duration = EXPERIMENT_CONFIG.fb.img_seq.overlay_duration;
-fbsettings.playback_delay = EXPERIMENT_CONFIG.fb.img_seq.playback_delay;
+
+fbsettings = EXPERIMENT_CONFIG.fb.img_seq;
 
 
 fbsettings.log_prefix_block = [EXPERIMENT_CONFIG.filePrefix '_' block_name];

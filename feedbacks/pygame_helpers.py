@@ -63,7 +63,40 @@ def draw_abstract_stimulus(surface, color=(100, 100, 100), width=80):
     center_x = surface.get_width() / 2
     center_y = surface.get_height() / 2
     pygame.draw.rect(surface, color, (center_x - width/2, center_y - width/2, width, width))
+
+def draw_questionaire_scale(surface, title, labels=("low", "high"), tick_count=11, color=(200, 200, 200)):
+    """draws a questionaire scale with the supplied labels at each end"""
+    scale_length = surface.get_width() / 2
+    center_y = surface.get_height() / 2
+    start_x = surface.get_width() / 4
+    end_x = start_x + scale_length
+
+    label_height = 50
+    tick_height = 20
+    spacing = 20
+
+    pygame.draw.line(surface, color, (start_x, center_y), (end_x, center_y),  2)
+    tick_delta = scale_length / (tick_count - 1) 
+    for i in range(tick_count):
+        tick_x = start_x + i * tick_delta
+        if i in [0, int(tick_count / 2), tick_count - 1]:
+            cur_height = tick_height * 1.5
+        else:
+            cur_height = tick_height
+        pygame.draw.line(surface, color, (tick_x, center_y), (tick_x, center_y - cur_height))
+
+    monofont = pygame.font.SysFont("monospace", label_height)
+
+    title_label = monofont.render(title, 1, color)
+    surface.blit(title_label, ((surface.get_width() - title_label.get_width()) / 2,
+                               center_y - tick_height - 3 * label_height))
     
+    start_label = monofont.render(labels[0], 1, color)
+    surface.blit(start_label, (start_x - start_label.get_width() / 2, center_y + spacing))
+    end_label = monofont.render(labels[1], 1, color)
+    surface.blit(end_label, (end_x - end_label.get_width() / 2, center_y + spacing))
+
+
 def load_image(filename, max_depth=10):
     """loads an image and returns the corresponding object
        if filename points to a text file containing another file path (as occurs when checking out symbolic links on Windows), this file path is loaded (recursively)"""
