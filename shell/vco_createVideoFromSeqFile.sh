@@ -1,7 +1,7 @@
 #!/bin/sh
 set -ue
 seqFile=$1
-fps=${2:-8}
+fps=${2:-10}
 seqFileBaseName=$(basename "$seqFile")
 outFileName=${3:-${seqFileBaseName%.*}_${fps}fps.mp4}
 startFrame=`head -n 1 ${seqFile} | sed -r 's%.*/([0-9]*).png%\1%'`

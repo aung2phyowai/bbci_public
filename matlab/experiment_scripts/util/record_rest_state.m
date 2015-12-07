@@ -28,7 +28,7 @@ for rstate = {'eyes_open', 'eyes_closed'}
     
     %recycle reaction time feedback, we only want cursor
  
-    fprintf('Press a key to start recording with %s recording (%d) \n', rstate{1}, time_rec);
+    fprintf('Press a key to start recording with %s recording (%d s) \n', rstate{1}, time_rec);
     pause
     fprintf('starting recording...\n')
     data = bbci_apply(bbci);
