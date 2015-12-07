@@ -1,3 +1,4 @@
 ImageSeqViewer.ImageSeqViewer
 image_sequence_playback.ImageSeqFeedback
 reaction_time.ReactionTimeFeedback
+utility_feedback.UtilityFeedback

@@ -22,15 +22,16 @@ if PROJECT_SETUP.HARDWARE_AVAILABLE
 else
     parallelPortParam = '';
 end
+if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
+    mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
+end
 if isunix()
     outRedirects = [...
         ' >> ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.log')...
         ' 2>&1'];
-    if ~exist(EXPERIMENT_CONFIG.feedbackLogDir, 'dir')
-        mkdir(EXPERIMENT_CONFIG.feedbackLogDir)
-    end
 else
-    outRedirects = '';
+    outRedirects = [...
+        ' > ' fullfile(EXPERIMENT_CONFIG.feedbackLogDir, 'pyff.log')];
 end
 pyffStartupCmd = ['cd ' fullfile(PROJECT_SETUP.PYFF_DIR, 'src')...
     ' && ' PROJECT_SETUP.PYTHON_EXECUTABLE ' FeedbackController.py --nogui'...

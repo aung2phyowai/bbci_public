@@ -46,7 +46,7 @@ class StandbyState(FrameState):
     def _handle_state(self, screen):
         frame_markers = []
         #pygame_helpers.draw_center_cross(screen)
-
+        self.logger.warn(markers.technical)
         if self._state_frame_count == 0:
             frame_markers.append(markers.technical['standby_start'])
 
@@ -79,14 +79,14 @@ class SingleStimulusState(FrameState):
         frame_markers = []
         if self._state_frame_count < self._ready_start_frame_no:
             if self._state_frame_count == 0:
-                frame_markers.append(markers.technical['intra_block_pause_start'])
+                frame_markers.append(markers.technical['seq_start'])
             pygame_helpers.draw_center_cross(screen)
         elif self._state_frame_count < self._stimulus_start_frame_no:
             pygame_helpers.draw_center_cross(screen, color=(200, 200, 200))
         else:
             if self._state_frame_count == self._stimulus_start_frame_no:
                 frame_markers.append(markers.stimuli['generic_stimulus'])
-            pygame_helpers.draw_abstract_stimulus(screen)
+            pygame_helpers.draw_abstract_stimulus(screen, color=(255, 255, 255))
 
         if self._state_frame_count < self._state_end_frame_no:
             return StateOutput(frame_markers, self)
@@ -95,16 +95,6 @@ class SingleStimulusState(FrameState):
                 return StateOutput(frame_markers, SingleStimulusState(self.controller, self.stimulus_no + 1))
             else:
                 return StateOutput(frame_markers, StandbyState(self.controller))
-
-class CrosshairState(FrameState):
-    """dummy state that just draws cross
-     used for example during eyes open recording"""
-    def __init__(self, controller):
-        super(CrosshairState, self).__init__(controller)
-
-    def _handle_state(self, screen):
-        pygame_helpers.draw_center_cross(screen)
-        return StateOutput([], self)
 
             
 def _run_standalone():

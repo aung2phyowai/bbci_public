@@ -43,6 +43,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
     % pyff_sendUdp call from the main file, despite the socket being persistent
     pyff_sendUdp('interaction-signal', 'command','stop');
     pyff_sendUdp('interaction-signal', 's:_feedback', EXPERIMENT_CONFIG.fb.reaction_time.python_class_name, 'command','sendinit');
+    pause(0.2)
     pyff_send_reaction_time_params()
     pause(0.2)
     pyff_sendUdp('interaction-signal', 'command','play');
@@ -54,7 +55,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
     %% Run reaction time block
     for block_no = 0:(EXPERIMENT_CONFIG.fb.reaction_time.block_count - 1)
 
-        if (input('Enter q to quit, anything else to start new reaction time block...\n', 's') == 'q')
+        if (input(['Enter q to quit, anything else to start new reaction time block' num2str(block_no) '...\n'], 's') == 'q')
             break
         end
         

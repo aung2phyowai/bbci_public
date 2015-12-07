@@ -43,6 +43,8 @@ EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.block_length = 5;
 EXPERIMENT_CONFIG.fb.reaction_time.block_count = 4;
 
+EXPERIMENT_CONFIG.fb.utility.python_class_name = 'UtilityFeedback';
+
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed
 

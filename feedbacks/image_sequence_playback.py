@@ -125,7 +125,7 @@ class IntraBlockPauseState(FrameState):
         if self._state_frame_count < self._frame_pause_start:
             pygame_helpers.draw_questionaire_scale(screen,
                                                    "Wie komplex fanden Sie die Szene?",
-                                                   labels=("gering", "hoch"))
+                                                   labels=("einfach (1)", "komplex (10)"))
         else:
             pygame_helpers.draw_center_cross(screen)
 
@@ -280,6 +280,7 @@ class BlockPreloadState(FrameState):
         #TODO check for errors
         if self.block_data.caching_progress() == 1: #updated since last check
             if not self.caching_complete: #first check after completion -> marker
+                self.logger.info("preload completed")
                 new_markers.append(markers.technical['preload_completed'])
             self.caching_complete = True
         if self.caching_complete and self._state_frame_count >= self._earliest_playback_start:
