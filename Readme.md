@@ -12,6 +12,8 @@ For the subject config, just copy [config/subject_config.m.example](config/subje
 
 ## Run the experiments
 
+The experiment protocol can be found in [doc/experiment_protocol.org](doc/experiment_protocol.org).
+
 The main file for running the experiment is [matlab/experiment_scripts/main_experiment.m](matlab/experiment_scripts/main_experiment.m). Depending on your local config, either the BV recorder or a random signal generator is used
 Data can be found on the fileserver at ``/mnt/blbt-fs1/projects/visual_complexity/data/kitti/`` (your mountpoint may vary). It is recommended to copy the data to the local disk to improve loading times.
 Additional information can be found in the corresponding [Experiment Readme](matlab/experiment_scripts/Readme.md)

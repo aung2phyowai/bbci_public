@@ -1,0 +1,136 @@
+#+TITLE: Experiment Protocol
+#+OPTIONS: toc:nil num:nil ^:nil
+
+* Basisdaten
+  - VPCode
+  - Datum
+  - Geschlecht
+  - Kappe: Größe und ID
+  - Experimentleiter
+  - Fahrerfahrung
+    - wie viele Jahren besitzen Sie einen Führerschein?
+    - wie viel Jahreskilometer legen Sie geschätzt zurück?
+    - würden Sie sich selbst als "erfahrene[n]" Autofahrer[in] bezeichnen: 
+       forced-choice Likert-Skala?
+        (1) trifft zu (2) trifft eher zu (3) trifft eher nicht zu, (4)
+        trifft nicht zu
+      TODO: Formulierung
+      - ... als guten Autofahrer ...
+      - ... als defensiven Autofahrer...
+      - ... als sicheren Autofahrer .. -> niemand Gegenteil!?
+      - Sind Sie sich Ihrer Umgebung beim Fahren stets bewusst?
+      - Sind Sie sich in Verkehrssituationen häufig möglicher Unfallgefahren bewusst?
+      
+* Aufbau
+  - Amplifier
+   - DC Amp 1 -> Port 1
+   - DC Amp 2 -> Port 2
+   - ExG Amp -> Port 3
+  - EEG-Kappe
+  - Button in rechter Hand (Rechtshänder, sonst andersherum)
+  - Pulssensor an linker Hand
+  - EMG an rechter Hand (zu Button)
+  - Hautleitfähigkeitssensor (linker Zeige-/Mittelfinger)
+  - Atemgurt
+  - Optischer Sensor
+     - Signal Gain: 10
+     - Trigger Level: ca 1.5
+  - Distanz zum Bildschirm: 80cm
+* Vorbedingungen an Probanden
+  tbd
+ - Führerschein?
+
+* Hinweise/Erklärung Experiment
+
+** Ziel
+Wir wollen untersuchen, wie Sie Gefahren im Straßenverkehr wahrnehmen.
+
+** Szenenbetrachtung wie bei autonomem Fahren
+ - Sie sind Beifahrer in einem autonomen Fahrzeug
+ - beobachten Sequenzen, die sich in ihrer Komplexität und dem Risiko unterscheiden
+
+** Aufgabe
+ - Sie haben nur eine Interaktionsmöglichkeit: 
+   Einen Not-aus-Knopf, mit dem Sie das Auto zum Stehen bringen
+ - Drücken Sie den Knopf, sobald Sie einen Unfall für wahrscheinlich halten
+ - hier: (der Einfachheit halber):
+   Sie erhalten nur eine leichte Verdunkelung als Feedback, das Fahrzeug stoppt nicht
+
+** Aufbau
+
+ 1. Augen geschlossen/offen
+ 2. Reaktionszeit
+ 3. wir zeigen Ihnen gleich 20 Blöcke mit je 8 kurzen Sequenzen
+    am Ende jeder Szene bitten wir Sie, kurz die Komplexität einzuschätzen
+
+** Hinweise
+
+ - EEG-Artifakte erklären
+ - Augenbewegungen gering halten
+ - Pausen nach jedem Block nutzen, um aktiv zu entspannen
+* Presession
+
+  - 30 Sekunde Augen offen/geschlossen
+  - Button testen
+  - Reaktionszeit
+     - 4 Blöcke mit je 5 Stimuli im Zeitraum [1, 3], max 2 Sekunden
+  - Familiarisierung
+     - eine Bildfolge (Block 0) wird abgespielt
+     - Fragebogen vorgestellt
+
+* je Block
+
+
+** Fragebogen am Ende jedes vierten Blocks (nach Block 4, 8,..)
+
+*** geistige Anforderung
+Wie viel geistige Anforderung war bei der Informationsaufnahme und bei der Informationsverarbeitung erforderlich
+ (z.B. Denken, Entscheiden, Rechnen, Erinnern, Hinsehen, Suchen ...)?
+War die Aufgabe 
+ - leicht oder anspruchsvoll,
+ - einfach oder komplex,
+ - erfordert sie hohe Genauigkeit oder ist sie fehlertolerant?
+
+ => Fanden Sie das Beobachten der Szene leicht oder anspruchsvoll?
+*** körperliche Anforderung
+Wie viel körperliche Aktivität war erforderlich 
+ (z.B. ziehen, drücken, drehen, steuern, aktivieren ...)? 
+War die Aufgabe 
+ - leicht oder schwer,
+ - einfach oder anstrengend,
+ - erholsam oder mühselig?
+
+ => weglassen?
+
+*** zeitliche Anforderung
+Wie viel Zeitdruck empfanden Sie hinsichtlich der Häufigkeit oder dem Takt mit dem die Aufgaben oder Aufgabenelemente auftraten?
+ War die Aufgabe 
+  - langsam und geruhsam oder schnell und hektisch?
+
+ => War die Aufgabe geruhsam oder hektisch?
+*** Leistung
+Wie erfolgreich haben Sie Ihrer Meinung nach die vom Versuchsleiter (oder Ihnen selbst) gesetzten Ziele erreicht? 
+Wie zufrieden waren Sie mit Ihrer Leistung bei der Verfolgung dieser Ziele?
+
+ => Wie erfolgreich waren Sie Ihrer Meinung nach beim Erkennen der Gefahrensituationen? Wie
+ zufrieden sind Sie mit Ihrer Leistung?
+
+*** Anstrengung
+Wie hart mussten Sie arbeiten, um Ihren Grad an Aufgabenerfüllung zu erreichen?
+
+ => Wie stark mussten Sie sich anstrengen, um die Szenen beurteilen zu können?
+
+*** Frustration
+Wie unsicher, entmutigt, irritiert, gestresst und verärgert 
+ (versus sicher, bestätigt, zufrieden, entspannt und zufrieden mit sich selbst) 
+fühlten Sie sich während der Aufgabe?
+
+ 
+ => Fühlten Sie sich während der Aufgabe unsicher und gestresst oder sicher und entspannt?
+* am Ende
+
+** im Pilot
+
+   - Pausenlänge
+
+   - Feedback nach jeder Szene/nach jedem Block?
