@@ -16,6 +16,7 @@ import seq_file_utils
 from state_machine import StateMachineFeedback, StateOutput, FrameState
 import vco_utils
 
+
 class ImageSeqFeedback(StateMachineFeedback):
     """Feedback implementation for sequence playback
         
@@ -337,23 +338,3 @@ class BlockData(object):
             self._cache[filename] = pygame_helpers.load_image(filename)
         return self._cache[filename]
 
-
-def _run_example():
-    """run feedback for test purposes"""
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.getLogger().setLevel(logging.INFO)
-    feedback = ImageSeqFeedback()
-    feedback.on_init()
-    feedback.udp_markers_host = '127.0.0.1'  #pylint: disable=attribute-defined-outside-init
-    feedback.udp_markers_port = 12344 #pylint: disable=attribute-defined-outside-init
-    feedback._handle_config_param('display_debug_information', True)
-    seq_fps_list_str = '[("/mnt/blbt-fs1/backups/cake-hk1032/data/kitti/seqs/seq03_kelterstr.txt", 10)]'
-    param_block_seq_file_fps_list = [ord(c) for c in seq_fps_list_str]  #pylint: disable=attribute-defined-outside-init
-    feedback._handle_config_param('next_block_info', param_block_seq_file_fps_list) #pylint: disable=protected-access
-    parsed_block_info = feedback.config['next_block_info']
-    #instead of command, we force the state directly
-    feedback._cur_state = BlockPreloadState(feedback, parsed_block_info, auto_play=True)#pylint: disable=attribute-defined-outside-init
-    feedback.on_play()
-
-if __name__ == "__main__":
-    _run_example()

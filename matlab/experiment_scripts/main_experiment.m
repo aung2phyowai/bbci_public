@@ -26,8 +26,15 @@ if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
 end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
+%% Record rest state
+if (EXPERIMENT_CONFIG.rest_state.enabled && input('Enter s to skip, anything else to start new rest state recording...\n', 's') ~= 's')
+	record_rest_state(EXPERIMENT_CONFIG.rest_state.duration)
+else
+    warning('skipping rest state')
+end
+
 %% Reaction time task (if enabled)
-if EXPERIMENT_CONFIG.fb.reaction_time.enabled
+if EXPERIMENT_CONFIG.reaction_time_recording.enabled
     %% Start feedback and BV controller
     pyff_start_feedback_controller()
     
@@ -41,6 +48,9 @@ if EXPERIMENT_CONFIG.fb.reaction_time.enabled
     pyff_sendUdp('interaction-signal', 'command','play');
     
  
+    if (input('Press y to display a sample reaction time block...\n', 's') == 'y')
+        pyff_sendUdp('interaction-signal', 'state_command','start_block'); 
+    end
     %% Run reaction time block
     for block_no = 0:(EXPERIMENT_CONFIG.fb.reaction_time.block_count - 1)
 
@@ -68,6 +78,7 @@ if EXPERIMENT_CONFIG.fb.reaction_time.enabled
     end
     
 
+    pyff_sendUdp('interaction-signal', 'command','stop');
     pyff_stop_feedback_controller()
 
 end

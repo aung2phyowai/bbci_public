@@ -19,6 +19,11 @@ EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
 EXPERIMENT_CONFIG.logging.enabled = false;
 EXPERIMENT_CONFIG.validation.show_validation_stats = false;
 
+
+EXPERIMENT_CONFIG.rest_state.enabled = true;
+EXPERIMENT_CONFIG.rest_state.duration = 60; % in seconds
+EXPERIMENT_CONFIG.reaction_time_recording.enabled = true;
+
 % feedback settings
 EXPERIMENT_CONFIG.fb.show_debug_infos = false;
 
@@ -29,14 +34,14 @@ EXPERIMENT_CONFIG.fb.img_seq.playback_delay = 5.0; %after receiving play state c
 EXPERIMENT_CONFIG.fb.img_seq.question_duration = 8.0;
 EXPERIMENT_CONFIG.fb.img_seq.inter_sequence_delay = 2.0;  %between scenes in same block, after question
 
+
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
-EXPERIMENT_CONFIG.fb.reaction_time.enabled = false;
 EXPERIMENT_CONFIG.fb.reaction_time.max_reaction_time = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.inter_stimulus_delay = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 1.0;
 EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 2.0;
-EXPERIMENT_CONFIG.fb.reaction_time.block_length = 2;
-EXPERIMENT_CONFIG.fb.reaction_time.block_count = 5;
+EXPERIMENT_CONFIG.fb.reaction_time.block_length = 5;
+EXPERIMENT_CONFIG.fb.reaction_time.block_count = 4;
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % from this point on, the configuration should [usually] not be changed

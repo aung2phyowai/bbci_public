@@ -53,6 +53,9 @@ class StandbyState(FrameState):
         if "start_block" in self._unhandled_commands:
             self._unhandled_commands.remove('start_block')
             return StateOutput(frame_markers, SingleStimulusState(self.controller, 0))
+        elif "show_crosshair" in self._unhandled_commands:
+            self._unhandled_commands.remove("show_crosshair")
+            return StateOutput(frame_markers, CrosshairState(self.controller))
         else:
             return StateOutput(frame_markers, self)
 
@@ -93,7 +96,17 @@ class SingleStimulusState(FrameState):
             else:
                 return StateOutput(frame_markers, StandbyState(self.controller))
 
+class CrosshairState(FrameState):
+    """dummy state that just draws cross
+     used for example during eyes open recording"""
+    def __init__(self, controller):
+        super(CrosshairState, self).__init__(controller)
 
+    def _handle_state(self, screen):
+        pygame_helpers.draw_center_cross(screen)
+        return StateOutput([], self)
+
+            
 def _run_standalone():
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.getLogger().setLevel(logging.INFO)

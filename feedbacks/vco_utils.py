@@ -8,6 +8,19 @@ def parse_matlab_char_array(char_array):
     characters = [chr(int(i)) for i in char_array]
     return ''.join(characters)
 
+def get_pyff_path(vco_repo_dir):
+    """tries to parse the pyff repo dir from the matlab config file"""
+    local_setup_file = os.path.join(vco_repo_dir, 'config', 'local_setup.m')
+    print "vco repo %s " % vco_repo_dir
+    print "file %s" % local_setup_file
+    with open(local_setup_file, 'r') as f:
+        pyff_lines = [l.split("'") for l in f if 'PROJECT_SETUP.PYFF_DIR' in l]
+        #we want the value, i.e. the part within single quotes
+        if pyff_lines and len(pyff_lines[0]) > 1:
+            return (pyff_lines[0])[1]
+        else:
+            return None
+
 def dump_settings(object_to_pickle, pickle_file_name):
     """Dumps all pickable attribute of the object to the supplied file"""
     # Determine the pickable attributes of the feedback and store them
