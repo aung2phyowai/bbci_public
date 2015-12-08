@@ -1,4 +1,6 @@
 blockNo	seqName	FPS	type
+0	kitti/seqs/final/seq_s09_3-b10nord.txt	10	simple
+0	kitti/seqs/final/seq_c07_1-erbprinzenstr.txt	10	complex
 0	kitti/seqs/final/seq_c08_2-kirchfeld-mod3-v1.txt	10	complex
 1	kitti/seqs/final/seq_s07_1-rommelstr.txt	10	simple
 1	kitti/seqs/final/seq_c10_6-weiherfeldb-mod7-v00.txt	10	complex

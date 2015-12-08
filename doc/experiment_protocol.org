@@ -10,16 +10,21 @@
   - Fahrerfahrung
     - wie viele Jahren besitzen Sie einen Führerschein?
     - wie viel Jahreskilometer legen Sie geschätzt zurück?
-    - würden Sie sich selbst als "erfahrene[n]" Autofahrer[in] bezeichnen: 
-       forced-choice Likert-Skala?
-        (1) trifft zu (2) trifft eher zu (3) trifft eher nicht zu, (4)
-        trifft nicht zu
-      TODO: Formulierung
-      - ... als guten Autofahrer ...
-      - ... als defensiven Autofahrer...
-      - ... als sicheren Autofahrer .. -> niemand Gegenteil!?
-      - Sind Sie sich Ihrer Umgebung beim Fahren stets bewusst?
-      - Sind Sie sich in Verkehrssituationen häufig möglicher Unfallgefahren bewusst?
+    - als welchen Typ von Autofahrer[in] würden Sie sich bezeichnen: 
+      - unerfahren                               erfahren
+        ---------
+      - defensiv                                 sportlich
+        ---------
+      - Wie nehmen Sie Ihre Umgebung beim Fahren wahr?
+        bewusst                                  unbewusst/automatisch
+        ---------
+      - Nehmen Sie häufig *mögliche* Unfallgefahren wahr?
+        (z.B. Blick in den Rückspiegel vor Bremsen an roter Ampel)
+        häufig                                   selten
+        ---------
+      - Wie würden Sie Ihrer Risikobereitschaft  bezeichnen?
+        hoch                                     niedrig
+        ---------
       
 * Aufbau
   - Amplifier
@@ -37,24 +42,13 @@
      - Trigger Level: ca 1.5
   - Distanz zum Bildschirm: 80cm
 * Vorbedingungen an Probanden
-  tbd
- - Führerschein?
+ tbd -> Fahrererfahrung!?
+* Presession
+** Hinweise
 
-* Hinweise/Erklärung Experiment
-
-** Ziel
-Wir wollen untersuchen, wie Sie Gefahren im Straßenverkehr wahrnehmen.
-
-** Szenenbetrachtung wie bei autonomem Fahren
- - Sie sind Beifahrer in einem autonomen Fahrzeug
- - beobachten Sequenzen, die sich in ihrer Komplexität und dem Risiko unterscheiden
-
-** Aufgabe
- - Sie haben nur eine Interaktionsmöglichkeit: 
-   Einen Not-aus-Knopf, mit dem Sie das Auto zum Stehen bringen
- - Drücken Sie den Knopf, sobald Sie einen Unfall für wahrscheinlich halten
- - hier: (der Einfachheit halber):
-   Sie erhalten nur eine leichte Verdunkelung als Feedback, das Fahrzeug stoppt nicht
+ - EEG-Artifakte erklären
+ - Augenbewegungen gering halten
+ - Pausen nach jedem Block nutzen, um aktiv zu entspannen
 
 ** Aufbau
 
@@ -63,19 +57,38 @@ Wir wollen untersuchen, wie Sie Gefahren im Straßenverkehr wahrnehmen.
  3. wir zeigen Ihnen gleich 20 Blöcke mit je 8 kurzen Sequenzen
     am Ende jeder Szene bitten wir Sie, kurz die Komplexität einzuschätzen
 
-** Hinweise
-
- - EEG-Artifakte erklären
- - Augenbewegungen gering halten
- - Pausen nach jedem Block nutzen, um aktiv zu entspannen
-* Presession
-
+**  Recording
   - 30 Sekunde Augen offen/geschlossen
   - Button testen
   - Reaktionszeit
      - 4 Blöcke mit je 5 Stimuli im Zeitraum [1, 3], max 2 Sekunden
-  - Familiarisierung
-     - eine Bildfolge (Block 0) wird abgespielt
+
+
+* Hinweise/Erklärung Experiment
+
+** Ziel
+Wir wollen untersuchen, wie Sie Gefahren im Straßenverkehr wahrnehmen.
+
+** Szenenbetrachtung wie bei autonomem Fahren
+ - Sie sind Beifahrer in einem autonomen Fahrzeug
+ - beobachten Fahrszenen, die sich in ihrer Komplexität und dem Risiko unterscheiden
+ - einige dieser Szenen wurden um künstliche Figure erweitert, um mehr
+   Ereignisse darstellen zu können
+
+** Aufgabe
+ - Sie haben nur eine Interaktionsmöglichkeit: 
+   Einen Knopf, mit dem Sie dem Auto mitteilen, dass die Szene
+   gefährlich ist und es sehr defensiv fahren soll
+ - Drücken Sie den Knopf, sobald Sie die Szene für gefährlich halten.
+   Achten Sie darauf, den Knopf nicht unnötig zu drücken.
+ - hier: (der Einfachheit halber):
+   Sie erhalten nur eine leichte Verdunkelung als Feedback, das Fahrzeug stoppt nicht.
+ - => Proband wiederholen lassen
+
+
+
+** Familarisierung
+     - vier Bildfolgen (Block 0) wird abgespielt
      - Fragebogen vorgestellt
 
 * je Block
@@ -91,7 +104,7 @@ War die Aufgabe
  - einfach oder komplex,
  - erfordert sie hohe Genauigkeit oder ist sie fehlertolerant?
 
- => Fanden Sie das Beobachten der Szene leicht oder anspruchsvoll?
+ => Ist die Aufgabe leicht oder anspruchsvoll?
 *** körperliche Anforderung
 Wie viel körperliche Aktivität war erforderlich 
  (z.B. ziehen, drücken, drehen, steuern, aktivieren ...)? 
@@ -100,7 +113,7 @@ War die Aufgabe
  - einfach oder anstrengend,
  - erholsam oder mühselig?
 
- => weglassen?
+ => Ist die Aufgabe einfach oder angstrengend?
 
 *** zeitliche Anforderung
 Wie viel Zeitdruck empfanden Sie hinsichtlich der Häufigkeit oder dem Takt mit dem die Aufgaben oder Aufgabenelemente auftraten?
