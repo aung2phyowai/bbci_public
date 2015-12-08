@@ -39,7 +39,7 @@ EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
 EXPERIMENT_CONFIG.fb.reaction_time.max_reaction_time = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.inter_stimulus_delay = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 1.0;
-EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 2.0;
+EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 5.0;
 EXPERIMENT_CONFIG.fb.reaction_time.block_length = 5;
 EXPERIMENT_CONFIG.fb.reaction_time.block_count = 4;
 

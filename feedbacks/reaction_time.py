@@ -4,7 +4,9 @@
 
 """ Simple reaction time task """
 
+import datetime
 import logging
+import os
 import random
 
 import markers
@@ -73,7 +75,18 @@ class SingleStimulusState(FrameState):
         self.logger.info("ready start frame %d, stimulus start frame %d",
                          self._ready_start_frame_no,
                          self._stimulus_start_frame_no)
-    
+        rt_filepath = os.path.join(conf['log_dir'],
+                                   '_'.join([conf['start_date_string'],
+                                             conf['log_prefix'],
+                                             'reaction_time_params']) + ".log")
+        with open(rt_filepath, 'a') as rt_file:
+            line = [datetime.datetime.now().isoformat(),
+                    str(conf['min_readiness_duration']),
+                    str(conf['max_stimulus_jitter']),
+                    str(conf['inter_stimulus_delay']),
+                    str(1.0 * self._stimulus_start_frame_no / conf['screen_fps'])]
+            rt_file.write('\t'.join(line) + '\n')
+
 
     def _handle_state(self, screen):
         frame_markers = []
