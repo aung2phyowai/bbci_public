@@ -104,7 +104,8 @@ pyff_sendUdp('interaction-signal', 'command','play');
 
 %% loop over blocks
 %convention: block 0 is familarization
-for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
+block_no = input(['Enter block to start with: 0-> Familiarization, max: ' num2str(EXPERIMENT_CONFIG.block_count - 1) '\n'])
+while block_no < EXPERIMENT_CONFIG.block_count(1)
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     
@@ -154,6 +155,7 @@ for block_no = 0:(EXPERIMENT_CONFIG.block_count - 1)
     if EXPERIMENT_CONFIG.validation.show_validation_stats
         marker_stats(data.marker)
     end
+    block_no = block_no + 1
     
 end
 
