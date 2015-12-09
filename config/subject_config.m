@@ -3,5 +3,5 @@ function subject_config()
 
 global EXPERIMENT_CONFIG
 
-EXPERIMENT_CONFIG.VPcode = 'VPpaus';
+EXPERIMENT_CONFIG.VPcode = 'VPtest';
 EXPERIMENT_CONFIG.date = datestr(now, 'yy-mm-dd');
