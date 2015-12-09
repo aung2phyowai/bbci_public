@@ -1,0 +1,19 @@
+questionaire_no	after_block_no	question_no	question	scale_label_1	scale_label_10	subject_answer
+0	0	1a	Seit wie vielen Jahren besitzen Sie einen Führerschein	n/a	n/a	-1
+0	0	2a	Wie viel Jahreskilometer legen Sie geschätzt als Autofahrer zurück?	n/a	n/a	-1
+0	0	3a	Als wie erfahren würden Sie sich als Autofahrer bezeichnen?	unerfahren	erfahren	-1
+0	0	4a	Als wie defensiv würden Sie sich als Autofahrer bezeichnen?	defensiv	sportlich	-1
+0	0	5a	Wie nehmen Sie Ihre Umgebung beim Autofahren wahr?	bewusst	unbewusst	-1
+0	0	6a	Nehmen Sie häufig mögliche Unfallgefahren beim Autofahren wahr?	häufig	selten	-1
+0	0	7a	Wie hoch würden Sie Ihre Risikobereitschaft beim Autofahren bezeichnen?	hoch	niedrig	-1
+0	0	8a	Als wie erfahren würden Sie sich als Radfahrer bezeichnen?	unerfahren	erfahren	-1
+0	0	9a	Als wie defensiv würden Sie sich als Radfahrer bezeichnen?	defensiv	sportlich	-1
+0	0	10a	Wie nehmen Sie Ihre Umgebung beim Radfahren wahr?	bewusst	unbewusst	-1
+0	0	11a	Nehmen Sie häufig mögliche Unfallgefahren beim Radfahren wahr?	häufig	selten	-1
+0	0	12a	Wie hoch würden Sie Ihre Risikobereitschaft beim Radfahren bezeichnen?	hoch	niedrig	-1
+1	4	100a	Ist die Aufgabe leicht oder anspruchsvoll?	leicht	anspruchsvoll	-1
+1	4	101a	Ist die Aufgabe einfach oder anstrengend?	einfach	anstrengend	-1
+1	4	102a	War die Aufgabe geruhsam oder hektisch?	geruhsam	hektisch	-1
+1	4	103a	Wie erfolgreichen waren Sie Ihrer Meinung nach beim Erkennen der Gefahrensituationen? Wie zufrieden sind Sie mit Ihrer Leistung?	zufrieden	unzufrieden	-1
+1	4	104a	Wie stark mussten Sie sich anstrengen, um die Szenen beurteilen zu können?	viel	wenig	-1
+1	4	105a	Fühlten Sie sich während der Aufgabe unsicher und gestresst oder sicher und entspannt?	gestresst	entspannt	-1
