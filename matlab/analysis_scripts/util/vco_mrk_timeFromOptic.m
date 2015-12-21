@@ -49,7 +49,8 @@ function [ mrk_updated ] = vco_mrk_timeFromOptic( mrk_orig, used_config )
     mrk_updated.time(i_matched_feedback) = mrk_optic.time(i_matched_optic);
     
     %add interactions
-    mrk_updated = mrk_mergeMarkers(mrk_updated, mrk_interactions);
+    mrk_updated = mrk_sortChronologically(mrk_mergeMarkers(mrk_updated, mrk_interactions));
+    
     
     %inspect manually, e.g., with [mrk_orig.event.desc(1:20),mrk_orig.time(1:20)',mrk_timed.event.desc(1:20), mrk_timed.time(1:20)']
 end

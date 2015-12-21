@@ -61,7 +61,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         
         %% setup recording
         % Setup bbci toolbox parameters
-        bbci = bbci_setup(['reaction_time_block' num2str(block_no)]);
+        bbci = bbci_setup(['reaction_time_block' sprintf('block%02d', block_no)]);
         %configure brain vision recorder
         if PROJECT_SETUP.HARDWARE_AVAILABLE
             bvr_sendcommand('stoprecording');

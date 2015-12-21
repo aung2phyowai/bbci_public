@@ -5,35 +5,53 @@ clear all;
 clc, close all; 
 init_analysis_setup();
 
-experiment_name = 'vco_pilot_run';
-experiment_run = 'VPtest_15-10-28'; %'VPtest_15-09-09';
-block_count = 0;
+% experiment_name = 'vco_pilot_run';
+% experiment_run = 'VPtest_15-10-28'; %'VPtest_15-09-09';
+% block_count = 0;
+% 
+% data_dir = fullfile('/home/henkolk/local_data/audiolab', experiment_run);
+% 
+% tmp = load(fullfile(data_dir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
+% %only temporary, added in future saves
+% %tmp.EXPERIMENT_CONFIG.block_count = 2*tmp.EXPERIMENT_CONFIG.seqsPerType / tmp.EXPERIMENT_CONFIG.blockSize;
+% used_config = tmp.EXPERIMENT_CONFIG;
+% clear tmp
+% 
+% current_block_index = 5;
+% block_name = sprintf('block%02d', current_block_index);
+% file_prefix = [experiment_run, '_', experiment_name, '_', block_name];
+% file_pattern = fullfile(data_dir, [file_prefix '*']);
+% [cnt, mrk_orig, hdr] = file_readBV(file_pattern, 'fs', 100);
 
-data_dir = fullfile('/home/henkolk/local_data/audiolab', experiment_run);
+%% Load main experiment
 
-tmp = load(fullfile(data_dir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
-%only temporary, added in future saves
-%tmp.EXPERIMENT_CONFIG.block_count = 2*tmp.EXPERIMENT_CONFIG.seqsPerType / tmp.EXPERIMENT_CONFIG.blockSize;
-used_config = tmp.EXPERIMENT_CONFIG;
-clear tmp
+[cnt, mrk_orig, hdr, metadata] = vco_load_experiment('vco_pilot_run', 'VPpau_15-12-08');
 
-current_block_index = 5;
-block_name = sprintf('block%02d', current_block_index);
-file_prefix = [experiment_run, '_', experiment_name, '_', block_name];
-file_pattern = fullfile(data_dir, [file_prefix '*']);
-[cnt, mrk_orig, hdr] = file_readBV(file_pattern, 'fs', 100);
 
-tmp_mrk = cell(size(mrk_orig.event.desc,1), 4);
-tmp_mrk(:,1) = mrk_orig.event.type;
-tmp_mrk(:, 2) = num2cell(mrk_orig.event.desc);
-tmp_mrk(:,3) = num2cell(mrk_orig.time);
-tmp_mrk(:,4) = num2cell([0 diff(mrk_orig.time)]);
+mrk_timed = vco_mrk_timeFromOptic(mrk_orig, metadata.session.used_config);
+
+%% Load Reaction time
+[rt_cnt, rt_mrk_orig, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', 'VPpau_15-12-08');
+
+
+rt_mrk_timed = vco_mrk_timeFromOptic(rt_mrk_orig, metadata.session.used_config);
+
+
+reaction_times = vco_get_reaction_times(rt_mrk_timed, rt_metadata.session.used_config);
+hist(reaction_times, 20)
+
+tmp_mrk = cell(size(rt_mrk_timed.event.desc,1), 4);
+% tmp_mrk(:,1) = rt_mrk_timed.event.type;
+tmp_mrk(:, 2) = num2cell(rt_mrk_timed.event.desc);
+tmp_mrk(:,3) = num2cell(rt_mrk_timed.time);
+tmp_mrk(:,4) = num2cell([0 diff(rt_mrk_timed.time)]);
+
+
+%% Some debugging
 
 hist(mrk_orig.event.desc)
 
 % scatter(mrk_orig.time, mrk_orig.event.desc, 64, 'x')
-
-mrk_timed = vco_mrk_timeFromOptic(mrk_orig, used_config);
 
 scatter(mrk_timed.time, mrk_timed.event.desc, 64, 'x')
 
