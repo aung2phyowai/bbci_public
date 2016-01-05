@@ -46,14 +46,19 @@ class ImageSeqFeedback(StateMachineFeedback):
     def _build_default_configuration(self):
         default_conf = super(ImageSeqFeedback, self)._build_default_configuration()
         default_conf.update({'sync_markers_enabled' : True,
-                             #seconds between seqs in same block
-                             'inter_sequence_delay': 3.0, #in seconds
+                             #before each sequence
+                             'get_ready_duration_min': 1.5, #in seconds
+                             'get_ready_duration_median' : 2.5,
+                             #after each sequence
+                             'pre_question_pause_min': 1.5,
+                             'pre_question_pause_median' : 2.5,
                              'question_duration' : 8.0, #if complexity question is displayed
+                             'rest_screen_duration' : 3.0,
                              'overlay_duration' : 1.0, #in seconds
                              'overlay_color': pygame.Color('0x00000088'),
                              'next_block_info' : [],
-                             #minimal delay to wait before playback after receiving command
-                             'playback_delay' : 2.0,
+                             #minimal delay to wait before starting block playback after receiving command
+                             'initial_playback_delay' : 5.0,
                              'log_prefix_block' : "defaultblock"
                             })
         return default_conf
@@ -106,15 +111,21 @@ class StandbyState(FrameState):
 class IntraBlockPauseState(FrameState):
     """
        Pause between two sequences within the same block
+       It consists of 
+        1. a short black screen (randomized duration) 
+        2. the question
+        3. a black screen for rest
     """
     def __init__(self, controller, next_state):
         super(IntraBlockPauseState, self).__init__(controller)
         conf = self.controller.config
-        self._time_delay = conf['inter_sequence_delay']
         self._subsequent_state = next_state
-        self._frame_pause_start = conf['question_duration'] * conf['screen_fps']
-        self._frame_pause_end = (self._frame_pause_start
-                                + conf['inter_sequence_delay'] * conf['screen_fps'])
+        pre_question_pause = vco_utils.draw_uniform_time_delay(
+            conf['pre_question_pause_min'], conf['pre_question_pause_median'])
+        self._questionaire_start = int(pre_question_pause * conf['screen_fps'] + 0.5) + 1
+        self._frame_rest_start = self._questionaire_start + conf['question_duration'] * conf['screen_fps']
+        self._frame_rest_end = (self._frame_rest_start
+                                + conf['rest_screen_duration'] * conf['screen_fps'])
 
     def _handle_state(self, screen):
         new_markers = []
@@ -122,15 +133,15 @@ class IntraBlockPauseState(FrameState):
             new_markers.append(markers.technical['intra_block_pause_start'])
 
         #screen content
-        if self._state_frame_count < self._frame_pause_start:
+        if (self._state_frame_count >= self._questionaire_start
+            and self._state_frame_count < self._frame_rest_start):
             pygame_helpers.draw_questionaire_scale(screen,
                                                    "Wie komplex fanden Sie die Szene?",
                                                    labels=("einfach (1)", "komplex (10)"))
-        else:
-            pygame_helpers.draw_center_cross(screen)
+        #otherwise black screen
 
         #state output
-        if self._state_frame_count < self._frame_pause_end:
+        if self._state_frame_count < self._frame_rest_end:
             #still delaying
             #self.logger.debug("%d of %d frames elapsed, delaying", self._state_frame_count, self._delay_frame_no)
 
@@ -139,6 +150,31 @@ class IntraBlockPauseState(FrameState):
             #new_markers.append(markers.technical['pre_seq_start'])
             return StateOutput(new_markers, self._subsequent_state)
 
+class GetReadyState(FrameState):
+    """ displays a fixation cross for a randomized configurable duration"""
+    def __init__(self, controller, next_state):
+        super(GetReadyState, self).__init__(controller)
+        conf = self.controller.config
+        time_delay = vco_utils.draw_uniform_time_delay(
+            conf['get_ready_duration_min'], conf['get_ready_duration_median'])
+        self._subsequent_state = next_state
+        self._last_frame = int(time_delay * conf['screen_fps'] + 0.5)
+
+    def _handle_state(self, screen):
+        new_markers = []
+        if self._state_frame_count == 0:
+            new_markers.append(markers.technical['get_ready_start'])
+
+        #screen content
+        pygame_helpers.draw_center_cross(screen)
+
+        #state output
+        if self._state_frame_count < self._last_frame:
+            #still delaying
+            return StateOutput(new_markers, self)
+        else:
+            #new_markers.append(markers.technical['pre_seq_start'])
+            return StateOutput(new_markers, self._subsequent_state)
 
 class SequencePlaybackState(FrameState):
     """ state for actual sequence playback
@@ -156,7 +192,6 @@ class SequencePlaybackState(FrameState):
         self.seq_frame_count = len(self.block_data.image_seqs[self.seq_name])
         self._overlay_end_frame = -1
 
-
     def _handle_state(self, screen):
         assert self._state_frame_count < self.seq_frame_count
         new_markers = []
@@ -170,7 +205,6 @@ class SequencePlaybackState(FrameState):
                 self._unhandled_controls.remove(ctrl)
             self._overlay_end_frame = self._state_frame_count + conf['overlay_duration'] * conf['screen_fps']
 
-        
         #-------
         #markers
         if self._state_frame_count == 0:
@@ -216,9 +250,10 @@ class SequencePlaybackState(FrameState):
         else: #we're at the last frame of the sequence
             #new_markers.append(markers.technical['seq_end'])
             if self.seq_no + 1 < len(self.block_data.seq_fps_list):
-                state_after_pause = SequencePlaybackState(self.controller,
-                                                          self.seq_no + 1,
-                                                          self.block_data)
+                state_after_pause = GetReadyState(self.controller,
+                                                  SequencePlaybackState(self.controller,
+                                                                        self.seq_no + 1,
+                                                                        self.block_data))
             else: #we're done with the last sequence of the block
                 state_after_pause = StandbyState(self.controller)
 
@@ -266,18 +301,17 @@ class BlockPreloadState(FrameState):
             pygame_helpers.display_message(screen, progress,
                                            pos=(20, 80), size=20)
 
-        pygame_helpers.draw_center_cross(screen)
+        #pygame_helpers.draw_center_cross(screen)
 
         #check if we received playback command
         if "start_playback" in self._unhandled_commands:
-            delay_framelength = config['playback_delay'] * config['screen_fps']
+            delay_framelength = config['initial_playback_delay'] * config['screen_fps']
             after_delay = self._state_frame_count + delay_framelength
             self._earliest_playback_start = min(self._earliest_playback_start, after_delay)
 
         #do actual work
         self._load_images_blocking()
         #control state
-        #TODO check for errors
         if self.block_data.caching_progress() == 1: #updated since last check
             if not self.caching_complete: #first check after completion -> marker
                 self.logger.info("preload completed")
@@ -293,7 +327,8 @@ class BlockPreloadState(FrameState):
             vco_utils.dump_settings(self.controller, conf_dump_file)
             self.logger.info("starting block playback, git code revision %s", config['git_revision_info'])
             return StateOutput(new_markers,
-                               SequencePlaybackState(self.controller, 0, self.block_data))
+                               GetReadyState(self.controller,
+                                             SequencePlaybackState(self.controller, 0, self.block_data)))
         else:
             return StateOutput(new_markers, self)
 

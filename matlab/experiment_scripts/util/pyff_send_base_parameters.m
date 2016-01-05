@@ -19,7 +19,6 @@ fbsettings.screen_height = PROJECT_SETUP.SCREEN_SIZE(2);
 fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);
 fbsettings.screen_position_y = PROJECT_SETUP.SCREEN_POSITION(2);
 fbsettings.display_debug_information = EXPERIMENT_CONFIG.fb.show_debug_infos;
-fbsettings.playback_delay = EXPERIMENT_CONFIG.fb.img_seq.playback_delay;
 
 
 fbsettings.log_dir = EXPERIMENT_CONFIG.feedbackLogDir;

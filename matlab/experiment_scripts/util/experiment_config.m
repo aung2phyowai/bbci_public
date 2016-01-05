@@ -30,9 +30,14 @@ EXPERIMENT_CONFIG.fb.show_debug_infos = false;
 EXPERIMENT_CONFIG.fb.img_seq.python_class_name = 'ImageSeqFeedback';
 EXPERIMENT_CONFIG.fb.img_seq.use_optomarker = true;
 EXPERIMENT_CONFIG.fb.img_seq.overlay_duration = 1.0;
-EXPERIMENT_CONFIG.fb.img_seq.playback_delay = 5.0; %after receiving play state command
+EXPERIMENT_CONFIG.fb.img_seq.initial_playback_delay = 5.0; %after receiving play state command
 EXPERIMENT_CONFIG.fb.img_seq.question_duration = 8.0;
-EXPERIMENT_CONFIG.fb.img_seq.inter_sequence_delay = 2.0;  %between scenes in same block, after question
+EXPERIMENT_CONFIG.fb.img_seq.min_inter_sequence_delay = 3.0;  %between scenes in same block, after question
+EXPERIMENT_CONFIG.fb.img_seq.get_ready_duration_min = 1.5;
+EXPERIMENT_CONFIG.fb.img_seq.get_ready_duration_median =  2.5;
+EXPERIMENT_CONFIG.fb.img_seq.pre_question_pause_min = 1.5;
+EXPERIMENT_CONFIG.fb.img_seq.pre_question_pause_median = 2.5;
+EXPERIMENT_CONFIG.fb.img_seq.rest_screen_duration = 2.5;
 
 
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';

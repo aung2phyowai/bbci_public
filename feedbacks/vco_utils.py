@@ -61,6 +61,12 @@ def setup_logging_handlers(logger_name, config):
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
+def draw_uniform_time_delay(min_delay, median_delay):
+    """draws a random floating point, uniformly distributed between
+       min_delay and median_delay + (median_delay - min_delay)"""
+    max_delay = min_delay + 2 * (median_delay - min_delay)
+    return random.uniform(min_delay, max_delay)
+
 def draw_exp_time_delay(min_delay, median_delay):
     """ draws a random floating point x number so that
          x >= min_delay, the median value of x is median_delay
