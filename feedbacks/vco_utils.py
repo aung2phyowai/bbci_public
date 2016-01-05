@@ -1,7 +1,9 @@
 """Generic utility functions"""
 import logging
+import math
 import os
 import pickle
+import random
 
 def parse_matlab_char_array(char_array):
     """convert char array to string"""
@@ -58,4 +60,24 @@ def setup_logging_handlers(logger_name, config):
             handler.setLevel(level)
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-    
+
+def draw_exp_time_delay(min_delay, median_delay):
+    """ draws a random floating point x number so that
+         x >= min_delay, the median value of x is median_delay
+        and x-min_delay has an exponential distribution
+        The expected value is min_delay + 1/(ln(2))*median_delay; 1/(ln(2)) ~= 1.44
+        Hence, 90% of samples should be smaller than 3.32*(median_delay-min_delay) and 
+         99% of samples should be smaller than 6.64*(median_delay-min_delay)."""
+    dist_median = median_delay - min_delay
+    dist_lambda = math.log(2) / dist_median
+    return min_delay + random.expovariate(dist_lambda)
+
+def test_plot_exp_time_delays(count, min_delay=1, median_delay=2):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    samples=[draw_exp_time_delay(min_delay, median_delay) for i in range(count)]
+    hist, bins = np.histogram(samples, bins=50)
+    width=0.7*(bins[1] - bins[0])
+    center= (bins[:-1] + bins[1:]) / 2
+    plt.bar(center, hist, align='center', width=width)
+    plt.show()

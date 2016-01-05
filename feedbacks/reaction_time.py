@@ -8,10 +8,12 @@ import datetime
 import logging
 import os
 import random
+import time
 
 import markers
 import pygame_helpers
 from state_machine import StateMachineFeedback, StateOutput, FrameState
+import vco_utils
 
 class ReactionTimeFeedback(StateMachineFeedback):
     """ State machine for display of reaction time
@@ -34,8 +36,8 @@ class ReactionTimeFeedback(StateMachineFeedback):
         default_conf = super(ReactionTimeFeedback, self)._build_default_configuration()
         default_conf.update({'max_reaction_time' : 2.0,
                              'inter_stimulus_delay' : 2.0,
-                             'min_readiness_duration' : 1.0,
-                             'max_stimulus_jitter' : 2.0,
+                             'min_readiness_duration' : 3.0,
+                             'median_readiness_duration' : 3.5,
                              'block_length' : 5})
 
         return default_conf
@@ -48,7 +50,6 @@ class StandbyState(FrameState):
     def _handle_state(self, screen):
         frame_markers = []
         #pygame_helpers.draw_center_cross(screen)
-        self.logger.warn(markers.technical)
         if self._state_frame_count == 0:
             frame_markers.append(markers.technical['standby_start'])
 
@@ -68,24 +69,15 @@ class SingleStimulusState(FrameState):
         self.stimulus_no = stimulus_no
         conf = controller.config
         self._ready_start_frame_no = conf['inter_stimulus_delay'] * conf['screen_fps']
-        min_stimulus_frame_no = self._ready_start_frame_no + conf['min_readiness_duration'] * conf['screen_fps']
-        max_stimulus_frame_no = min_stimulus_frame_no + conf['max_stimulus_jitter'] * conf['screen_fps']
-        self._stimulus_start_frame_no = random.randint(min_stimulus_frame_no, max_stimulus_frame_no)
+        self._ready_duration = vco_utils.draw_exp_time_delay(conf['min_readiness_duration'], conf['median_readiness_duration'])
+        ready_frame_length = int(self._ready_duration * conf['screen_fps'] + 0.5)
+        self._stimulus_start_frame_no = self._ready_start_frame_no + ready_frame_length
         self._state_end_frame_no = self._stimulus_start_frame_no + conf['max_reaction_time'] * conf['screen_fps']
+        self._stimulus_start_tick = None
+        self._first_reaction_tick = None
         self.logger.info("ready start frame %d, stimulus start frame %d",
                          self._ready_start_frame_no,
                          self._stimulus_start_frame_no)
-        rt_filepath = os.path.join(conf['log_dir'],
-                                   '_'.join([conf['start_date_string'],
-                                             conf['log_prefix'],
-                                             'reaction_time_params']) + ".log")
-        with open(rt_filepath, 'a') as rt_file:
-            line = [datetime.datetime.now().isoformat(),
-                    str(conf['min_readiness_duration']),
-                    str(conf['max_stimulus_jitter']),
-                    str(conf['inter_stimulus_delay']),
-                    str(1.0 * self._stimulus_start_frame_no / conf['screen_fps'])]
-            rt_file.write('\t'.join(line) + '\n')
 
 
     def _handle_state(self, screen):
@@ -99,17 +91,45 @@ class SingleStimulusState(FrameState):
         else:
             if self._state_frame_count == self._stimulus_start_frame_no:
                 frame_markers.append(markers.stimuli['generic_stimulus'])
+                self._stimulus_start_tick = time.time()
+                self._first_reaction_tick = None
             pygame_helpers.draw_abstract_stimulus(screen, color=(255, 255, 255))
 
         if self._state_frame_count < self._state_end_frame_no:
             return StateOutput(frame_markers, self)
         else:
+            #log data
+            conf = self.controller.config
+            rt_filepath = os.path.join(conf['log_dir'],
+                                       '_'.join([conf['start_date_string'],
+                                                 conf['log_prefix'],
+                                                 'reaction_time_params']) + ".log")
+            if self._stimulus_start_tick is None or self._first_reaction_tick is None:
+                reaction_time = float('nan')
+            else:
+                reaction_time = self._first_reaction_tick - self._stimulus_start_tick
+            with open(rt_filepath, 'a') as rt_file:
+                line = [datetime.datetime.now().isoformat(),
+                        str(self.stimulus_no),
+                        str(conf['min_readiness_duration']),
+                        str(conf['median_readiness_duration']),
+                        str(conf['inter_stimulus_delay']),
+                        str(self._ready_duration),
+                        str(reaction_time)]
+                rt_file.write('\t'.join(line) + '\n')
+            #followup state
             if self.stimulus_no + 1 < self.controller.config['block_length']:
                 return StateOutput(frame_markers, SingleStimulusState(self.controller, self.stimulus_no + 1))
             else:
                 return StateOutput(frame_markers, StandbyState(self.controller))
 
-            
+    def handle_event(self, event_type, event):
+        if event_type == 'control':
+            self.logger.info("control event at %1.4f",
+                         time.time())
+            if self._first_reaction_tick is None:
+                self._first_reaction_tick = time.time()
+
 def _run_standalone():
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.getLogger().setLevel(logging.INFO)

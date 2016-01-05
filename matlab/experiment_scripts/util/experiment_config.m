@@ -12,7 +12,7 @@ subject_config(); %source VP code etc
 %type of block structure:
 
 
-EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'block_structure.tsv');
+EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'block_structure_v02.tsv');
 
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date];
 EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
@@ -38,8 +38,8 @@ EXPERIMENT_CONFIG.fb.img_seq.inter_sequence_delay = 2.0;  %between scenes in sam
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
 EXPERIMENT_CONFIG.fb.reaction_time.max_reaction_time = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.inter_stimulus_delay = 2.0;
-EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 1.0;
-EXPERIMENT_CONFIG.fb.reaction_time.max_stimulus_jitter = 5.0;
+EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 2.0;
+EXPERIMENT_CONFIG.fb.reaction_time.median_readiness_duration = 3.5;
 EXPERIMENT_CONFIG.fb.reaction_time.block_length = 5;
 EXPERIMENT_CONFIG.fb.reaction_time.block_count = 4;
 
