@@ -163,9 +163,23 @@ def select_seqs(target_count, available_seqs):
 #    max_version_count = max((len(l) for l seqs_by_scene.values()))
     selected_seqs = []
 
+    #sort scenes of each seq based on number of hazard event counts
+    #(rationale: as many events as early as possible if only shortened recording)
+    for scene in seqs_by_scene:
+        seqs_by_scene[scene] = sorted(seqs_by_scene[scene], key=lambda elem_version: (
+            elem_version['event_type_counts']['hazard']), reverse=True)
+    
     #sort scenes based on number of different versions of sequence and the number of events in the sequence (only taken from first version)
-    seqs_by_scene = collections.OrderedDict(sorted(seqs_by_scene.items(), key=lambda e: (len(e[1]), sum(e[1][0]['event_type_counts'].values())), reverse=True))
+    #seqs_by_scene = collections.OrderedDict(sorted(seqs_by_scene.items(), key=lambda e: (len(e[1]), sum(e[1][0]['event_type_counts'].values())), reverse=True))
 
+
+    #updated version
+    #sort based on (number of hazardous events, versions count, number of overall events)
+    seqs_by_scene = collections.OrderedDict(sorted(seqs_by_scene.items(), key=lambda e: (
+        1.0 * sum([elem_version['event_type_counts']['hazard'] for elem_version in e[1]])/len(e[1]),
+        len(e[1]),
+        sum(e[1][0]['event_type_counts'].values())), reverse=True))
+    
     max_version_count = len(seqs_by_scene.values()[0])
     scene_ctr = collections.Counter()
     while len(selected_seqs) < target_count:
@@ -182,6 +196,7 @@ def select_seqs(target_count, available_seqs):
 
 def generate_block_structure(seqfiles_dir, block_count, block_size):
     """generates the block structure based on available sequence files"""
+    seqfiles_dir = os.path.normpath(os.path.expanduser(seqfiles_dir))
     available_seqs = [extract_meta_from_name(os.path.join(seqfiles_dir, f)) for f in os.listdir(seqfiles_dir)]
     complex_seqs = [s for s in available_seqs if s['type'] == 'complex']
     simple_seqs = [s for s in available_seqs if s['type'] == 'simple']
@@ -201,6 +216,7 @@ def generate_block_structure(seqfiles_dir, block_count, block_size):
     #v1 simple
     for i in range(block_count):
         cur_block = []
+        #each block has same number of simple and complex sequences
         start_idx_per_type = i * block_size / 2
         end_idx_per_type = start_idx_per_type + (block_size / 2)
         cur_block.extend(selected_simple_seqs[start_idx_per_type:end_idx_per_type])
