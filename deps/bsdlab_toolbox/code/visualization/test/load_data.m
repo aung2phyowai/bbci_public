@@ -1,0 +1,33 @@
+%% Load data, preprocess it a save it
+options_data ={'fs', 500,...
+            'runsLoad', runs, ...
+            'critMinMax',120, ...
+            'sPosLim', [0 1920], ...
+            'timeLim', [150 1000],...
+            'ival', [-1000,0],...
+            'classDef',{60;'stim'},...
+            'notch', true,...
+            'filter',[0.2 0.7 90 95],...
+            'saveMatlab',1,...
+            'loadMatlab',1};
+
+for i = 1:numel(VPs)
+    mkdir(fullfile(dir_saveResults,VPs{i}))
+    try
+        %%%%% LOAD DATA %%%%%%
+        load(fullfile(dir_saveData,[VPs{i} '.mat']))
+    catch
+        warning('No data preprocessed found for subject %s', VPs{i})
+        [cnt_eeg, epo, mrk, rtrials] = custom_readPosnerOsciEEG(VPs{i}, options_data{:});
+        rtrials = rtrials | isnan(epo.reactionTime);
+        idx = find(~rtrials);
+        epo = custom_selectEpochsPosner(epo,idx);
+        mrk = mrk_selectEvents(mrk,idx);
+        z = epo.reactionTime;
+        
+        % Save processed data in matlab format
+        clab = cnt_eeg.clab;
+        save(fullfile(dir_saveData,VPs{i}),'cnt_eeg','mrk','z','rtrials','clab')
+        save(fullfile(dir_saveData,[VPs{i} 'parameters']),'runs','fbands','ival','map_fcts','do_SSD')
+    end
+end

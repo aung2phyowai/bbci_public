@@ -1,0 +1,113 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{dsfont}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{natbib}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\cov}{Cov}
+\DeclareMathOperator*{\var}{Var}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\Lagr}{\mathcal{L}}
+\usepackage{graphicx}
+\author{Andreas Meinel}
+\title{Pattern_calculation_for_linear_methods}
+
+
+%\usepackage[style=numeric-comp,citestyle=ieee]{biblatex}
+%\usepackage[babel,german=guillemets]{csquotes}
+
+\begin{document}
+
+\title{Backprojection of linear filtering methods}
+\author{Andreas Meinel\\
+Brain State Decoding Lab\\
+University of Freiburg}  
+\date{January, 2015}
+\maketitle
+
+\subsection*{}
+\paragraph*{Goal} When applying linear filtering methods on recorded EEG data (here: SSD and SPoC), the corresponding activation patterns give introspection about the extracted oscillatory component. Thus, given a set of linear filters (from training data), we want to extract oscillatory components from unseen data and by that verify the stability and relevance of the given set of filters.
+ 
+\paragraph*{Background} 
+\begin{itemize}
+\item Activation patterns can be directly gained as $\vec{A}=(\vec{W}^{-1})^\top$ if and only if the filter matrix $\vec{W}$ is a square matrix. Since an SSD decomposition contains a dimensionality reduction, this requirement is not fulfilled.
+\item \textbf{Questions:}
+
+\subitem a) How can we derive activation patterns of two subsequent linear filter methods (SSD and SPoC) when the dimensionality of the data is reduced (known as low rank factorization)? 
+\subitem b) Is there a way to verify if linear filters can extract the same oscillatory components from unseen data?
+
+\end{itemize}
+
+\subsection*{Activation patterns from extraction filters}
+
+The determination of activation patterns has been studied in detail by Haufe et al. \cite{haufe:2014}. The following theorem will be the core part of this documenation. The proof of the theorem can be found in the appendix of \cite{haufe:2014}. \\
+
+\textbf {Theorem 1:} For any backward model 
+\begin{equation}\label{eq:bw_model}
+\vec{W}^\top \vec{x}(n) = \hat{\vec{s}}(n)
+\end{equation}
+
+the corresponding forward model is unique and its parameters are obtained by
+
+\begin{equation}\label{eq:fw_pattern}
+\vec{A} = \Sigma_{\vec{x}} \vec{W} \Sigma_{\hat{\vec{s}}}^{-1} 
+\end{equation}
+
+$\Sigma_{\vec{x}}=\mathbb{E}[\vec{x}(n) \vec{x}(n)^\top]_{n}$ denotes the covariance matrix in the EEG-channel space whereas $\Sigma_{\hat{\vec{s}}}=\mathbb{E}[\hat{\vec{s}}(n) \hat{\vec{s}}(n)^\top]_{n}$ describes it in the projected subspace. The scalp recorded EEG data $\vec{x} = [x_{1},...,x_{M}]^\top$ contains M channels. Furthermore, we assume that N data samples $\vec{x}(n) = 1,...,N$ are available. Note that this theorem has no demands on the filtering approach, it is even able to deal with filter matrices $\vec{W}$ that have low rank $K \leq M$. 
+
+
+\subsection*{Application to SSD and SPoC}
+
+Given an EEG data set $\vec{x}(n)$, we split into a training $\vec{x}_{tr}(i)$ and test $\vec{x}_{te}(j)$  subset with $i \in [1,...,N-S]$ and $j \in [N-S+1,...,N]$. Subsequently, we apply the following procedure:
+\begin{enumerate}
+
+\item Using $\vec{x}_{tr}$, we apply SSD and gain a filter $W_{ssd} \in [M \times K]$ with $K \leq M$. The choice of K corresponds to a dimensionality reduction of the projected data:
+\begin{equation}\label{eq:bw_ssd}
+\vec{x}_{ssd,tr} = W_{ssd}^\top \vec{x}_{tr} \in [K \times (N-S)]
+\end{equation}
+\item Utilizing $\vec{x}_{ssd,tr}$ for the SPoC algorithm yields a filter set $W_{sp} \in [K \times K]$. Applying those on the data leads to: 
+\begin{equation}\label{eq:bw_spoc}
+\vec{x}_{sp,tr} = W_{sp}^\top \, \vec{x}_{ssd,tr} \in [K \times K]
+\end{equation}
+
+\end{enumerate}
+
+The combination of both linear methods by inserting Eq. (\ref{eq:bw_ssd}) into (\ref{eq:bw_spoc}) yields a relation between the "SPoC-space" and the original EEG channel space:
+\begin{equation}\label{eq:bw_comb}
+\vec{x}_{sp,tr} = W_{sp}^\top \, W_{ssd}^\top \, \vec{x}_{tr} = W_{lc}^\top\, \vec{x}_{tr}
+\end{equation}
+$W_{lc} := W_{sp} \, W_{ssd}$ summarizing the linear combination of the two filters. 
+
+In the following, we are deriving the activation patterns corresponding to the application of two linear filters on our EEG data $\vec{x}(n)$. According to Eq.\,(\ref{eq:fw_pattern}), we can derive the activation pattern as follows:
+\begin{equation}\label{eq:fw_pattern_lc}
+\vec{A} = \Sigma_{\vec{x}} \vec{W}_{lc} \Sigma_{\vec{x}_{sp}}^{-1} 
+\end{equation}
+$\Sigma_{\vec{x}_{sp}}$ denotes the covariance matrix in the SPoC space which can be reformulated as:
+\begin{equation}\label{eq:cov_spoc}
+\begin{split}
+\Sigma_{\vec{x}_{sp}} & = \mathbb{E}[\vec{x}_{sp}(n) \vec{x}_{sp}(n)^\top]_{n} \\
+                      & \overset{\eqref{eq:bw_comb}}{=} \mathbb{E}[\vec{W}_{lc}^\top\, \vec{x} (\vec{W}_{lc}^\top\, \vec{x})^\top]_{n} \\
+                      & =\mathbb{E}[\vec{W}_{lc}^\top\, \vec{x} \vec{x}^\top \, \vec{W}_{lc}]_{n} \\
+                      & = \vec{W}_{lc}^\top \, \Sigma_{\vec{x}} \, \vec{W}_{lc}
+\end{split}
+\end{equation}
+Combining \eqref{eq:cov_spoc} and \eqref{eq:fw_pattern_lc} yields the following relation:
+\begin{equation}\label{eq:fw_pattern_final}
+\vec{A} = \Sigma_{\vec{x}} \vec{W}_{lc} (\vec{W}_{lc}^\top \, \Sigma_{\vec{x}} \, \vec{W}_{lc})^{-1} 
+\end{equation}
+The following conclusions can be drawn from Eq. \eqref{eq:fw_pattern_final}:
+\begin{itemize}
+\item The activation pattern $A$ depends on exactly two input variables, the empirical covariance matrix $\Sigma_{\vec{x}}$ of the EEG data and the linear combined filter matrix $W_{lc}$.
+\item Activation patterns can be calculated for training and test sets separately, given that we determined $W_{lc}$ on some training data set $\vec{x}_{tr}$. In other words, the usability of $W_{lc}$ on some unseen data can be checked by verifying the corresponding patterns.
+\item The derived procedure is not limited to apply just two linear methods subsequently. The only variable that has to be adapted is the filter matrix $W_{lc}$.
+\item The derivation is based on the assumption of uncorrelated SSD and SPoC components. It is also assumed that the noise contained in $\vec{x}(n)$ is uncorrelated with the derived SSD and SPoC components (see Haufe et al. \cite{haufe:2014}, Eq. (4)).
+\item Further details on linear methods that enable for a dimensionality reduction can be found in \cite{haufe:2014b}.
+
+\end{itemize}
+
+\bibliography{general_bib} 
+\bibliographystyle{plain}
+
+\end{document}
