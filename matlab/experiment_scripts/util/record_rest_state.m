@@ -1,4 +1,4 @@
-function [  ] = record_rest_state( time_rec )
+function [  ] = record_rest_state( time_rec, name )
 %record_rest_state Records eyes open/closed
 
 global EXPERIMENT_CONFIG
@@ -19,7 +19,7 @@ pyff_sendUdp('interaction-signal', 'state_command','show_crosshair');
 
 for rstate = {'eyes_open', 'eyes_closed'}
     
-    bbci = bbci_setup(rstate{1});
+    bbci = bbci_setup(strcat(name, rstate{1}));
     bbci.quit_condition.running_time = time_rec;
     
     if PROJECT_SETUP.HARDWARE_AVAILABLE
@@ -30,8 +30,6 @@ for rstate = {'eyes_open', 'eyes_closed'}
             bvr_sendcommand('viewsignals')
     end
     
-    %recycle reaction time feedback, we only want cursor
- 
     fprintf('Press a key to start recording with %s recording (%d s) \n', rstate{1}, time_rec);
     pause
     fprintf('starting recording...\n')

@@ -3,13 +3,14 @@
 
 import argparse
 import os
+import re
 
 import block_structure_utils
 
 def generateComplexityTable(block_structure, target_file, sep='\t'):
     with open(target_file, 'w') as fp:
         fp.write(sep.join(["block_no", "seq_no", "seq_name", "subject_complexity_rating"]) + '\n')
-        for block_no, block in enumerate(block_structure):
+        for block_no, block in block_structure.items():
             for seq_no, block_entry in enumerate(block):
                 fp.write(sep.join([str(block_no), str(seq_no), block_entry.seq_name, '-1']))
                 fp.write('\n')
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--output_directory', help="target directory for output")
     args = parser.parse_args()
     out_dir = os.path.abspath(args.output_directory)
-    complexity_table_file = os.path.join(out_dir, 'complexity_table.tsv')
+    bs_version = re.search("_v(\d+)", args.block_structure_file).group(1)
+    complexity_table_file = os.path.join(out_dir, 'complexity_table_v' + bs_version + '.tsv')
     bs = block_structure_utils.load_block_structure(args.block_structure_file)
     generateComplexityTable(bs, complexity_table_file)

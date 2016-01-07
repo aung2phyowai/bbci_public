@@ -211,7 +211,7 @@ the last seven frames are doubled
 
 #+TBLFM: $5=$2/$4::@26$2=vsum(@I..II)::@26$3=vsum(@I..II)::@26$4=vmean(@I..II)::@26$5=vsum(@I..II)::@26$6=vmean(@I..II)::@26$7=vmean(@I..II)::@26$8=vmean(@I..II)
 
-*** complex environment [6/26]
+*** complex environment [7/26]
 :PROPERTIES:
 :COOKIE_DATA: todo recursive
 :END:      
@@ -222,7 +222,7 @@ the last seven frames are doubled
 
 semi-complex, rather wide street
 
-***** COMBINE c01_2 365-565 -> 200 frames
+***** DONE c01_2 365-565 -> 200 frames
 can be complex with added pedestrians
 
       - 380-406 *safe* /mod1/ pedestrian walking

@@ -12,6 +12,12 @@ experiment_config();
 %% Start BV recorder (if available)
 
 if PROJECT_SETUP.HARDWARE_AVAILABLE
+    if strcmp(EXPERIMENT_CONFIG.VPcode, 'VPtest')
+         if dinput('Using test VP code, are you sure (y/n) ...\n', 'n') ~= 'y'
+             error('test VP code on experiment machine')
+         end
+    end
+    
     system([PROJECT_SETUP.BV_RECORDER_EXECUTABLE ' &'])
     pause(3);
     bvr_sendcommand('stoprecording');
@@ -27,8 +33,9 @@ end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
 %% Record rest state
-if (EXPERIMENT_CONFIG.rest_state.enabled && input('Enter s to skip, anything else to start new rest state recording...\n', 's') ~= 's')
-	record_rest_state(EXPERIMENT_CONFIG.rest_state.duration)
+if (EXPERIMENT_CONFIG.rest_state.enabled && ...
+    strcmp(dinput('Record rest state (y/n)...\n', 'y'), 'y'))
+	record_rest_state(EXPERIMENT_CONFIG.rest_state.duration, 'beginning')
 else
     warning('skipping rest state')
 end
@@ -49,19 +56,18 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
     pyff_sendUdp('interaction-signal', 'command','play');
     
  
-    if (input('Press y to display a sample reaction time block...\n', 's') == 'y')
-        pyff_sendUdp('interaction-signal', 'state_command','start_block'); 
-    end
     %% Run reaction time block
-    for block_no = 0:(EXPERIMENT_CONFIG.fb.reaction_time.block_count - 1)
+    %convention: block 0 is sample
+    rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], 0);
+    while rt_block_no <= EXPERIMENT_CONFIG.fb.reaction_time.block_count 
 
-        if (input(['Enter q to quit, anything else to start new reaction time block' num2str(block_no) '...\n'], 's') == 'q')
+        if (input(['Enter q to quit, anything else to start new reaction time block' num2str(rt_block_no) '...\n'], 's') == 'q')
             break
         end
         
         %% setup recording
         % Setup bbci toolbox parameters
-        bbci = bbci_setup(sprintf('reaction_time_block%02d', block_no));
+        bbci = bbci_setup(sprintf('reaction_time_block%02d', rt_block_no));
         %configure brain vision recorder
         if PROJECT_SETUP.HARDWARE_AVAILABLE
             bvr_sendcommand('stoprecording');
@@ -76,6 +82,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         fprintf('Sent play signal\n')
         
         data = bbci_apply(bbci);
+        rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], rt_block_no + 1);
     end
     
 
@@ -103,9 +110,13 @@ pyff_send_parameters(EXPERIMENT_CONFIG.block_structure(false,:), 'standby'); %se
 pyff_sendUdp('interaction-signal', 'command','play');
 
 %% loop over blocks
-%convention: block 0 is familarization
-block_no = input(['Enter block to start with: -2, -1, 0-> Familiarization, max: ' num2str(EXPERIMENT_CONFIG.block_count - 1) '\n'])
-while block_no < EXPERIMENT_CONFIG.block_count(1)
+%convention: blocks < 1 are familarization
+
+min_block_no = min(EXPERIMENT_CONFIG.block_structure.blockNo);
+max_block_no = max(EXPERIMENT_CONFIG.block_structure.blockNo);
+
+block_no = dinput(['Enter next block number (' num2str(min_block_no) '<=i<=' num2str(max_block_no) '), or i> ' num2str(max_block_no) '  to quit\n'], min_block_no);
+while min_block_no <= block_no && block_no <= max_block_no
     block_rows_sel = EXPERIMENT_CONFIG.block_structure.blockNo == block_no;
     current_block = EXPERIMENT_CONFIG.block_structure(block_rows_sel, :);
     
@@ -120,7 +131,7 @@ while block_no < EXPERIMENT_CONFIG.block_count(1)
     stimutil_waitForMarker(bbci_setup('loading'), EXPERIMENT_CONFIG.markers.technical.preload_completed)
     fprintf('complete\n')
 
-    fprintf([' Next block: ', block_name, '\n'])
+    fprintf([' Next block: ', block_name, '; last block is ' num2str(max_block_no) ' \n'])
     for seqIdx = 1:size(current_block, 1)
         fprintf(['  ' current_block.seqName{seqIdx} '\n'])
     end
@@ -155,9 +166,16 @@ while block_no < EXPERIMENT_CONFIG.block_count(1)
     if EXPERIMENT_CONFIG.validation.show_validation_stats
         marker_stats(data.marker)
     end
-    block_no = block_no + 1
-    
+
+    block_no = dinput(['Enter next block number (' num2str(min_block_no) '<=i<=' num2str(max_block_no) '), or i> ' num2str(max_block_no) '  to quit\n'], block_no + 1);
 end
 
 
 pyff_stop_feedback_controller()
+
+if (EXPERIMENT_CONFIG.rest_state.enabled && ...
+    strcmp(dinput('Record rest state (y/n)...\n', 'y'), 'y'))
+	record_rest_state(EXPERIMENT_CONFIG.rest_state.duration, 'end')
+else
+    warning('skipping rest state')
+end

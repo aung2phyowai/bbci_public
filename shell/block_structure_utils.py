@@ -8,7 +8,7 @@ BlockEntry = collections.namedtuple('BlockEntry', ['seq_name', 'seq_file', 'fps'
 
 def load_block_structure(bs_file, vco_data_dir=None):
     """reads a block structure file into a list of 'BlockEntry's """
-    blocks = []
+    blocks = collections.OrderedDict()
     with open(bs_file) as fp:
         tsv_reader = csv.reader(fp, delimiter='\t')
         next(tsv_reader) #skip header
@@ -16,7 +16,7 @@ def load_block_structure(bs_file, vco_data_dir=None):
         for row in tsv_reader:
             block_no = int(row[0])
             if block_no != last_block_no:
-                blocks.append([])
+                blocks[block_no] = []
                 last_block_no = block_no
             seq_basename = os.path.basename(os.path.normpath(row[1]))
             if vco_data_dir:
