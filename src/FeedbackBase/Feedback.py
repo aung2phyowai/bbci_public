@@ -86,11 +86,17 @@ class Feedback(object):
         # Setup the parallel port
         self._pport = None
         if sys.platform == 'win32':
-            try:
-                from ctypes import windll
-                self._pport = windll.inpout32
-            except:
-                self.logger.warning("Could not load inpout32.dll. Please make sure it is located in the system32 directory")
+            from ctypes import windll
+            if sys.maxsize > 2**32: #64bit
+                try:
+                    self._pport = windll.inpoutx64
+                except:
+                    self.logger.warning("Could not load inpoutx64.dll. Please make sure it is located in the system32 directory")
+            else:
+                try:
+                    self._pport = windll.inpout32
+                except:
+                    self.logger.warning("Could not load inpout32.dll. Please make sure it is located in the system32 directory")
         else:
             try:
                 import parallel
