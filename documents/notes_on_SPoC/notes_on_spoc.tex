@@ -1,0 +1,119 @@
+\documentclass[11pt,a4paper]{paper}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{dsfont}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\cov}{Cov}
+\DeclareMathOperator*{\var}{Var}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\Lagr}{\mathcal{L}}
+\usepackage{graphicx}
+\author{Andreas Meinel}
+\title{SPoC_details_for_implementation}
+\begin{document}
+\subsection*{Details on the SPoC implementation}
+
+This section refers to the publication 'SPoC: A novel framework for relating the amplitude of neuronal oscillations to behaviorally relevant parameters.' (Dähne et al., 2014, NeuroImage) 
+
+\subsection*{Covariances}
+Given a data set x(e) for a fixed epoch e with $N_{s}$ sample points and for $N_{ch}$ channels, the channelwise covariance matrix $\vec{C}(e)$ is defined as:
+
+\begin{equation}\label{eq:spoc_cov_def}
+\vec{C}(e):=E[xx^\intercal]=(x(e)-\langle x\rangle)(x(e)-\langle x\rangle)^\intercal
+\end{equation}
+
+$\langle x\rangle$ denotes the mean over $N_{s}$ sample points for a fixed channel. The mean covariance matrix over all epochs (trials) e is defined as $C:=\langle \vec{C}(e)\rangle$. In addition, a z-weighted covariance matrix averaged over all $N_{e}$ epochs is required for the SPoC formulation as follows:
+
+\begin{equation}\label{eq:spoc_Cxxz_def}
+C_{z}:=\langle \vec{C}(e)z(e)\rangle=\frac{1}{N_{e}}\sum_{e=1}^{N_{e}}\vec{C}(e)z(e)
+\end{equation}
+
+
+\subsection*{Optimizing source power covariance}
+The SPoC$_{\lambda}$ approach maximizes the covariance of the bandpower $\tilde{z}$ of a specific frequency band and the target variable $z$. This ansatz drops the variance restriction and doesn't take negative correlations into account. The objective function is set up as follows:
+
+\begin{equation}\label{eq:spoc_lambda}
+\argmax_\vec{w} {\cov{(\tilde{z},z)}}=\vec{w}C_{z}\vec{w}^\intercal
+\end{equation}
+
+In addition, the following norm constraint on the filter vector $\vec{w}$ has to be done:
+
+\begin{equation}\label{eq:spoc_lambda_constraint}
+\var{[\vec{w}^\intercal\vec{x}(t)]}=\vec{w}C\vec{w}^\intercal\overset{!}{=}1
+\end{equation}
+
+This norm restriction on $\vec{w}$ is required since one could just take large weights in order to maximize the covariance.\newline
+The optimization of Eq.~\eqref{eq:spoc_lambda} under the constraint that is formulated as an equality, given in Eq.\eqref{eq:spoc_lambda_constraint}, can be solved by the method of Lagrange multipliers. The Lagrange function is given as:
+
+\begin{equation}\label{eq:spoc_lagrange}
+\Lagr(\vec{w})=\vec{w}C_{z}\vec{w}^\intercal+\lambda(\vec{w}C\vec{w}^\intercal-1)
+\end{equation}
+
+$\lambda$ denotes a scalar which is called Lagrange multiplier. Taking the partial derivative of Eq.\eqref{eq:spoc_lagrange} with respect to $\vec{w}$ and setting it to zero, leads to $n_{ev}$ \textit{generalized} eigenvalue equations:
+
+\begin{equation}\label{eq:spoc_gev}
+C_{z}\vec{w}_{i}=\lambda_{i} C\vec{w}_{i}\qquad i=1,...,n_{ev}
+\end{equation}
+
+\subsection*{Whitening step leads to eigenvalue equation}
+In this section a whitening transformation is described in order to further simplify Eq.~\eqref{eq:spoc_gev} into an eigenvalue equation. Therefore the following transformation is applied on the mean free data $x$:
+
+\begin{equation}\label{eq:spoc_trafo}
+x':=D^{-1/2}V^{\intercal} x
+\end{equation}
+
+The matrices $D$ and $V$ will be gained by performing a PCA on the mean covariance matrix $C$. The eigenvalue decomposition of $C$ can be formulated as follows:
+
+\begin{equation}\label{eq:spoc_pca_cov}
+C\vec{v}_{i}=\gamma_{i} \vec{v}_{i}\qquad i=1,...,N_{ev}
+\end{equation}
+
+
+In matrix form, the eigenvalue problem can be formulated as:
+
+\begin{equation}\label{eq:spoc_pca_matrix}
+C=VDV^{-1}
+\end{equation}
+
+$D$ is a diagonal matrix and thus symmetric containing all eigenvalues $\gamma_{i}$ along the diagonal. For this reason, the property $D=D^\intercal$ holds. $V$ contains all eigenvectors $\vec{v}_{i}$ in its rows and is an orthogonal matrix. Thus the relation $V^{-1}=V^{\intercal}$ holds.
+\newline
+The transformation introduced in Eq.~\eqref{eq:spoc_trafo} modifies both matrices given in the generalized eigenvalue problem stated in Eq.~\eqref{eq:spoc_gev}. First, let us consider the transformation of the covariance matrix $C$ into the whitened space $C'$. The matrix property $(AB)^\intercal=B^\intercal A^\intercal$ is used in following:
+
+\begin{equation}\label{eq:spoc_trafo_C}
+\begin{split}
+C'& :=\frac{1}{N_{e}}\sum_{e}^{}E[x'(e)x'(e)^{\intercal}] \\
+&\overset{Eq.\eqref{eq:spoc_trafo}}{=}\frac{1}{N_{e}}\sum_{e}^{}E[D^{-1/2}V^{\intercal} x(e)(D^{-1/2}V^{\intercal} x(e))^{\intercal}] \\
+& = D^{-1/2}V^{\intercal}\frac{1}{N_{e}}\sum_{e}^{}E[xx^\intercal](D^{-1/2}V^{\intercal})^\intercal \\
+& = D^{-1/2}V^{\intercal} CV D^{-1/2} \\
+&\overset{Eq.\eqref{eq:spoc_pca_matrix}}{=} D^{-1/2}V^{\intercal}VDV^\intercal VD^{-1/2} \\
+& = \mathds{1}
+\end{split}
+\end{equation}
+
+The transformation of $C$ into the identity matrix brings the main advantage of this transformation procedure: the generalized eigenvalue problem turns into a simpler eigenvalue problem. \newline
+In a second step, the whitening step is applied to the z weighted mean covariance matrix $C_{z}'$ using the transformation matrix $M:=D^{-1/2}V^{\intercal}$:
+
+\begin{equation}\label{eq:spoc_trafo_Cz}
+\begin{split}
+C_{z}'& :=\frac{1}{N_{e}}\sum_{e}^{}E[x'(e)x'(e)^{\intercal}] z(e) \\
+&\overset{Eq.\eqref{eq:spoc_trafo}}{=}\frac{1}{N_{e}}\sum_{e}^{}E[D^{-1/2}V^{\intercal} x(e)(D^{-1/2}V^{\intercal} x(e))^{\intercal}]z(e) \\
+& = D^{-1/2}V^{\intercal}\Big[\frac{1}{N_{e}}\sum_{e}^{} (E[x(e)x(e)^\intercal]z(e))\Big](D^{-1/2}V^{\intercal})^\intercal \\
+&\overset{Eq.\eqref{eq:spoc_Cxxz_def}}{=} D^{-1/2}V^{\intercal}C_{z} VD^{-1/2} \\
+& = MC_{z}M^\intercal
+\end{split}
+\end{equation}
+
+Taking into account both transformation of Eq.~\eqref{eq:spoc_trafo_C} and Eq.~\eqref{eq:spoc_trafo_Cz}, the formulation of Eq.~\eqref{eq:spoc_gev} now turns into the following \textit{eigenvalue problem}:
+
+\begin{equation}\label{eq:spoc_ev}
+C_{z}'\vec{w'}_{i}=\lambda'_{i} \vec{w'}_{i}\qquad i=1,...,n_{ev}
+\end{equation}
+
+This equation can easily be solved by the Matlab function eig() with the whitened $C_{z}'$ matrix as an input. $\vec{w'}_{i}$ denotes the $i.^{th}$ eigenvector in the whitened space. Thus, to gain the filters for the original data x, the eigenvectors have to be retransformed by $\vec{w}_{i}=M^\intercal \vec{w'}_{i}$
+
+\paragraph{Geometrical interpretation of the whitening}
+The whitening procedure can be interpreted as a rotation by applying $V^\intercal$ on the data, and in a second step all dimensions are rescaled to unit variance by applying $D^{-1/2}$. More details on this interpretation can be found in the BCI lecture of Benjamin Blankertz (Lecture 5).
+
+\end{document}

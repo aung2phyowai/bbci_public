@@ -1,0 +1,13 @@
+Run generate_bsdlab_publications.py to generate the "index.php" file (the one that goes on the webpages)
+
+OR
+
+Run send_publications.sh to generate index.php and then push it to the webserver*
+*Requires login information for the webserver, which can be found in the group wiki
+
+===========
+To upload the info to the database of the uni:
+
+1) Install bibutils (http://sourceforge.net/projects/bibutils/)
+2) just run bib2xml or biblatex2xml. That'd be it.
+3) How to actually upload this to the uni database?

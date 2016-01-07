@@ -1,0 +1,38 @@
+Demo of job computation in the BWUniCluster
+sebastian.castano@blbt.uni-freiburg.de
+
+Description: Compute a parameter sweep for SPoC, i.e., different time 
+and frequency bands.
+
+Data: Two healthy subjects of the main Neglect-Posner Study
+
+Content:
+1) prepare_data.sh: Sends a job to execute demo_SPoCGridPrepare.m, where the
+raw data is read, preprocessed and converted to matlab format. Additionally
+M number of files are created, where each file contains the parameters to
+be evaluated for each of the subjects.
+IMPORTANT: Pay attention to where these two data sets are saved. You
+can choose betwee $HOME and $WORK. If you choose $HOME, your data is going 
+to be saved for ever but its access is relatively slow. On the other hand,
+if you choose $WORK, your data is going to be saved max 240 days, min 7 days,
+but it's access is 2x faster then the access to $HOME.
+
+2) compute_spoc.sh: Sends N jobs, where N is the number of subjects. Each
+job makes uses of MATLAB's parfor, where each thread takes care of reading 
+one of the parameters.
+IMPORTANT: Pay attention to the directory where you want to save your work.
+See the description above.
+
+STEPS:
+1) Copy the raw data to the BWUniCluster using the transfer_data.sh located in parallel/
+Example:
+bash transfer_data.sh -s ~/Dropbox/Solo/work/posner/matlab_scripts/analysis/main_study/extra_utils/session_list -l /mnt/fs_bsdlab/data/bbciRaw/
+
+2) Preprocess the data in a working node with the function demo_SPoCGridPrepare. This function is called using the bash script prepare_data.sh
+
+Example:
+msub -q singlenode -l pmem=10gb prepare_data.sh 
+
+3) Run SPoC in the server with the compute_batchSPoC script
+Example:
+bash compute_batchSPoC.sh ~/source/Posner/matlab_scripts/analysis/main_study/extra_utils/session_list

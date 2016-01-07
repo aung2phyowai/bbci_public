@@ -1,0 +1,35 @@
+.pubauthor {
+	color: black;
+}
+
+.pubtitle {
+	font-style:italic;
+}
+
+.pubnote {
+	color: #666666;
+}
+
+div.header {
+	padding-left:0px;
+	padding-right:120px;
+	text-align:left;
+}
+
+.noteauthority {
+	margin-top:20px;
+	font-style:italic;
+}
+
+.navbar {
+	margin-bottom:20px;
+	padding:5px;
+	font-weight: bold;
+	border-bottom: solid #000099 2px;
+	background-color: #DDDDEE;
+}
+
+.journal {
+ color: green;
+}
+
