@@ -27,6 +27,12 @@ PROJECT_SETUP.FEEDBACKS_DIR=fullfile(PROJECT_SETUP.BASE_DIR, 'feedbacks');
 addpath(PROJECT_SETUP.CONFIG_DIR)
 local_setup()
 
+% dependencies
+PROJECT_SETUP.DEPENDENCY_DIR=fullfile(PROJECT_SETUP.BASE_DIR, 'deps');
+
+PROJECT_SETUP.BBCI_DIR = fullfile(PROJECT_SETUP.DEPENDENCY_DIR, 'bbci_public');
+PROJECT_SETUP.BSDLAB_TOOLBOX_DIR = fullfile(PROJECT_SETUP.DEPENDENCY_DIR, 'bsdlab_toolbox');
+PROJECT_SETUP.PYFF_DIR = fullfile(PROJECT_SETUP.DEPENDENCY_DIR, 'pyff');
 
 %common_util should be already added
 addpath(PROJECT_SETUP.BBCI_DIR);
