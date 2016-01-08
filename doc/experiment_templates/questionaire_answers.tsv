@@ -14,6 +14,6 @@ questionaire_no	after_block_no	question_no	question	scale_label_1	scale_label_10
 1	4	100a	Ist die Aufgabe leicht oder anspruchsvoll?	leicht	anspruchsvoll	-1
 1	4	101a	Ist die Aufgabe einfach oder anstrengend?	einfach	anstrengend	-1
 1	4	102a	War die Aufgabe geruhsam oder hektisch?	geruhsam	hektisch	-1
-1	4	103a	Wie erfolgreichen waren Sie Ihrer Meinung nach beim Erkennen der Gefahrensituationen? Wie zufrieden sind Sie mit Ihrer Leistung?	zufrieden	unzufrieden	-1
+1	4	103a	Wie erfolgreich waren Sie Ihrer Meinung nach beim Erkennen der Gefahrensituationen? Wie zufrieden sind Sie mit Ihrer Leistung?	zufrieden	unzufrieden	-1
 1	4	104a	Wie stark mussten Sie sich anstrengen, um die Szenen beurteilen zu können?	viel	wenig	-1
 1	4	105a	Fühlten Sie sich während der Aufgabe unsicher und gestresst oder sicher und entspannt?	gestresst	entspannt	-1
