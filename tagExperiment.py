@@ -37,17 +37,13 @@ def checkout_branch(branch_name):
             print "could not checkout experiments branch, exiting"
             exit(ret_code)
 
-def override_branch_with_commit(commit_id, branch_name, commit_changes=False):
+def override_branch_with_current(branch_name, commit_changes=False):
     #we want to preserver the parent commit on the target branch
     # but ignore all of it contents
     #Since git only has a "ours" and not a "theirs" merge-strategy, we use a temp branch
     print_and_call('git branch %s' % branch_name) #to assure it exists, command itself might fail
     tmp_branch_name = 'tmp_%d' % datetime.datetime.now().toordinal()
     checkout_branch(tmp_branch_name)
-    ret_code = print_and_call('git reset --hard %s' % commit_id)
-    if ret_code != 0:
-        print "resetting failed, please delete temporary branch %s" % tmp_branch_name
-        exit(ret_code)
     if commit_changes:
         commit_all_changes("Auto-commit of changed and untracked files")
     #now we merge the target branch pro forma, so that we have a fast-forward later
@@ -68,7 +64,12 @@ def override_branch_with_commit(commit_id, branch_name, commit_changes=False):
 def commit_all_changes(commit_msg, include_untracked=True):
     if not check_clean_working_dir():
         if include_untracked:
-            cmd = "git add $(git ls-files -o -m  --exclude-standard)"
+            ls_files_cmd = "git ls-files -o -m  --exclude-standard"
+            files_to_add = subprocess.check_output(ls_files_cmd, shell=True)
+            print "///"
+            print files_to_add
+            print "///"
+            cmd = "git add " + files_to_add.replace('\n', ' ')
             ret_code = print_and_call(cmd)
             if ret_code != 0:
                 print "could not add files to index"
@@ -102,13 +103,12 @@ def get_vp_code():
     return (vpcode, vpdate)
 
 def init_experiment(vp_code, date_str, tag_name, commit, branch):
-    old_head = subprocess.check_output("git rev-parse HEAD", shell=True)
     if not check_clean_working_dir() and not commit:
         print "there are uncommitted changes in the repository; call git status for details. Use -c to auto-commit them."
         exit(-1)
-    override_branch_with_commit(old_head, branch, commit_changes=commit)
+    override_branch_with_current(branch, commit_changes=commit)
     configure_vp_code(vp_code, "'%s'" % date_str)
-    commit_msg = "Auto-commit before experiment %s" % tag_name
+    commit_msg = "Auto-commit before experiment %s, setting VPcode" % tag_name
     commit_all_changes(commit_msg)
     print "ready to run experiment; don't forget to call the script with finish to tag the results"
 
@@ -125,6 +125,10 @@ def finish_experiment(tag_name, message):
     configure_vp_code("VPtest")
     commit_msg = "Auto-commit: Reset VP code"
     commit_all_changes(commit_msg)
+    print "Finished experiment and created tag %s" % tag_name
+    branch_name_cmd = "git rev-parse --abbrev-ref HEAD"
+    cur_branch_name = subprocess.check_output(branch_name_cmd, shell=True)
+    print "You are still on branch %s; any auto-committed changes need to be incorporated from here." % cur_branch_name
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="initialize repository for experiment and tag current codebase")
