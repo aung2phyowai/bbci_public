@@ -80,6 +80,7 @@ def validate_seq_file(image_seq_file):
     for frame in image_marker_list:
         image_file = frame.file_name
         image_markers = frame.marker_tuples
+        event_names = frame.event_names
         if not os.path.isfile(image_file):
             print("%s ERROR: cannot find image %s" % (image_seq_file, image_file))
         try:
@@ -93,6 +94,11 @@ def validate_seq_file(image_seq_file):
                 print("%s  WARN: using 'generic_stimulus' marker for frame %s" % (image_seq_file, image_file))
             if marker.name is None:
                 print("%s  WARN: using purely numeric marker %d for frame %s" % (image_seq_file, marker[0], image_file))
+
+        if image_markers and not event_names:
+            print("%s ERROR: found marker without event name" % image_seq_file)
+        if len(event_names) > 1:
+            print("%s WARN: using multiple event_names for single frame; some scripts might assume only one per frame" % image_seq_file)
 
 def write_seq_file(seq_file_data, target_file):
     """ writes the data from a list of SeqFileEntry objects to a seq file """
