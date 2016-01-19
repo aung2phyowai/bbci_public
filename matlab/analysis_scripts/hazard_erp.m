@@ -13,8 +13,10 @@ preprocessing_config.highpass.passband = 0.7;
 preprocessing_config.highpass.stopband = 0.2;
 preprocessing_config.time_from_optic = true;
 preprocessing_config.target_fs = 100;
+preprocessing_config.add_event_labels = true;
 
-[vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config);
+[vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config,...
+    'LoadFromMat', false);
 
 [rt_cnt_pp, rt_mrk_pp, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', experiment_run, preprocessing_config);
 [reaction_times, jitter] = vco_get_reaction_times(rt_mrk_pp, rt_metadata.session.used_config);
@@ -100,3 +102,37 @@ toc
 % tic
 % saveas(h1, fullfile(PROJECT_SETUP.PLOT_DIR, [fig_name ival_str '2.pdf']), 'pdf')
 % toc
+
+%% Equal class sizes
+%well, there is probably also a bbci method to do this ...
+class_counts = sum(vco_epo_hazard_cleaned.y, 2);
+%assume that we have to remove non-hazard 
+assert( class_counts(1) <= class_counts(2))
+hazard_count = sum(vco_epo_hazard_cleaned.y(1,:) == 1);
+non_hazard_idxs = find(vco_epo_hazard_cleaned.y(2, :) == 1);
+non_hazard_idxs_to_remove = non_hazard_idxs(randperm(numel(non_hazard_idxs), numel(non_hazard_idxs) - hazard_count));
+vco_epo_hazard_cleaned_balanced = proc_selectEpochs(vco_epo_hazard_cleaned, 'not', non_hazard_idxs_to_remove);
+
+vco_epo_hazard_cleaned_balanced_rsqs = proc_rSquareSigned(vco_epo_hazard_cleaned_balanced);
+
+%no plot again with balanced epos
+ivals = [ 380 420; 450 550]
+% ivals = [50 100; 100 130; 130 160; 160 190; 190 220]
+% ivals = [290 310; 310 350; 350 400]
+% ivals = [100 150; 150 200; 200 230; 230 260; 260 270; 270 280; 280 290; 290 310; 390 410; 450 550];
+
+
+h1 = figure,
+h = plot_scalpEvolutionPlusChannelPlusrSquared(vco_epo_hazard_cleaned_balanced, vco_epo_hazard_cleaned_balanced_rsqs, mnt, {'PO7', 'Cz'}, ivals, struct('CLim', 'sym',     'GlobalCLim', 1), 'ExtrapolateToZero', 1);
+util_scalpChannels
+
+%% not-yet-thought-through classification
+%classify into hazard/non-hazard scenes based on 
+% - ERPs time-aligned to begin of stimulus
+% - unbalanced data (more non-hazardous scenes)
+cl_ivals = [100 150; 150 200; 200 230; 230 260; 260 270; 270 280; 280 290; 290 310; 390 410; 450 550];
+fv = proc_jumpingMeans(vco_epo_hazard_cleaned, cl_ivals);
+fv = proc_selectChannels(fv, util_scalpChannels);
+[loss, lossSem] = crossvalidation(fv,@train_RLDAshrink,'SampleFcn',{@sample_chronKFold,5},'LossFcn',@loss_rocArea);
+fprintf('Majority baseline (hazard/non-hazard): %1.3f \n', max(class_counts)/sum(class_counts))
+fprintf('Classification accuracy (hazard/non-hazard): %1.3f \n',1-loss)

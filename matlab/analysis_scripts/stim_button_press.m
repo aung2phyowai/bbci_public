@@ -20,6 +20,7 @@ preprocessing_config.highpass.passband = 0.7;
 preprocessing_config.highpass.stopband = 0.2;
 preprocessing_config.time_from_optic = true;
 preprocessing_config.target_fs = 100;
+preprocessing_config.add_event_labels = true;
 
 [vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config);
 

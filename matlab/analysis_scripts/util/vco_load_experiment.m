@@ -1,6 +1,14 @@
-function [ cnt_pp, mrk_pp, hdr, metadata ] = vco_load_experiment( experiment_name, experiment_run, preprocessing_config )
+function [ cnt_pp, mrk_pp, hdr, metadata ] = vco_load_experiment( experiment_name, experiment_run, preprocessing_config, varargin )
 %VCO_LOAD_SUBJECT Summary of this function goes here
 %   Detailed explanation goes here
+
+props= {'LoadFromMat'   true   'BOOL'};
+
+
+opt= opt_proplistToStruct(varargin{:});
+opt= opt_setDefaults(opt, props);
+opt_checkProplist(opt, props);
+
 
 global BTB
 
@@ -17,7 +25,7 @@ disp(['preprocessing with config ' num2str(config_hash)])
 cache_file_name = fullfile(BTB.MatDir, strcat(experiment_name, '_', experiment_run, '_', num2str(config_hash)));
 
 loaded = false;
-if exist([ cache_file_name '.mat'], 'file') == 2
+if opt.LoadFromMat && exist([ cache_file_name '.mat'], 'file') == 2
     [cnt_pp, mrk_pp, mnt, hdr, saved_preprocessing_config,  metadata] = file_loadMatlab(cache_file_name, {'cnt','mrk','mnt', 'hdr', 'preprocessing_config', 'metadata'});
     if isequal(preprocessing_config, saved_preprocessing_config)
         loaded = true;
@@ -34,6 +42,14 @@ if ~loaded
         mrk_timed = vco_mrk_timeFromOptic(mrk_orig, metadata.session.used_config);
     else
         mrk_timed = mrk_orig;
+    end
+
+    %experiment-specific settings
+    if strcmp(experiment_name, 'vco_pilot_run') 
+
+        if preprocessing_config.add_event_labels
+            mrk_timed = vco_mrk_addEventLabels(mrk_timed, metadata);
+        end
     end
     
     %% Preprocessing

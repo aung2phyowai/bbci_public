@@ -13,6 +13,7 @@ preprocessing_config.highpass.passband = 0.7;
 preprocessing_config.highpass.stopband = 0.2;
 preprocessing_config.time_from_optic = true;
 preprocessing_config.target_fs = 100;
+preprocessing_config.add_event_labels = true;
 
 [vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config);
 
@@ -39,7 +40,7 @@ spectogram = custom_plotFreqSpectrum(seq_spec, 'showFreqBand', true, 'freqBand',
 
 %%
 channel_idx = util_chanind(vco_epo_seq_start, 'Pz');
-SpectrogramExample(vco_epo_seq_start.x(:, channel_idx, 1), vco_epo_seq_start.fs)
+SpectrogramExample(vco_epo_seq_start.x(:, channel_idx, 2), vco_epo_seq_start.fs)
 spectogram(vco_epo_seq_start.x(:, :, 1))
 
 %%
