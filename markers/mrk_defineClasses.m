@@ -58,6 +58,8 @@ if iscell(mk.event.desc),
 else
   mrk= struct('time', mk.time, 'event',struct('desc',mk.event.desc));
 end
+%changed from upstream
+mrk = struct('time', mk.time, 'event', mk.event);
 
 mrk.y= zeros(nClasses, numel(mrk.time));
 for cc= 1:nClasses,
