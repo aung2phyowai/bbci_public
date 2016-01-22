@@ -11,7 +11,8 @@ Dependency = collections.namedtuple('Dependency', ['directory', 'repository', 'd
 PROJECT_DEPENDENCIES = {
     'bbci_public' : Dependency('deps/bbci_public', 'git@github.com:bsdlab/bbci_public.git', 'master'),
     'bsdlab_toolbox' : Dependency('deps/bsdlab_toolbox', 'git@github.com:bsdlab/bsdlab_toolbox.git', 'master'),
-    'pyff' : Dependency('deps/pyff', 'git@github.com:bsdlab/pyff.git', 'windows_x64')
+    'pyff' : Dependency('deps/pyff', 'git@github.com:bsdlab/pyff.git', 'windows_x64'),
+    'iview' : Dependency('deps/iview', 'https://github.com/bsdlab/iview.git', 'master')
     }
 
 def init_dependency(dep_name, branch_name, squash):
