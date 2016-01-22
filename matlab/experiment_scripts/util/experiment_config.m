@@ -16,6 +16,9 @@ EXPERIMENT_CONFIG.block_structure_file = fullfile(PROJECT_SETUP.CONFIG_DIR, 'blo
 
 EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.date];
 EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
+
+EXPERIMENT_CONFIG.eye_tracking.enabled = true;
+
 EXPERIMENT_CONFIG.logging.enabled = false;
 EXPERIMENT_CONFIG.validation.show_validation_stats = false;
 
@@ -25,7 +28,7 @@ EXPERIMENT_CONFIG.rest_state.duration = 60; % in seconds
 EXPERIMENT_CONFIG.reaction_time_recording.enabled = true;
 
 % feedback settings
-EXPERIMENT_CONFIG.fb.show_debug_infos = false;
+EXPERIMENT_CONFIG.fb.show_debug_infos = true;
 
 EXPERIMENT_CONFIG.fb.img_seq.python_class_name = 'ImageSeqFeedback';
 EXPERIMENT_CONFIG.fb.img_seq.use_optomarker = true;
@@ -71,6 +74,11 @@ EXPERIMENT_CONFIG.feedbackLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedba
 EXPERIMENT_CONFIG.markers = ini2struct(fullfile(PROJECT_SETUP.CONFIG_DIR, 'markers.ini'));
 
 [EXPERIMENT_CONFIG.block_structure, EXPERIMENT_CONFIG.block_count, EXPERIMENT_CONFIG.block_size] = load_block_structure(EXPERIMENT_CONFIG.block_structure_file);
+
+%load iview folder only when necessary
+if EXPERIMENT_CONFIG.eye_tracking.enabled
+   addpath(PROJECT_SETUP.IVIEW_DIR) 
+end
 
 %initialize RNG based on VPcode and date -> identical order on each run
 reset_rng()

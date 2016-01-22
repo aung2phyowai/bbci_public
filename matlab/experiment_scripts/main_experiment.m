@@ -32,6 +32,14 @@ if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
 end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
+if EXPERIMENT_CONFIG.eye_tracking.enabled
+    iview_acquire_gaze('persistent_init');
+    cleaner = onCleanup(@() iview_acquire_gaze('persistent_close'));
+    if strcmp(dinput('Calibrate Eyetracker? (y/n)...\n', 'y'), 'y')
+        iview_calibrate()
+    end
+end
+
 %% Record rest state
 if (EXPERIMENT_CONFIG.rest_state.enabled && ...
     strcmp(dinput('Record rest state (y/n)...\n', 'y'), 'y'))
@@ -128,7 +136,11 @@ while min_block_no <= block_no && block_no <= max_block_no
     pyff_sendUdp('interaction-signal', 'state_command','start_preload');
     fprintf('Preloading...')
 %     wait_for_marker(EXPERIMENT_CONFIG.markers.technical.preload_completed)
-    stimutil_waitForMarker(bbci_setup('loading'), EXPERIMENT_CONFIG.markers.technical.preload_completed)
+    tmp_bbci = bbci_setup('loading');
+    if EXPERIMENT_CONFIG.eye_tracking.enabled
+        tmp_bbci.source(2) = [];
+    end
+    stimutil_waitForMarker(tmp_bbci, EXPERIMENT_CONFIG.markers.technical.preload_completed)
     fprintf('complete\n')
 
     fprintf([' Next block: ', block_name, '; last block is ' num2str(max_block_no) ' \n'])

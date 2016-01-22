@@ -23,10 +23,19 @@ if PROJECT_SETUP.HARDWARE_AVAILABLE
     bbci.source(1).acquire_param= {'clab',{'*'}};
     bbci.source(1).min_blocklength = 10;
     bbci.source(1).record_signals = true;
+    bbci.source(1).record_param = {};
 
     bbci.signal(1).source = 1;
     bbci.signal(1).proc = {};
     bbci.signal(1).buffer_size = 10;
+    
+    if EXPERIMENT_CONFIG.eye_tracking.enabled
+        bbci.source(2).acquire_fcn= @iview_acquire_gaze;
+        bbci.source(2).acquire_param= {};
+        bbci.source(2).record_signals = true;
+        bbci.source(2).record_param = {'Internal' 1};
+        bbci.source(2).record_basename = [full_rec_name '_iview'];
+    end
 else
     fs = 100;
     max_amp = 26.3;

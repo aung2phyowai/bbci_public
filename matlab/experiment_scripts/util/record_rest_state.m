@@ -19,7 +19,7 @@ pyff_sendUdp('interaction-signal', 'state_command','show_crosshair');
 
 for rstate = {'eyes_open', 'eyes_closed'}
     
-    bbci = bbci_setup(strcat(name, rstate{1}));
+    bbci = bbci_setup(strcat(name, '_', rstate{1}));
     bbci.quit_condition.running_time = time_rec;
     
     if PROJECT_SETUP.HARDWARE_AVAILABLE
@@ -28,6 +28,11 @@ for rstate = {'eyes_open', 'eyes_closed'}
             bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
             
             bvr_sendcommand('viewsignals')
+            
+            %remove eyetracking in rest state since we don't have markers
+            if EXPERIMENT_CONFIG.eye_tracking.enabled
+                bbci.source(2) = [];
+            end
     end
     
     fprintf('Press a key to start recording with %s recording (%d s) \n', rstate{1}, time_rec);
