@@ -93,7 +93,7 @@ function varargout= iview_acquire_gaze(varargin)
           pocketSize = pnet(sock, 'readpacket', 'noblock');
           if pocketSize > 0
             packet = pnet(sock, 'read', 'noblock');
-            if(str2double(packet) == 100),
+            if(str2double(packet) == 204),
                 state.active = true;
                 display('Marker 100 captured, iView activated!');
             end
