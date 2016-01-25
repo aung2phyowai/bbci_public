@@ -59,6 +59,7 @@ class ImageSeqFeedback(StateMachineFeedback):
                              'next_block_info' : [],
                              #minimal delay to wait before starting block playback after receiving command
                              'initial_playback_delay' : 5.0,
+                             'pre_start_marker_gap' : 1.0, #in seconds before and after pre-start marker
                              'log_prefix_block' : "defaultblock"
                             })
         return default_conf
@@ -273,6 +274,7 @@ class BlockPreloadState(FrameState):
         self.block_data = BlockData(seq_fps_list)
         self.cache_batch_size = 5
         self.caching_complete = False
+        self._send_pre_start_marker_frame = sys.maxint
         self._earliest_playback_start = sys.maxint #for delay after command
         if auto_play:
             self._unhandled_commands.append('start_playback')
@@ -306,9 +308,16 @@ class BlockPreloadState(FrameState):
         #check if we received playback command
         if "start_playback" in self._unhandled_commands:
             delay_framelength = config['initial_playback_delay'] * config['screen_fps']
-            after_delay = self._state_frame_count + delay_framelength
-            self._earliest_playback_start = min(self._earliest_playback_start, after_delay)
+            pre_start_marker_gap_frames = config['pre_start_marker_gap'] * config['screen_fps']
+            self._send_pre_start_marker_frame = self._state_frame_count + delay_framelength + pre_start_marker_gap_frames
+            self._earliest_playback_start = min(self._earliest_playback_start, self._send_pre_start_marker_frame + pre_start_marker_gap_frames)
+            self.logger.warn('pre' + str(self._send_pre_start_marker_frame))
+            self.logger.warn('earliest' + str(self._earliest_playback_start))
+            self._unhandled_commands.remove('start_playback')
 
+        if self._state_frame_count == self._send_pre_start_marker_frame:
+            new_markers.append(markers.technical['pre_start'])
+            
         #do actual work
         self._load_images_blocking()
         #control state

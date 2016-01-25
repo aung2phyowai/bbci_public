@@ -31,7 +31,7 @@ if PROJECT_SETUP.HARDWARE_AVAILABLE
     
     if EXPERIMENT_CONFIG.eye_tracking.enabled
         bbci.source(2).acquire_fcn= @iview_acquire_gaze;
-        bbci.source(2).acquire_param= {};
+        bbci.source(2).acquire_param= {'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start};
         bbci.source(2).record_signals = true;
         bbci.source(2).record_param = {'Internal' 1};
         bbci.source(2).record_basename = [full_rec_name '_iview'];

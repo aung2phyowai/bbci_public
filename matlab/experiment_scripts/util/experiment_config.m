@@ -19,7 +19,7 @@ EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
 
 EXPERIMENT_CONFIG.eye_tracking.enabled = true;
 
-EXPERIMENT_CONFIG.logging.enabled = false;
+EXPERIMENT_CONFIG.logging.enabled = true;
 EXPERIMENT_CONFIG.validation.show_validation_stats = false;
 
 
@@ -78,6 +78,9 @@ EXPERIMENT_CONFIG.markers = ini2struct(fullfile(PROJECT_SETUP.CONFIG_DIR, 'marke
 %load iview folder only when necessary
 if EXPERIMENT_CONFIG.eye_tracking.enabled
    addpath(PROJECT_SETUP.IVIEW_DIR) 
+%    addpath(genpath(fullfile(PROJECT_SETUP.IVIEW_DIR, 'sdk')))
+   addpath(genpath(fullfile(PROJECT_SETUP.IVIEW_DIR, 'bin')))
+   addpath(genpath(fullfile(PROJECT_SETUP.IVIEW_DIR, 'dotnet')))
 end
 
 %initialize RNG based on VPcode and date -> identical order on each run

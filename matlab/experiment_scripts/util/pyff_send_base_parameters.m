@@ -20,7 +20,6 @@ fbsettings.screen_position_x = PROJECT_SETUP.SCREEN_POSITION(1);
 fbsettings.screen_position_y = PROJECT_SETUP.SCREEN_POSITION(2);
 fbsettings.display_debug_information = EXPERIMENT_CONFIG.fb.show_debug_infos;
 
-
 fbsettings.log_dir = EXPERIMENT_CONFIG.feedbackLogDir;
 fbsettings.log_prefix = EXPERIMENT_CONFIG.filePrefix;
 

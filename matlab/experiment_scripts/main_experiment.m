@@ -90,6 +90,10 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         fprintf('Sent play signal\n')
         
         data = bbci_apply(bbci);
+        
+        if EXPERIMENT_CONFIG.eye_tracking.enabled
+            iview_merge_matlab( data.source(1).record.filename, data.source(2).record.filename, 'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start );
+        end
         rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], rt_block_no + 1);
     end
     
@@ -170,6 +174,10 @@ while min_block_no <= block_no && block_no <= max_block_no
     
     data = bbci_apply(bbci);
 
+    if EXPERIMENT_CONFIG.eye_tracking.enabled
+        iview_merge_matlab( data.source(1).record.filename, data.source(2).record.filename, 'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start );
+    end
+    
     if ~any(data.marker.desc == EXPERIMENT_CONFIG.markers.technical.seq_start)
         fprintf('%s\n', ['Playback did not start, consult log in ' EXPERIMENT_CONFIG.feedbackLogDir])
     end

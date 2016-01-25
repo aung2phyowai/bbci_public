@@ -8,6 +8,7 @@ import datetime
 import logging
 import os
 import random
+import sys
 import time
 
 import markers
@@ -38,6 +39,7 @@ class ReactionTimeFeedback(StateMachineFeedback):
                              'inter_stimulus_delay' : 2.0,
                              'min_readiness_duration' : 3.0,
                              'median_readiness_duration' : 3.5,
+                             'pre_start_marker_gap' : 1.0, #in seconds before and after pre-start marker
                              'block_length' : 5})
 
         return default_conf
@@ -46,19 +48,28 @@ class ReactionTimeFeedback(StateMachineFeedback):
 class StandbyState(FrameState):
     def __init__(self, controller):
         super(StandbyState, self).__init__(controller)
+        self._send_pre_start_marker_frame = sys.maxint
+        self._block_start_frame = sys.maxint
 
     def _handle_state(self, screen):
         frame_markers = []
         #pygame_helpers.draw_center_cross(screen)
         if self._state_frame_count == 0:
             frame_markers.append(markers.technical['standby_start'])
+        elif self._state_frame_count == self._send_pre_start_marker_frame:
+            frame_markers.append(markers.technical['pre_start'])
 
         if "start_block" in self._unhandled_commands:
+            conf = self.controller.config
+            frame_gap = conf['pre_start_marker_gap'] * conf['screen_fps']
+            self._send_pre_start_marker_frame = self._state_frame_count + frame_gap
+            self._block_start_frame = self._send_pre_start_marker_frame + frame_gap
             self._unhandled_commands.remove('start_block')
+        if self._state_frame_count == self._block_start_frame:
             return StateOutput(frame_markers, SingleStimulusState(self.controller, 0))
-        elif "show_crosshair" in self._unhandled_commands:
-            self._unhandled_commands.remove("show_crosshair")
-            return StateOutput(frame_markers, CrosshairState(self.controller))
+#        elif "show_crosshair" in self._unhandled_commands:
+#            self._unhandled_commands.remove("show_crosshair")
+#            return StateOutput(frame_markers, CrosshairState(self.controller))
         else:
             return StateOutput(frame_markers, self)
 
@@ -87,6 +98,8 @@ class SingleStimulusState(FrameState):
                 frame_markers.append(markers.technical['seq_start'])
             pygame_helpers.draw_center_cross(screen)
         elif self._state_frame_count < self._stimulus_start_frame_no:
+            if self._state_frame_count == self._stimulus_start_frame_no:
+                frame_markers.append(markers.technical['get_ready_start'])
             pygame_helpers.draw_center_cross(screen, color=(200, 200, 200))
         else:
             if self._state_frame_count == self._stimulus_start_frame_no:
