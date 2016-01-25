@@ -1,29 +1,37 @@
 function varargout= iview_acquire_gaze(varargin)
 
-    global ACQ_MARKER
+
     persistent recorder
     persistent sock
     
     output = {};
 
     if isequal(varargin{1}, 'persistent_init'),   
+        init_props= {'SendAddress'       '192.168.1.2'       '!CHAR'
+                'SendPort'          4444                '!INT[1]'
+                'ReceiveAddress'    '192.168.1.1'       '!CHAR'
+                'ReceivePort'       5555                '!INT[1]'
+                'UdpMarkerPort'     12344               '!INT[1]'
+            };
+        init_opts = opt_proplistToStruct(varargin{2:end});
+        init_params = opt_setDefaults(init_opts, init_props, 1);
         if isempty(recorder)
+            
+            
             display('start recorder')
-            file_path = mfilename('fullpath');
-            idx = max(strfind(file_path, '\'));
-            dir_path = file_path(1:idx);
-            NET.addAssembly([dir_path '\bin\iViewClient.dll']);
+            dir_path = fileparts(which(mfilename));
+            NET.addAssembly(fullfile(dir_path, 'bin', 'iViewClient.dll')); 
 
             params = iViewClient.RecorderParameters();
-            params.SendAddress = '192.168.1.2';
-            params.SendPort = 4444;
-            params.ReceiveAddress = '192.168.1.1';
-            params.ReceivePort = 5555;
+            params.SendAddress = init_params.SendAddress;
+            params.SendPort = init_params.SendPort;
+            params.ReceiveAddress = init_params.ReceiveAddress;
+            params.ReceivePort = init_params.ReceivePort;
             recorder = iViewClient.Recorder(params);
         end
         if isempty(sock)
             display('persistent init')
-            sock = pnet('udpsocket', 12344);
+            sock = pnet('udpsocket', init_params.UdpMarkerPort);
         end
     elseif isequal(varargin{1}, 'persistent_close'),
         %pnet(sock, 'close');
@@ -54,10 +62,11 @@ function varargout= iview_acquire_gaze(varargin)
     function init(state)
         default_clab= {'iView_left_x', 'iView_left_y', 'iView_left_diam', ...
                        'iView_right_x', 'iView_right_y', 'iView_right_diam'};
-        props= {'fs'           1000           '!DOUBLE[1]'
-               'clab'          default_clab   'CELL{CHAR}'
-               'blocksize'     40             '!DOUBLE[1]'
-               'realtime'      1              '!DOUBLE[1]'
+        props= {'fs'                1000           '!DOUBLE[1]'
+               'clab'               default_clab   'CELL{CHAR}'
+               'blocksize'          40             '!DOUBLE[1]'
+               'realtime'           1              '!DOUBLE[1]'
+               'rec_start_marker'   100            '!INT[1]'
              };
         state= opt_setDefaults(state, props, 1);
         state.nChannels= length(state.clab);
@@ -93,9 +102,9 @@ function varargout= iview_acquire_gaze(varargin)
           pocketSize = pnet(sock, 'readpacket', 'noblock');
           if pocketSize > 0
             packet = pnet(sock, 'read', 'noblock');
-            if(str2double(packet) == 204),
+            if(str2double(packet) == state.rec_start_marker),
                 state.active = true;
-                display('Marker 100 captured, iView activated!');
+                display(['Marker ' num2str(state.rec_start_marker) ' captured, iView activated!']);
             end
           end
         end

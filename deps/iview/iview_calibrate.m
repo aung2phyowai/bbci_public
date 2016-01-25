@@ -1,12 +1,18 @@
-function iview_calibrate()
+function iview_calibrate(varargin)
 
-path(path, 'D:\git\iview\bin')
+init_props= {'SendAddress'       '192.168.1.2'       '!CHAR'
+            'SendPort'          4444                '!INT[1]'
+            'ReceiveAddress'    '192.168.1.1'       '!CHAR'
+            'ReceivePort'       5555                '!INT[1]'
+    };
+calib_opts = opt_proplistToStruct(varargin{1:end});
+calib_params = opt_setDefaults(calib_opts, init_props, 1);
 
 includename = 'iViewXAPI.h';
 dllname = 'iViewXAPI64.dll';
 libraryname = 'iViewXAPI64';
 
-loadlibrary(dllname, includename);
+[notfound, warning] = loadlibrary(dllname, includename);
 
 [pSystemInfoData, pSampleData, pEventData, pAccuracyData, CalibrationData] = InitiViewXAPI();
 
@@ -23,7 +29,8 @@ CalibrationData.targetFilename = int8('');
 pCalibrationData = libpointer('CalibrationStruct', CalibrationData);
 
 disp('Connect to iViewX (eyetracking-server)')
-res = calllib(libraryname, 'iV_Connect', '192.168.1.2', int32(4444), '192.168.1.1', int32(5555));
+res = calllib(libraryname, 'iV_Connect', calib_params.SendAddress, int32(calib_params.SendPort),...
+    calib_params.ReceiveAddress, int32(calib_params.ReceivePort));
 connected = check_response(res);
 
 if connected
