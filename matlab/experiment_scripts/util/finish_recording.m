@@ -9,7 +9,8 @@ global PROJECT_SETUP
 if PROJECT_SETUP.HARDWARE_AVAILABLE
     if EXPERIMENT_CONFIG.eye_tracking.enabled
         iview_merge_matlab( data.source(1).record.filename, data.source(2).record.filename,...
-            'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start );
+            'SyncMarker', EXPERIMENT_CONFIG.markers.technical.pre_start,...
+            'ResultSuffix', '_merged');
     end
 end
 

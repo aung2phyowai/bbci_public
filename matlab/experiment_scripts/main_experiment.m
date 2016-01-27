@@ -120,7 +120,16 @@ while min_block_no <= block_no && block_no <= max_block_no
         fprintf(['  ' current_block.seqName{seqIdx} '\n'])
     end
 
-    if (input('Enter q to quit, anything else to continue...\n', 's') == 'q')
+    
+    %% recalibrate eyetracker
+    if EXPERIMENT_CONFIG.eye_tracking.enabled && mod(block_no, EXPERIMENT_CONFIG.eye_tracking.blocks_per_calibration) == 1  ...
+            && strcmp(dinput('Calibrate Eyetracker? (y/n)...\n', 'y'), 'y')
+        iview_calibrate('SaveAccuracy', true, ...
+            'LogFile', EXPERIMENT_CONFIG.eye_tracking.calibration_log,...
+            'LogLabel', block_name);
+    end
+    
+    if (input('Enter q to quit, anything else to start block...\n', 's') == 'q')
         break
     end
     

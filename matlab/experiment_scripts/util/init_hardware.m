@@ -26,7 +26,9 @@ if PROJECT_SETUP.HARDWARE_AVAILABLE
         iview_acquire_gaze('persistent_init');
         cleanup_handle = onCleanup(@() iview_acquire_gaze('persistent_close'));
         if strcmp(dinput('Calibrate Eyetracker? (y/n)...\n', 'y'), 'y')
-            iview_calibrate()
+            iview_calibrate('SaveAccuracy', true, ...
+            'LogFile', EXPERIMENT_CONFIG.eye_tracking.calibration_log,...
+            'LogLabel', 'before_experiment');
         end
     end
 end

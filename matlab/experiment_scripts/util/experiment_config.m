@@ -18,6 +18,7 @@ EXPERIMENT_CONFIG.VPcode_date = [EXPERIMENT_CONFIG.VPcode '_' EXPERIMENT_CONFIG.
 EXPERIMENT_CONFIG.filePrefix = [EXPERIMENT_CONFIG.VPcode_date '_vco_pilot_run'];
 
 EXPERIMENT_CONFIG.eye_tracking.enabled = true;
+EXPERIMENT_CONFIG.eye_tracking.blocks_per_calibration = 4;
 
 EXPERIMENT_CONFIG.logging.enabled = true;
 EXPERIMENT_CONFIG.validation.show_validation_stats = false;
@@ -28,7 +29,7 @@ EXPERIMENT_CONFIG.rest_state.duration = 60; % in seconds
 EXPERIMENT_CONFIG.reaction_time_recording.enabled = true;
 
 % feedback settings
-EXPERIMENT_CONFIG.fb.show_debug_infos = true;
+EXPERIMENT_CONFIG.fb.show_debug_infos = false;
 
 EXPERIMENT_CONFIG.fb.img_seq.python_class_name = 'ImageSeqFeedback';
 EXPERIMENT_CONFIG.fb.img_seq.use_optomarker = true;
@@ -41,6 +42,7 @@ EXPERIMENT_CONFIG.fb.img_seq.get_ready_duration_median =  2.5;
 EXPERIMENT_CONFIG.fb.img_seq.pre_question_pause_min = 1.5;
 EXPERIMENT_CONFIG.fb.img_seq.pre_question_pause_median = 2.5;
 EXPERIMENT_CONFIG.fb.img_seq.rest_screen_duration = 2.5;
+EXPERIMENT_CONFIG.fb.img_seq.pre_start_marker_gap = 2.0;
 
 
 EXPERIMENT_CONFIG.fb.reaction_time.python_class_name = 'ReactionTimeFeedback';
@@ -48,8 +50,9 @@ EXPERIMENT_CONFIG.fb.reaction_time.max_reaction_time = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.inter_stimulus_delay = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.min_readiness_duration = 2.0;
 EXPERIMENT_CONFIG.fb.reaction_time.median_readiness_duration = 3.5;
-EXPERIMENT_CONFIG.fb.reaction_time.block_length = 5;
+EXPERIMENT_CONFIG.fb.reaction_time.block_length = 10;
 EXPERIMENT_CONFIG.fb.reaction_time.block_count = 4;
+EXPERIMENT_CONFIG.fb.reaction_time.pre_start_marker_gap = 2.0;
 
 EXPERIMENT_CONFIG.fb.utility.python_class_name = 'UtilityFeedback';
 
@@ -70,6 +73,9 @@ EXPERIMENT_CONFIG.fb.utility.python_class_name = 'UtilityFeedback';
 
 EXPERIMENT_CONFIG.recordDir = fullfile(PROJECT_SETUP.BBCI_DATA_DIR, EXPERIMENT_CONFIG.VPcode_date);
 EXPERIMENT_CONFIG.feedbackLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedback_logs');
+
+
+EXPERIMENT_CONFIG.eye_tracking.calibration_log = fullfile(EXPERIMENT_CONFIG.recordDir, 'iview_calibration.log');
 
 EXPERIMENT_CONFIG.markers = ini2struct(fullfile(PROJECT_SETUP.CONFIG_DIR, 'markers.ini'));
 

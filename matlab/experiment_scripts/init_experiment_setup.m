@@ -3,6 +3,7 @@ function [  ] = init_experiment_setup( )
 %   Delegates to ../common_util/project_setup.m
 
 curDir = fileparts(which(mfilename));
+addpath(curDir)
 commonUtilDir = fullfile(fileparts(curDir), 'common_util');
 addpath(commonUtilDir);
 project_setup();

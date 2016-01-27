@@ -10,7 +10,7 @@ end
 if ispc()
    % don't know about anything more selective than just killing all cmds
    % ... so we better ask
-   if (input('Press "y" to kill all cmd.exe processes...\n', 's') == 'y')
+   if strcmp(dinput('Kill all cmd.exe processes? (y/n)...\n', 'y'), 'y')
        system('taskkill /IM cmd.exe');
    end
 end
