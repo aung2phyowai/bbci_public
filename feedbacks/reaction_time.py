@@ -39,7 +39,7 @@ class ReactionTimeFeedback(StateMachineFeedback):
                              'inter_stimulus_delay' : 2.0,
                              'min_readiness_duration' : 3.0,
                              'median_readiness_duration' : 3.5,
-                             'pre_start_marker_gap' : 1.0, #in seconds before and after pre-start marker
+                             'pre_start_marker_gap' : 2.0, #in seconds before and after pre-start marker
                              'block_length' : 5})
 
         return default_conf

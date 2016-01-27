@@ -59,7 +59,7 @@ class ImageSeqFeedback(StateMachineFeedback):
                              'next_block_info' : [],
                              #minimal delay to wait before starting block playback after receiving command
                              'initial_playback_delay' : 5.0,
-                             'pre_start_marker_gap' : 1.0, #in seconds before and after pre-start marker
+                             'pre_start_marker_gap' : 2.0, #in seconds before and after pre-start marker
                              'log_prefix_block' : "defaultblock"
                             })
         return default_conf
@@ -132,6 +132,10 @@ class IntraBlockPauseState(FrameState):
         new_markers = []
         if self._state_frame_count == 0:
             new_markers.append(markers.technical['intra_block_pause_start'])
+        elif self._state_frame_count == self._questionaire_start:
+            new_markers.append(markers.technical['questionaire_start'])
+        elif self._state_frame_count == self._frame_rest_start:
+            new_markers.append(markers.technical['rest_start'])
 
         #screen content
         if (self._state_frame_count >= self._questionaire_start
