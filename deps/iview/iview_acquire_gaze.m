@@ -66,7 +66,7 @@ function varargout= iview_acquire_gaze(varargin)
                'clab'               default_clab   'CELL{CHAR}'
                'blocksize'          40             '!DOUBLE[1]'
                'realtime'           1              '!DOUBLE[1]'
-               'rec_start_marker'   100            '!INT[1]'
+               'SyncMarker'   100            '!INT[1]'
              };
         state= opt_setDefaults(state, props, 1);
         state.nChannels= length(state.clab);
@@ -102,9 +102,9 @@ function varargout= iview_acquire_gaze(varargin)
           pocketSize = pnet(sock, 'readpacket', 'noblock');
           if pocketSize > 0
             packet = pnet(sock, 'read', 'noblock');
-            if(str2double(packet) == state.rec_start_marker),
+            if(str2double(packet) == state.SyncMarker),
                 state.active = true;
-                display(['Marker ' num2str(state.rec_start_marker) ' captured, iView activated!']);
+                display(['Marker ' num2str(state.SyncMarker) ' captured, iView activated!']);
             end
           end
         end

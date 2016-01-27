@@ -4,6 +4,9 @@ init_props= {'SendAddress'       '192.168.1.2'       '!CHAR'
             'SendPort'          4444                '!INT[1]'
             'ReceiveAddress'    '192.168.1.1'       '!CHAR'
             'ReceivePort'       5555                '!INT[1]'
+            'SaveAccuracy'      false               'BOOL[1]'
+            'LogFile'           ''                  'CHAR'
+            'LogLabel'          ''                  'CHAR'
     };
 calib_opts = opt_proplistToStruct(varargin{1:end});
 calib_params = opt_setDefaults(calib_opts, init_props, 1);
@@ -54,7 +57,21 @@ if connected
     res = calllib(libraryname, 'iV_GetAccuracy', pAccuracyData, int32(0));
     check_response(res);
     
-    get(pAccuracyData, 'Value')
+    accuracy_struct = get(pAccuracyData, 'Value')
+    
+    if calib_params.SaveAccuracy
+        
+        log_table = struct2table(accuracy_struct);
+        log_table.time = datestr(now,'yyyy-mm-ddTHH:MM:SS.FFF');
+        log_table.label = calib_params.LogLabel;
+        if exist(calib_params.LogFile, 'file') == 2
+           old_log_table = readtable(calib_params.LogFile, 'FileType', 'text', 'Delimiter', '\t');
+           log_table = union(old_log_table, log_table);
+           log_table = sortrows(log_table, 'time');
+        else
+        end
+        writetable(log_table, calib_params.LogFile, 'FileType', 'text', 'Delimiter', '\t');
+    end
 end
 
 disp('Disconnect from iViewX')
