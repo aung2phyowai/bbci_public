@@ -24,20 +24,24 @@ init_analysis_setup();
 % [cnt, mrk_orig, hdr] = file_readBV(file_pattern, 'fs', 100);
 
 %% Load main experiment
+preprocessing_config = struct;
+preprocessing_config.lowpass.passband = 35;
+preprocessing_config.lowpass.stopband = 40;
+preprocessing_config.highpass.passband = 0.7;
+preprocessing_config.highpass.stopband = 0.2;
+preprocessing_config.time_from_optic = true;
+preprocessing_config.target_fs = 100;
+preprocessing_config.add_event_labels = true;
+[cnt, mrk_orig, hdr, metadata] = vco_load_experiment('vco_pilot_run', 'VPpau_15-12-08', preprocessing_config);
 
-[cnt, mrk_orig, hdr, metadata] = vco_load_experiment('vco_pilot_run', 'VPpau_15-12-08');
 
-
-mrk_timed = vco_mrk_timeFromOptic(mrk_orig, metadata.session.used_config);
 
 %% Load Reaction time
-[rt_cnt, rt_mrk_orig, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', 'VPpau_15-12-08');
+[rt_cnt, rt_mrk_timed, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', 'VPpau_15-12-08', preprocessing_config);
 
 
-rt_mrk_timed = vco_mrk_timeFromOptic(rt_mrk_orig, metadata.session.used_config);
 
-
-reaction_times = vco_get_reaction_times(rt_mrk_timed, rt_metadata.session.used_config);
+[reaction_times, jitter, rt_exgaussian] = vco_get_reaction_times(rt_mrk_timed, rt_metadata.session.used_config);
 hist(reaction_times, 20)
 
 tmp_mrk = cell(size(rt_mrk_timed.event.desc,1), 4);

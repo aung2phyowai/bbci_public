@@ -37,7 +37,8 @@ PROJECT_SETUP.IVIEW_DIR = fullfile(PROJECT_SETUP.DEPENDENCY_DIR, 'iview');
 
 %common_util should be already added
 addpath(PROJECT_SETUP.BBCI_DIR);
-addpath(fullfile(PROJECT_SETUP.MATLAB_DIR, 'lib'));
+PROJECT_SETUP.MATLAB_LIB_DIR = fullfile(PROJECT_SETUP.MATLAB_DIR, 'lib');
+addpath(PROJECT_SETUP.MATLAB_LIB_DIR);
 
 startup_bbci_toolbox(...
     'DataDir', PROJECT_SETUP.BBCI_DATA_DIR,...

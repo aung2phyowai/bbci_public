@@ -16,11 +16,12 @@ preprocessing_config.target_fs = 100;
 preprocessing_config.add_event_labels = true;
 
 [vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config,...
-    'LoadFromMat', false);
+    'LoadFromMat', true);
 
 [rt_cnt_pp, rt_mrk_pp, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', experiment_run, preprocessing_config);
 [reaction_times, jitter] = vco_get_reaction_times(rt_mrk_pp, rt_metadata.session.used_config);
 med_rt = median(reaction_times);
+vco_plot_reaction_times(reaction_times);
 
 % %% Extract relevant epochs
 % 
