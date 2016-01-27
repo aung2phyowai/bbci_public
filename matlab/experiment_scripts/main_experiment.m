@@ -8,37 +8,15 @@ clc, close all;
 init_experiment_setup();
 % config for this experimental run
 experiment_config();
-
-%% Start BV recorder (if available)
-
-if PROJECT_SETUP.HARDWARE_AVAILABLE
-    if strcmp(EXPERIMENT_CONFIG.VPcode, 'VPtest')
-         if dinput('Using test VP code, are you sure (y/n) ...\n', 'n') ~= 'y'
-             error('test VP code on experiment machine')
-         end
-    end
-    
-    system([PROJECT_SETUP.BV_RECORDER_EXECUTABLE ' &'])
-    pause(3);
-    bvr_sendcommand('stoprecording');
-    bbci_acquire_bv('close')
-    bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
-    bvr_sendcommand('viewsignals')
-end
-
 %save config
 if ~exist(EXPERIMENT_CONFIG.recordDir, 'dir')
     mkdir(EXPERIMENT_CONFIG.recordDir)
 end
 save(fullfile(EXPERIMENT_CONFIG.recordDir, 'experiment_config.mat'), 'EXPERIMENT_CONFIG');
 
-if EXPERIMENT_CONFIG.eye_tracking.enabled
-    iview_acquire_gaze('persistent_init');
-    cleaner = onCleanup(@() iview_acquire_gaze('persistent_close'));
-    if strcmp(dinput('Calibrate Eyetracker? (y/n)...\n', 'y'), 'y')
-        iview_calibrate()
-    end
-end
+%% Start BV recorder and eye tracker (if available)
+hardware_cleanup_handle = init_hardware();
+
 
 %% Record rest state
 if (EXPERIMENT_CONFIG.rest_state.enabled && ...
@@ -75,15 +53,8 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         
         %% setup recording
         % Setup bbci toolbox parameters
-        bbci = bbci_setup(sprintf('reaction_time_block%02d', rt_block_no));
-        %configure brain vision recorder
-        if PROJECT_SETUP.HARDWARE_AVAILABLE
-            bvr_sendcommand('stoprecording');
-            bbci_acquire_bv('close')
-            bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
-            
-            bvr_sendcommand('viewsignals')
-        end
+        bbci = init_recording(sprintf('reaction_time_block%02d', rt_block_no));
+       
         
         %% Run!
         pyff_sendUdp('interaction-signal', 'state_command','start_block');
@@ -91,9 +62,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         
         data = bbci_apply(bbci);
         
-        if EXPERIMENT_CONFIG.eye_tracking.enabled
-            iview_merge_matlab( data.source(1).record.filename, data.source(2).record.filename, 'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start );
-        end
+        finish_recording(data);
         rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], rt_block_no + 1);
     end
     
@@ -122,7 +91,7 @@ pyff_send_parameters(EXPERIMENT_CONFIG.block_structure(false,:), 'standby'); %se
 pyff_sendUdp('interaction-signal', 'command','play');
 
 %% loop over blocks
-%convention: blocks < 1 are familarization
+%convention: blocks < 1 are familiarization
 
 min_block_no = min(EXPERIMENT_CONFIG.block_structure.blockNo);
 max_block_no = max(EXPERIMENT_CONFIG.block_structure.blockNo);
@@ -139,7 +108,6 @@ while min_block_no <= block_no && block_no <= max_block_no
     pyff_send_parameters(current_block, block_name);
     pyff_sendUdp('interaction-signal', 'state_command','start_preload');
     fprintf('Preloading...')
-%     wait_for_marker(EXPERIMENT_CONFIG.markers.technical.preload_completed)
     tmp_bbci = bbci_setup('loading');
     if EXPERIMENT_CONFIG.eye_tracking.enabled
         tmp_bbci.source(2) = [];
@@ -158,15 +126,8 @@ while min_block_no <= block_no && block_no <= max_block_no
     
     %% setup recording
     % Setup bbci toolbox parameters
-    bbci = bbci_setup(block_name);
-    %configure brain vision recorder
-    if PROJECT_SETUP.HARDWARE_AVAILABLE
-        bvr_sendcommand('stoprecording');
-        bbci_acquire_bv('close')
-        bvr_sendcommand('loadworkspace', fullfile(PROJECT_SETUP.CONFIG_DIR, PROJECT_SETUP.BV_WORKSPACE_FILE_NAME))
-        
-        bvr_sendcommand('viewsignals')
-    end
+    bbci = init_recording(block_name);
+
     
     %% Run!
     pyff_sendUdp('interaction-signal', 'state_command','start_playback');
@@ -174,9 +135,7 @@ while min_block_no <= block_no && block_no <= max_block_no
     
     data = bbci_apply(bbci);
 
-    if EXPERIMENT_CONFIG.eye_tracking.enabled
-        iview_merge_matlab( data.source(1).record.filename, data.source(2).record.filename, 'rec_start_marker', EXPERIMENT_CONFIG.markers.technical.pre_start );
-    end
+    finish_recording(data)
     
     if ~any(data.marker.desc == EXPERIMENT_CONFIG.markers.technical.seq_start)
         fprintf('%s\n', ['Playback did not start, consult log in ' EXPERIMENT_CONFIG.feedbackLogDir])

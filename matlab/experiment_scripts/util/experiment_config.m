@@ -73,7 +73,7 @@ EXPERIMENT_CONFIG.feedbackLogDir = fullfile(EXPERIMENT_CONFIG.recordDir, 'feedba
 
 EXPERIMENT_CONFIG.markers = ini2struct(fullfile(PROJECT_SETUP.CONFIG_DIR, 'markers.ini'));
 
-[EXPERIMENT_CONFIG.block_structure, EXPERIMENT_CONFIG.block_count, EXPERIMENT_CONFIG.block_size] = load_block_structure(EXPERIMENT_CONFIG.block_structure_file);
+[EXPERIMENT_CONFIG.block_structure, EXPERIMENT_CONFIG.block_count] = load_block_structure(EXPERIMENT_CONFIG.block_structure_file);
 
 %load iview folder only when necessary
 if EXPERIMENT_CONFIG.eye_tracking.enabled
@@ -123,7 +123,7 @@ EXPERIMENT_CONFIG %#ok<NOPRT>
 
 %% utility functions
 
-    function [blockStructure, blockCount, blockSize ] = load_block_structure( input_file )
+    function [blockStructure, blockCount ] = load_block_structure( input_file )
         %LOAD_BLOCK_STRUCTURE Loads experiment block structure
 
         blockStructure = readtable(input_file,...
@@ -131,8 +131,7 @@ EXPERIMENT_CONFIG %#ok<NOPRT>
             'Delimiter', '\t',...    
             'ReadVariableNames', true);
 
-        blockCount = size(unique(blockStructure.blockNo));
-        blockSize = size(blockStructure.blockNo(blockStructure.blockNo == 0));
+        blockCount = size(unique(blockStructure.blockNo), 1);     
 
     end
 
