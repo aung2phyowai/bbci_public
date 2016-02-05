@@ -121,7 +121,7 @@ while min_block_no <= block_no && block_no <= max_block_no
     pyff_sendUdp('interaction-signal', 'state_command','start_preload');
     fprintf('Preloading...')
     tmp_bbci = bbci_setup('loading');
-    if EXPERIMENT_CONFIG.eye_tracking.enabled
+    if PROJECT_SETUP.HARDWARE_AVAILABLE && EXPERIMENT_CONFIG.eye_tracking.enabled
         tmp_bbci.source(2) = [];
     end
     stimutil_waitForMarker(tmp_bbci, EXPERIMENT_CONFIG.markers.technical.preload_completed)
@@ -134,7 +134,7 @@ while min_block_no <= block_no && block_no <= max_block_no
 
     
     %% recalibrate eyetracker
-    if EXPERIMENT_CONFIG.eye_tracking.enabled && mod(block_no, EXPERIMENT_CONFIG.eye_tracking.blocks_per_calibration) == 1  ...
+    if PROJECT_SETUP.HARDWARE_AVAILABLE && EXPERIMENT_CONFIG.eye_tracking.enabled  ...
             && strcmp(dinput('Calibrate Eyetracker? (y/n)...\n', 'y'), 'y')
         iview_calibrate('SaveAccuracy', true, ...
             'LogFile', EXPERIMENT_CONFIG.eye_tracking.calibration_log,...

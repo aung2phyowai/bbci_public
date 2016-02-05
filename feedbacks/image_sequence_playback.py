@@ -117,9 +117,11 @@ class IntraBlockPauseState(FrameState):
         2. the question
         3. a black screen for rest
     """
-    def __init__(self, controller, next_state):
+    def __init__(self, controller, last_seq_no, seq_count, next_state):
         super(IntraBlockPauseState, self).__init__(controller)
         conf = self.controller.config
+        self._last_seq_no = last_seq_no
+        self._seq_count = seq_count
         self._subsequent_state = next_state
         pre_question_pause = vco_utils.draw_uniform_time_delay(
             conf['pre_question_pause_min'], conf['pre_question_pause_median'])
@@ -141,8 +143,12 @@ class IntraBlockPauseState(FrameState):
         if (self._state_frame_count >= self._questionaire_start
             and self._state_frame_count < self._frame_rest_start):
             pygame_helpers.draw_questionaire_scale(screen,
-                                                   "Wie komplex fanden Sie die Szene?",
+                                                   "Wie komplex fanden Sie die letzte Szene?",
                                                    labels=("einfach (1)", "komplex (10)"))
+            progress_msg = "Szene %d/%d" % (self._last_seq_no + 1, self._seq_count)
+            monofont = pygame.font.SysFont("monospace", 30)
+            progress_label = monofont.render(progress_msg, 1, (200, 200, 200))
+            screen.blit(progress_label, ((screen.get_width() - progress_label.get_width()) / 2, screen.get_height() / 2 + 3 * 40))
         #otherwise black screen
 
         #state output
@@ -262,7 +268,8 @@ class SequencePlaybackState(FrameState):
             else: #we're done with the last sequence of the block
                 state_after_pause = StandbyState(self.controller)
 
-            next_state = IntraBlockPauseState(self.controller,
+            next_state = IntraBlockPauseState(self.controller, self.seq_no,
+                                              len(self.block_data.seq_fps_list),
                                               state_after_pause)
             return StateOutput(new_markers, next_state)
 
