@@ -14,7 +14,7 @@ exgaussian_params.sigma = exgfit(2);
 exgaussian_params.tau = exgfit(3);
 
 %plot fit over actual values
-figure
+figure('name', 'Reaction times')
 histogram(reaction_times, 20, 'Normalization', 'pdf')
 hold on
 x = (min(reaction_times) - 100):(max(reaction_times) + 100);
@@ -24,6 +24,10 @@ scatter(median_rt, exgausspdf(exgaussian_params.mu, exgaussian_params.sigma, exg
 mean_rt = mean(reaction_times);
 scatter(mean_rt, exgausspdf(exgaussian_params.mu, exgaussian_params.sigma, exgaussian_params.tau, mean_rt))
 
+hold off
+title('Reaction times along Ex-Gaussian fit');
+xlabel('Reaction time [ms]');
+ylabel('Probability density function estimate');
 rmpath(exgaussian_toolbox_path);
 
 end

@@ -45,6 +45,7 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
     %% Run reaction time block
     %convention: block 0 is sample
     rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], 0);
+    block_rts = cell(EXPERIMENT_CONFIG.fb.reaction_time.block_count, 1);
     while rt_block_no <= EXPERIMENT_CONFIG.fb.reaction_time.block_count 
 
         if (input(['Enter q to quit, anything else to start new reaction time block' num2str(rt_block_no) '...\n'], 's') == 'q')
@@ -62,10 +63,21 @@ if EXPERIMENT_CONFIG.reaction_time_recording.enabled
         
         data = bbci_apply(bbci);
         
+        mrk = data.marker;
+        mrk.event = struct;
+        mrk.event.desc = mrk.desc(~isnan(mrk.time))';
+        
+        mrk.time = mrk.time(~isnan(mrk.time));
+        block_rts{rt_block_no + 1} = vco_get_reaction_times(marker_struct_online2offline(data.marker), EXPERIMENT_CONFIG);
         finish_recording(data);
+        fprintf('median reaction time of block %d is %1.0f ms\n', rt_block_no, median(block_rts{rt_block_no + 1}))
         rt_block_no = dinput(['Enter next block number; i>' num2str(EXPERIMENT_CONFIG.fb.reaction_time.block_count) '  to quit\n'], rt_block_no + 1);
     end
-    
+    reaction_times = reshape(cell2mat(block_rts), 1, []);
+    % Record rest state
+    if  strcmp(dinput('Do you want to plot the reaction times (y/n)...\n', 'y'), 'y')
+        vco_plot_reaction_times(reaction_times);
+    end
 
     pyff_sendUdp('interaction-signal', 'command','stop');
     pyff_stop_feedback_controller()

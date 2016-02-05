@@ -7,6 +7,7 @@
 import datetime
 import logging
 import os
+from pygame import Color
 import random
 import sys
 import time
@@ -39,6 +40,7 @@ class ReactionTimeFeedback(StateMachineFeedback):
                              'inter_stimulus_delay' : 2.0,
                              'min_readiness_duration' : 3.0,
                              'median_readiness_duration' : 3.5,
+                             'ready_cursor_color': "#8080FF",
                              'pre_start_marker_gap' : 2.0, #in seconds before and after pre-start marker
                              'block_length' : 5})
 
@@ -92,6 +94,7 @@ class SingleStimulusState(FrameState):
 
 
     def _handle_state(self, screen):
+        conf = self.controller.config
         frame_markers = []
         if self._state_frame_count < self._ready_start_frame_no:
             if self._state_frame_count == 0:
@@ -100,7 +103,7 @@ class SingleStimulusState(FrameState):
         elif self._state_frame_count < self._stimulus_start_frame_no:
             if self._state_frame_count == self._stimulus_start_frame_no:
                 frame_markers.append(markers.technical['get_ready_start'])
-            pygame_helpers.draw_center_cross(screen, color=(200, 200, 200))
+            pygame_helpers.draw_center_cross(screen, color=Color(conf['ready_cursor_color']))
         else:
             if self._state_frame_count == self._stimulus_start_frame_no:
                 frame_markers.append(markers.stimuli['generic_stimulus'])
@@ -112,7 +115,6 @@ class SingleStimulusState(FrameState):
             return StateOutput(frame_markers, self)
         else:
             #log data
-            conf = self.controller.config
             rt_filepath = os.path.join(conf['log_dir'],
                                        '_'.join([conf['start_date_string'],
                                                  conf['log_prefix'],
