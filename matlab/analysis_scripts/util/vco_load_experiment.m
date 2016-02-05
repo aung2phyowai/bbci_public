@@ -54,10 +54,10 @@ if ~loaded
     
     %% Preprocessing
     
-    
+    mnt= mnt_setElectrodePositions(cnt.clab);
     [cnt_pp, mrk_pp] = vco_preprocess(cnt, mrk_timed, preprocessing_config);
     
-    mnt= mnt_setElectrodePositions(cnt.clab);
+    
     file_saveMatlab(cache_file_name, cnt_pp, mrk_pp, mnt,'Vars',{'hdr', 'preprocessing_config', 'metadata'});
     disp('calculated data from scratch, saved as mat file')
 end

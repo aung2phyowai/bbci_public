@@ -5,7 +5,7 @@ init_analysis_setup();
 
 %% Load main experiment
 experiment_name = 'vco_pilot_run';
-experiment_run = 'VPpau_15-12-08';
+experiment_session = 'VPpau_15-12-08';
 preprocessing_config = struct;
 preprocessing_config.lowpass.passband = 35;
 preprocessing_config.lowpass.stopband = 40;
@@ -15,13 +15,15 @@ preprocessing_config.time_from_optic = true;
 preprocessing_config.target_fs = 100;
 preprocessing_config.add_event_labels = true;
 
-[vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_run, preprocessing_config,...
+[vco_cnt_pp, vco_mrk_pp, vco_hdr, vco_metadata] = vco_load_experiment(experiment_name, experiment_session, preprocessing_config,...
     'LoadFromMat', true);
 
-[rt_cnt_pp, rt_mrk_pp, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', experiment_run, preprocessing_config);
+[rt_cnt_pp, rt_mrk_pp, rt_hdr, rt_metadata] = vco_load_experiment('reaction_time', experiment_session, preprocessing_config);
 [reaction_times, jitter] = vco_get_reaction_times(rt_mrk_pp, rt_metadata.session.used_config);
 med_rt = median(reaction_times);
-vco_plot_reaction_times(reaction_times);
+rt_fig = vco_plot_reaction_times(reaction_times);
+savepic(fullfile(PROJECT_SETUP.PLOT_DIR, experiment_session, [experiment_session '_reaction_times']), rt_fig, 'pdf', '-dbg');
+
 
 % %% Extract relevant epochs
 % 
