@@ -28,6 +28,17 @@ for cur_data_dir = PROJECT_SETUP.RECORDING_DIRS
             end
             
             [cnt, mrk_orig, hdr] = file_readBV(blocks_file_names);
+            
+            %read questionaires etc
+            metadata.vco_pilot_run.complexity_ratings = readtable(...
+                fullfile(data_dir, metadata.vco_pilot_run.complexity_ratings_file),...
+                'FileType', 'text', 'Delimiter', '\t');
+            
+            metadata.vco_pilot_run.questionaire_answers = readtable(...
+                fullfile(data_dir, metadata.vco_pilot_run.questionaire_answers_file),...
+                'FileType', 'text', 'Delimiter', '\t');
+            
+            
             loaded = true;
         elseif strcmp(experiment_name, 'reaction_time')
             blocks_file_names = cell(1, metadata.reaction_time.block_count);
