@@ -307,7 +307,8 @@ if strcmp(opt_rSquared.ScalePos, 'vert'),
     H_rSquared.cb(1)= plotutil_colorbarAside;
     ylabel(H_rSquared.cb(1), opt_rSquared.YUnit);
 end
-visutil_unifyCLim([H_rSquared.scalp.ax]);
+clim=[-max(max(abs(erp_r.x))),max(max(abs(erp_r.x)))];% helps to get unified rSquared derived from all channels
+visutil_unifyCLim([H_rSquared.scalp.ax],clim);%
 pos= get(H_rSquared.scalp(1,end).ax, 'position');
 yy= pos(2)+0.65*pos(4); % you may change the coefficient of pos(4) to have a better adjustment for the className
 H_rSquared.background= visutil_getBackgroundAxis;
@@ -321,4 +322,3 @@ set(H_rSquared.text, 'verticalAli','top', ...
 if nargout<1,
   clear H
 end
-

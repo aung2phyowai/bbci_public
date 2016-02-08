@@ -27,7 +27,8 @@ function [out] = custom_xvalSPoC(cnt, mrk, z, epo_ival, band, varargin)
 
 def_nc = 3;
 def_n_folds = 5;
-def_doBandpass = false;
+def_doBandpass = 0;
+def_applyFilter = 0; 
 
 p = inputParser;
 p.KeepUnmatched = 1;
@@ -35,9 +36,12 @@ p.KeepUnmatched = 1;
 addParameter(p,'n_folds',def_n_folds);
 addParameter(p,'doBandpass',def_doBandpass);
 addParameter(p,'nc',def_nc);
+addParameter(p,'applyFilter',def_applyFilter);
 
 parse(p,varargin{:})
 opt = p.Results;
+
+out = struct;
 
 nc = opt.nc;
 n_folds = opt.n_folds;
@@ -59,6 +63,10 @@ end
 % train SPoC on all data (overfitted version!)
 epo = proc_segmentation(cnt, mrk, epo_ival);
 [W_alldata, A_alldata, eig] = spoc(epo.x, z);
+
+if opt.applyFilter
+    out.cnt_spoc = proc_linearDerivation(cnt,W_alldata(:,1:nc));
+end
 
 % get indices for chron. cross-validation
 [divTr, divTe] = sample_chronKFold(ones(1,n_epos), n_folds);
@@ -111,6 +119,9 @@ for f_idx = 1:n_folds
     epo_spoc_var = proc_variance(epo_spoc_test);
     fv_test = squeeze(epo_spoc_var.x);
     
+    if nc ==1 
+        fv_test = fv_test';
+    end    
     % fold-wise correlation on test data 
     corrTest(:,f_idx) = corr(z(idx_test)',fv_test(1:nc,:)');
     
@@ -141,4 +152,5 @@ out.A = A_test;
 out.lambda = lambda;
 out.z_est = z_est;
 out.corrTest = corrTest;
+
 

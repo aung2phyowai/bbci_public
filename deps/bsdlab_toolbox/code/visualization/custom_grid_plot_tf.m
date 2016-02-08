@@ -145,8 +145,9 @@ if(datadim == 4)
         opt_overrideIfDefault(opt,isdefault,...
         'ShrinkAxes',[0.8 0.8],...
         'AxisTitleColor', 'y');
-    
+    dat = epo;
     nClasses = 1;
+    
     if isfield(epo,'className')
         nClasses = numel(dat.className);
     end
