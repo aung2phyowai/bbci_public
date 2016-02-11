@@ -156,11 +156,8 @@ while min_block_no <= block_no && block_no <= max_block_no
     
     data = bbci_apply(bbci);
 
-    finish_recording(data)
+    finish_recording(data, 'ValidateImageSeqPlayback', true)
     
-    if ~any(data.marker.desc == EXPERIMENT_CONFIG.markers.technical.seq_start)
-        fprintf('%s\n', ['Playback did not start, consult log in ' EXPERIMENT_CONFIG.feedbackLogDir])
-    end
 
     %% some validation
     if EXPERIMENT_CONFIG.validation.show_validation_stats
