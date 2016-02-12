@@ -13,7 +13,7 @@ function events= bbci_apply_evalCondition(marker, data_control, bbci_control)
 %      subfield of 'bbci' structure of bbci_apply. 
 %
 %Output:
-%  EVENTS - Array of Struct, specifying the event(s) at which a control
+%  EVENTS - Array of Struct, specifying the eventdata_control.last_interval_event(s) at which a control
 %      signal should be calculated. Each Struct has the fields
 %      'time' and 'desc' like in the marker context.
 
@@ -36,8 +36,14 @@ if ~isempty(bcc.marker),
   return;
 end
 
+persistent last_interval_event
+
 % 3. Variant: determine control at a regular time interval, e.g. every 100msec
-tim= data_control.lastcheck + bcc.interval;
+if isempty(last_interval_event) || last_interval_event > data_control.time
+    last_interval_event = 0;
+end
+tim= last_interval_event + bcc.interval;
 if tim <= data_control.time,
   events= struct('time',tim, 'desc',[]);
+  last_interval_event = data_control.time;
 end
