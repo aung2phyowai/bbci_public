@@ -34,7 +34,9 @@ ii{nd}= idx;
 
 fv.x= fv.x(ii{:});
 fv.y= fv.y(:,idx);
-
+if isfield(fv, 'z'),
+  fv.z = fv.z(:,idx);
+end
 if isfield(fv, 'bidx'),
   fv.bidx= fv.bidx(idx);
 end
