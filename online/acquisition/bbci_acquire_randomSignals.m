@@ -51,6 +51,7 @@ if isequal(varargin{1}, 'init'),
           'blocksize'     40             '!DOUBLE[1]'
           'amplitude'     30             '!DOUBLE[1]'
           'marker_mode'   'global'       'CHAR(global pyff_udp)'
+          'marker_udp_port' 12344        '!DOUBLE[1]'
           'realtime'      0              '!DOUBLE[1]'
          };
   state= opt_setDefaults(state, props, 1);
@@ -62,17 +63,21 @@ if isequal(varargin{1}, 'init'),
     state.realtime= inf;
   end
   state.start_time= tic;
-  %  switch(state.marker_mode),
-  %   case 'pyff_udp',
-  %    state.socket= open_udp_socket();
-  %  end
+   switch(state.marker_mode),
+    case 'pyff_udp',
+        if isfield(state, 'socket') && ~isempty(state.socket),
+            pnet(state.socket, 'close')
+        end
+        state.socket = pnet('udpsocket', state.marker_udp_port);
+   end
   output= {state};
 elseif isequal(varargin{1}, 'close'),
   if length(varargin)>1,
     state= varargin{2};
     switch(state.marker_mode),
      case 'pyff_udp',
-      close_udp_socket(state.socket);
+         pnet(state.socket, 'close')
+         state.socket = [];
     end
   end
   return
@@ -94,15 +99,20 @@ else
       mrkTime= [];
       mrkDesc= [];
      case 'pyff_udp',
-      packet= receive_udp(sock);
-      if ~isempty(packet),
-        % we don't know the marker position within the block -> set randomly
-        mrkTime= ceil(state.blocksize_sa*rand)*1000/state.fs;
-        mrkDesc= str2int(packet);  % -> check format
-      else
-        mrkTime= [];
-        mrkDesc= [];
-      end
+         % Pyff's send_udp uses Python's socket.sendto
+         %  after converting the marker to a '\n'-terminated string
+         % Assuming byte-sized markers, 3 characters for marker
+         %  and 1 for the newline should suffice
+         read_length=pnet(state.socket, 'readpacket', 4, 'noblock');
+         if read_length > 0,
+             data = pnet(state.socket, 'read', 4, 'char');
+             % we don't know the marker position within the block -> set randomly
+             mrkTime= ceil(state.blocksize_sa*rand)*1000/state.fs;
+             mrkDesc= sscanf(data, '%d');  % -> parse string to number
+         else
+             mrkTime = [];
+             mrkDesc = [];
+         end
      case 'global',
       if ~isempty(ACQ_MARKER),
         mrkTime= ceil(state.blocksize_sa*rand)*1000/state.fs;
