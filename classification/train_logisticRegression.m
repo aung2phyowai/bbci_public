@@ -32,3 +32,4 @@ misc_checkType(YTr, 'DOUBLE[2 -]');
 B = mnrfit(XTr', categorical(YTr(1,:))');
 
 C.b = B;
+C.applyFcn = @apply_logisticRegression;
