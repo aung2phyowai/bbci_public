@@ -36,14 +36,27 @@ if ~isempty(bcc.marker),
   return;
 end
 
-persistent last_interval_event
-
 % 3. Variant: determine control at a regular time interval, e.g. every 100msec
-if isempty(last_interval_event) || last_interval_event > data_control.time
-    last_interval_event = 0;
+
+% we don't get the index of the control struct as a parameter, so we use
+% the hash of the bbci_control parameter as a key for bookkeeping and
+% saving the last interval state
+% we cannot use data_control.lastcheck if the time between calls is less
+% than the interval
+
+persistent last_event_by_control
+if isempty(last_event_by_control)
+    last_event_by_control = containers.Map('KeyType','double','ValueType','double');
 end
-tim= last_interval_event + bcc.interval;
+control_string = java.util.Arrays.toString(getByteStreamFromArray(bbci_control));
+control_hash = control_string.hashCode();
+if ~last_event_by_control.isKey(control_hash) || last_event_by_control(control_hash) > data_control.time
+    last_event_by_control(control_hash) = 0;
+end
+
+
+tim= last_event_by_control(control_hash) + bcc.interval;
 if tim <= data_control.time,
   events= struct('time',tim, 'desc',[]);
-  last_interval_event = tim;
+  last_event_by_control(control_hash) = data_control.time;
 end
