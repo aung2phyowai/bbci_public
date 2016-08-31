@@ -29,7 +29,7 @@ function y = stat_percentiles(x,p)
 
 % Author(s), Copyright: Anton Schwaighofer, May 2005
 
-error(nargchk(2, 2, nargin));
+narginchk(2, 2);
 misc_checkType(x,'!DOUBLE[- -]');
 misc_checkType(p,'!DOUBLE[1 -]');
 

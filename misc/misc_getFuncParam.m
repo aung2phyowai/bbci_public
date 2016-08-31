@@ -32,7 +32,7 @@ function [func, params]= misc_getFuncParam(proc)
 % Benjamin Blankertz
 
 
-error(nargchk(1, 1, nargin));
+narginchk(1, 1);
 misc_checkType(proc, 'CHAR|FUNC|CELL');
 
 if iscell(proc),

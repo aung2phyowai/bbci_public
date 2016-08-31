@@ -17,7 +17,6 @@ function mrk= mrk_appendMarkers(mrk1, mrk2, Tmsec)
 
 misc_checkType(mrk1, 'STRUCT(time)');
 misc_checkType(mrk2, 'STRUCT(time)');
-misc_checkType(Tmsec', '!DOUBLE[1]|struct(T fs)');
 
 if isempty(mrk1),
   mrk= mrk2;
@@ -26,7 +25,10 @@ end
 
 if isstruct(Tmsec),
   cnt= Tmsec;
+  misc_checkType(Tmsec, '!struct(T fs)');
   Tmsec= sum(cnt.T)*1000/cnt.fs;
+else
+    misc_checkType(Tmsec, '!DOUBLE[1]');
 end
 
 mrk2.time= mrk2.time + Tmsec;
