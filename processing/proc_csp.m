@@ -41,10 +41,11 @@ function [dat, varargout]= proc_csp(dat, varargin)
 %
 %See also demos/demo_validate_csp
 
-props= {'CovFcn'      {@cov}                            '!FUNC|CELL'
-        'ScoreFcn'    {@score_eigenvalues}              '!FUNC|CELL'
-        'SelectFcn'   {@cspselect_equalPerClass, 3}     '!FUNC|CELL'
-        'Verbose'     1                                 'INT'
+props= {'CovFcn'       {@cov}                            '!FUNC|CELL'
+        'ScoreFcn'     {@score_eigenvalues}              '!FUNC|CELL'
+        'SelectFcn'    {@cspselect_equalPerClass, 3}     '!FUNC|CELL'
+        'Verbose'      1                                 'INT'
+        'CovWhitening' true                              'BOOL'
        };
 
 if nargin==0,
@@ -70,23 +71,26 @@ for k= 1:2,
   C(:,:,k)= covFcn(X, covPar{:});
 end
 
-% get the whitening matrix
-M = procutil_whiteningMatrix([], 'C', mean(C,3));
-if (opt.Verbose > 0) && (size(M,2) < nChans)
-    warning('Due to dimensionality reduction a maximum of only %d CSP components can be computed', size(M,2))
+if opt.CovWhitening
+    % get the whitening matrix
+    M = procutil_whiteningMatrix([], 'C', mean(C,3));
+    if (opt.Verbose > 0) && (size(M,2) < nChans)
+        warning('Due to dimensionality reduction a maximum of only %d CSP components can be computed', size(M,2))
+    end
+    
+    % Do actual CSP computation as generalized eigenvalue decomposition in
+    % whitened space
+    [W, D]= eig(M'*(C(:,:,1)-C(:,:,2))*M);
+    W = M*W; % project filters from whitened space back into original channel space
+    [ev, sort_idx] = sort(diag(D), 'ascend');
+    D = diag(ev);
+    W = W(:,sort_idx);
+    
+else
+    % ORIGINAL CODE FOR COMPUTING CSP IN CHANNEL SPACE
+    % % Do actual CSP computation as generalized eigenvalue decomposition
+    [W, D]= eig( C(:,:,1)-C(:,:,2), C(:,:,1)+C(:,:,2) );
 end
-
-% Do actual CSP computation as generalized eigenvalue decomposition in
-% whitened space
-[W, D]= eig(M'*(C(:,:,1)-C(:,:,2))*M);
-W = M*W; % project filters from whitened space back into original channel space
-[ev, sort_idx] = sort(diag(D), 'ascend');
-D = diag(ev);
-W = W(:,sort_idx);
-
-% ORIGINAL CODE FOR COMPUTING CSP IN CHANNEL SPACE
-% % Do actual CSP computation as generalized eigenvalue decomposition
-% [W, D]= eig( C(:,:,1)-C(:,:,2), C(:,:,1)+C(:,:,2) );
 
 % Calculate score for each CSP channel
 [scoreFcn, scorePar]= misc_getFuncParam(opt.ScoreFcn);
