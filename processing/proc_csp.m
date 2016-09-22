@@ -45,7 +45,7 @@ props= {'CovFcn'       {@cov}                            '!FUNC|CELL'
         'ScoreFcn'     {@score_eigenvalues}              '!FUNC|CELL'
         'SelectFcn'    {@cspselect_equalPerClass, 3}     '!FUNC|CELL'
         'Verbose'      1                                 'INT'
-        'CovWhitening' true                              'BOOL'
+        'Method'       'CovWhitening'                    'CHAR'
        };
 
 if nargin==0,
@@ -71,7 +71,8 @@ for k= 1:2,
   C(:,:,k)= covFcn(X, covPar{:});
 end
 
-if opt.CovWhitening
+if strcmp(opt.Method, 'CovWhitening')
+    disp('using whitening')
     % get the whitening matrix
     M = procutil_whiteningMatrix([], 'C', mean(C,3));
     if (opt.Verbose > 0) && (size(M,2) < nChans)
@@ -86,10 +87,19 @@ if opt.CovWhitening
     D = diag(ev);
     W = W(:,sort_idx);
     
-else
+elseif strcmp(opt.Method, 'A_over_common')
+    disp('A over common (as in cspAuto)')
+    [W, D] = eig(C(:,:,2), C(:,:,1)+C(:,:,2));
+elseif strcmp(opt.Method, 'A_over_B')
+    disp('A over B')
+    [W, D] = eig(C(:,:,2), C(:,:,1));
+elseif strcmp(opt.Method, 'discriminative_over_common')
+    disp('discriminative_over_common')
     % ORIGINAL CODE FOR COMPUTING CSP IN CHANNEL SPACE
     % % Do actual CSP computation as generalized eigenvalue decomposition
     [W, D]= eig( C(:,:,1)-C(:,:,2), C(:,:,1)+C(:,:,2) );
+else
+    error('unknown method %s', opt.Method)
 end
 
 % Calculate score for each CSP channel
