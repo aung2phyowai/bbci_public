@@ -72,7 +72,7 @@ for k= 1:2,
 end
 
 if strcmp(opt.Method, 'CovWhitening')
-    disp('using whitening')
+%     disp('using whitening')
     % get the whitening matrix
     M = procutil_whiteningMatrix([], 'C', mean(C,3));
     if (opt.Verbose > 0) && (size(M,2) < nChans)
@@ -88,13 +88,13 @@ if strcmp(opt.Method, 'CovWhitening')
     W = W(:,sort_idx);
     
 elseif strcmp(opt.Method, 'A_over_common')
-    disp('A over common (as in cspAuto)')
+%     disp('A over common (as in cspAuto)')
     [W, D] = eig(C(:,:,2), C(:,:,1)+C(:,:,2));
 elseif strcmp(opt.Method, 'A_over_B')
-    disp('A over B')
+%     disp('A over B')
     [W, D] = eig(C(:,:,2), C(:,:,1));
 elseif strcmp(opt.Method, 'discriminative_over_common')
-    disp('discriminative_over_common')
+%     disp('discriminative_over_common')
     % ORIGINAL CODE FOR COMPUTING CSP IN CHANNEL SPACE
     % % Do actual CSP computation as generalized eigenvalue decomposition
     [W, D]= eig( C(:,:,1)-C(:,:,2), C(:,:,1)+C(:,:,2) );
