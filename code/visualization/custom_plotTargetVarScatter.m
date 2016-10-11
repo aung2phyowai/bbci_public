@@ -54,7 +54,9 @@ end
 axes_h = gca;
 ylim_vec = [0.95*min(z_map),1.05*max(z_map)];
 set(gca,'FontSize',options.fontSize)
-set(gcf, 'Position', [200 200 options.figSize])
+if ~isempty(options.figSize)
+    set(gcf, 'Position', [200 200 options.figSize])
+end
 
 %% Scatter plot the estimate for each subfold (if indices are available)
 

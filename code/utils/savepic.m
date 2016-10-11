@@ -118,7 +118,7 @@ function savepic(fname, varargin)
 	cmdEnd=			' -sDEVICE=%s -sOutputFile="%s"';					% Essential.
 	epsCmd=			'';
 	epsCmd=	[epsCmd ' -dSubsetFonts=true -dNOPLATFONTS'];				% Future support?
-	epsCmd=	[epsCmd ' -dUseCIEColor=true -dColorConversionStrategy=/UseDeviceIndependentColor'];
+	epsCmd=	[epsCmd ' -dColorConversionStrategy=/UseDeviceIndependentColor'];
 	epsCmd=	[epsCmd ' -dProcessColorModel=/%s'];						% Color conversion.
 	pdfCmd=	[epsCmd ' -dAntiAliasColorImages=false' cmdEnd];
 	epsCmd=	[epsCmd cmdEnd];
@@ -237,7 +237,7 @@ function savepic(fname, varargin)
 		cmp=	lossless;
 		if (strcmp(types{n}, 'pdf')),	cmp= gsCompr;		end			% Lossy compr only for pdf.
 		if (strcmp(types{n}, 'eps')),	cmp= '';			end			% eps can't use lossless.
-		cmd=	sprintf('%s %s %s -f "%s-temp.eps"', gs, cmd, cmp, fname);% Add up.
+		cmd=	sprintf('%s %s %s -f "%s-temp.eps" 2>/dev/null', gs, cmd, cmp, fname);% Add up.
 			status= system(cmd);										% Run Ghostscript.
 			if (op_dbg || status), 		display (cmd),		end
 	end
