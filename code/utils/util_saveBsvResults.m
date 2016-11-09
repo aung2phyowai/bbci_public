@@ -14,15 +14,32 @@ function [  ] = util_saveBsvResults(file_handle, metrics, parameters, meta, vara
 assert(isstruct(metrics))
 assert(isstruct(parameters))
 assert(isstruct(meta))
-additional_groups = opt_proplistToStruct(varargin{:});
+
 
 if length(intersect({'session', 'subject'}, fieldnames(parameters))) ~= 2
     warning('did not find session and subject information in parameters');
 end
 
+parser = inputParser;
+parser.PartialMatching = false;
+parser.KeepUnmatched = true;
+
 %build a result id as identifier for this group of results
 [~, hostname] = system('hostname');
-rId = [strtrim(hostname) '-' datestr(now, 'yymmddHHMMSSFFF')];
+default_rId = [strtrim(hostname) '-' datestr(now, 'yymmddHHMMSSFFF')];
+if isfield(parameters, 'session')
+   default_rId = [parameters.session '-' default_rId];
+end
+
+addParameter(parser, 'ResultId', default_rId)
+
+parse(parser, varargin{:})
+opts = parser.Results;
+
+
+additional_groups =  parser.Unmatched;
+
+
 if ~isempty(getenv('GIT_COMMIT'))
     gitRevision = getenv('GIT_COMMIT');
 else
@@ -36,16 +53,17 @@ end
 
 % fprintf(outFp, '|%s|%s|%s|%s|\n', 'ResultID', 'Group', 'Key', 'Value');
 
+rId = opts.ResultId;
 fprintf(file_handle, '|%s|%s|%s|%s|\n', rId, 'meta', 'git_commit', gitRevision);
 fprintf(file_handle, '|%s|%s|%s|%s|\n', rId, 'meta', 'datetime',  datestr(now, 'yyyy-mm-ddTHH:MM:SS'));
 for metaName = fieldnames(meta)'
     fprintf(file_handle, '|%s|%s|%s|%s|\n', rId, 'meta', metaName{1}, ...
-        vco_src.analysis.util.cell2name({meta.(metaName{1})}, '_', 'NormalizeForFilename', false));
+        util_cell2name({meta.(metaName{1})}, '_', 'NormalizeForFilename', false));
 end
 
 for paramName = fieldnames(parameters)'
     fprintf(file_handle, '|%s|%s|%s|%s|\n', rId, 'parameter', paramName{1}, ...
-        vco_src.analysis.util.cell2name({parameters.(paramName{1})}, '_', 'NormalizeForFilename', false));
+        util_cell2name({parameters.(paramName{1})}, '_', 'NormalizeForFilename', false));
 end
 
 for metricName = fieldnames(metrics)'
@@ -58,7 +76,7 @@ if isstruct(additional_groups)
         group_struct = additional_groups.(group_name{1});
         for fieldName = fieldnames(group_struct)'
             fprintf(file_handle, '|%s|%s|%s|%s|\n', rId, group_name{1}, fieldName{1}, ...
-                vco_src.analysis.util.cell2name({group_struct.(fieldName{1})}, '_', 'NormalizeForFilename', false));
+                util_cell2name({group_struct.(fieldName{1})}, '_', 'NormalizeForFilename', false));
         end
     end
 end
