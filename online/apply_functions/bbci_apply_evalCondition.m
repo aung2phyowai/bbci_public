@@ -45,5 +45,5 @@ end
 tim= last_interval_event + bcc.interval;
 if tim <= data_control.time,
   events= struct('time',tim, 'desc',[]);
-  last_interval_event = data_control.time;
+  last_interval_event = tim;
 end
