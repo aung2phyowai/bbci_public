@@ -19,4 +19,9 @@ if isfield(mnt, 'box'),
   clab= mnt.clab(idx);
 else
   clab= mnt.clab;
+  % workaround for non-assigned variable, did not check whether it actually
+  % makes sense (at least second return value is not used by grid_plot if
+  % mnt.box doesn't exist)
+  % use nan to make crash likely in case it is actually used
+  idx = nan;
 end
