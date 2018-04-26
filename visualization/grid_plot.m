@@ -89,7 +89,7 @@ props= {'Axes',                           [],                     'DOUBLE';
         'TitleAppendix',                  '',                     'CHAR';
         'XTickAxes',                      '*',                    'CHAR';
         'XUnit',                          'ms',                   'CHAR';
-%        'YUnit',                          'a.u.',                 'CHAR';
+%         'YUnit',                          'a.u.',                 'CHAR';
         'YUnit',                          '\muV',                 'CHAR';
         'YDir',                           'normal',               'CHAR';
         'YLim',                           [],                     'DOUBLE[2]';
