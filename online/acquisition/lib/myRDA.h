@@ -82,6 +82,24 @@ struct RDA_MessageData
 /* Array of markers -> RDA_Marker Markers[nMarkers] */
 };
 
+// #pragma pack(1)
+/* Block of data, Header -> nType = 4 */
+// struct RDA_MessageData32  // wrong, should use above with short and cast?
+// {
+  // unsigned char  guid[16];   /* Always GUID_RDAHeader */
+  // ULONG  nSize;              /* Size of this struct */
+  // ULONG  nType;              /* Message type. */
+  // ULONG  nBlock;        
+// /* Block number, i.e. acquired blocks since acquisition started. */
+  // ULONG  nPoints;            /* Number of data points in this block */
+  // ULONG  nMarkers;           /* Number of markers in this data block */
+  // float  nData[1];
+// /* Data array -> short nData[nChannels * nPoints], multiplexed */
+  // struct RDA_Marker   Markers[1];
+// /* Array of markers -> RDA_Marker Markers[nMarkers] */
+// };
+
+// typedef RDA_MessageData32 RDA_MessageData;
 
 /* Data acquisition has been stopped. // Header -> nType = 3 */
 #pragma pack(1)

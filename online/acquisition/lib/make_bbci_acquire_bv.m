@@ -1,5 +1,8 @@
 function make_bbci_acquire_bv(debug, nouzz)
 
+%%!!!!!!!!!!!!!!!!!!!!!
+% Change the port number to 51234 in brainserver.h before making this file
+
 try
     bbci_acquire_bv('close');
 end

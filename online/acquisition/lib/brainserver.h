@@ -18,7 +18,7 @@
   The brainvision server port number
  */
 #ifndef BV_PORT
-#define BV_PORT 51234
+#define BV_PORT 51244
 #endif
 
 /*

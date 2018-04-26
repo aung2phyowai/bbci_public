@@ -28,26 +28,26 @@ function [cnt,state]= online_filterbank(cnt, state, filt_b, filt_a)
 
 
 if isempty(state),
-  state.nFilters= length(filt_b);
-  state.filt_b= filt_b;
-  state.filt_a= filt_a;
-  persistent xo;       %% reserve memory only once
-  [T, state.nChans]= size(cnt.x);
-  xo= zeros([T, state.nChans*state.nFilters]);
-  state.filtstate= cell([1 state.nFilters]);
-%  state.clab= cell(1, state.nChans*state.nFilters);
-%  cc= 1:state.nChans;
-%  for ii= 1:state.nFilters,
-%    state.clab(cc)= strcat(cnt.clab, ['_flt' int2str(ii)]);
-%    cc= cc + state.nChans;
-%  end
+    state.nFilters= length(filt_b);
+    state.filt_b= filt_b;
+    state.filt_a= filt_a;
+    persistent xo;       %% reserve memory only once
+    [T, state.nChans]= size(cnt.x);
+    xo= zeros([T, state.nChans*state.nFilters]);
+    state.filtstate= cell([1 state.nFilters]);
+%     state.clab= cell(1, state.nChans*state.nFilters);
+%     cc= 1:state.nChans;
+%     for ii= 1:state.nFilters,
+%         state.clab(cc)= strcat(cnt.clab, ['_flt' int2str(ii)]);
+%         cc= cc + state.nChans;
+%     end
 end
 
 cc= 1:state.nChans;
 for ii= 1:state.nFilters,
-  [xo(:,cc), state.filtstate{ii}]= ...
-     filter(state.filt_b{ii}, state.filt_a{ii}, cnt.x, state.filtstate{ii}, 1);
-  cc= cc + state.nChans;
+    [xo(:,cc), state.filtstate{ii}]= ...
+        filter(state.filt_b{ii}, state.filt_a{ii}, cnt.x, state.filtstate{ii}, 1);
+    cc= cc + state.nChans;
 end
 cnt.x= xo;
-%cnt.clab= state.clab;
+% cnt.clab= state.clab;
