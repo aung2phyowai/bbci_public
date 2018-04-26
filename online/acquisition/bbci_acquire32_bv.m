@@ -1,4 +1,4 @@
-function bbci_acquire_bv
+function bbci_acquire32_bv
 % bbci_acquire32_bv - get 32-bit data from the brainserver
 %
 % SYNPOSIS
